@@ -1,0 +1,137 @@
+conversation_id,labeler,criterion_id,answer,evidence_turns,note
+p1-ru-003,final,opening,yes,11,ai-agreed
+p1-ru-003,final,understanding,yes,1;5;11;12,human: dauka: 
+p1-ru-003,final,verification,na,1;5;13,ai-agreed
+p1-ru-003,final,guidance,10,1;5;13;14;15,ai-agreed
+p1-ru-003,final,empathy,yes,11;13;15,ai-agreed
+p1-ru-003,final,management,7,13;14;15,human: dauka: 
+p1-ru-003,final,closing,no,15,human override: dauka: 
+p1-ru-003,final,violations,no,11;13;15,ai-agreed
+p1-ru-007,final,opening,yes,11,ai-agreed
+p1-ru-007,final,understanding,na,1;5;10;11,ai-agreed
+p1-ru-007,final,verification,na,1;11,ai-agreed
+p1-ru-007,final,guidance,5,,human override: dauka: 
+p1-ru-007,final,empathy,yes,11;13,human: dauka: 
+p1-ru-007,final,management,4,5;12;13,human: dauka: 
+p1-ru-007,final,closing,no,12;13,human: dauka: 
+p1-ru-007,final,violations,no,11;13,ai-agreed
+p1-ru-022,final,opening,yes,10,ai-agreed
+p1-ru-022,final,understanding,na,1;4;10,human: dauka: 
+p1-ru-022,final,verification,na,1;10;12,ai-agreed
+p1-ru-022,final,guidance,0,10;12,ai-agreed
+p1-ru-022,final,empathy,no,11;12,ai-agreed
+p1-ru-022,final,management,4,10;11;12;14,human: dauka: 
+p1-ru-022,final,closing,no,13;14,ai-agreed
+p1-ru-022,final,violations,yes,10;12,ai-agreed
+p1-ru-025,final,opening,yes,10,ai-agreed
+p1-ru-025,final,understanding,yes,1;5;10;11,human: dauka: 
+p1-ru-025,final,verification,na,10;11,ai-agreed
+p1-ru-025,final,guidance,na,1;5;11,ai-agreed
+p1-ru-025,final,empathy,yes,10,ai-agreed
+p1-ru-025,final,management,10,10,ai-agreed
+p1-ru-025,final,closing,na,10;11,ai-agreed
+p1-ru-025,final,violations,no,10,ai-agreed
+p1-ru-028,final,opening,yes,10,ai-agreed
+p1-ru-028,final,understanding,na,1;5;12,ai-agreed
+p1-ru-028,final,verification,na,1;12;14,ai-agreed
+p1-ru-028,final,guidance,20,12;14,ai-agreed
+p1-ru-028,final,empathy,yes,5;10;13;14,ai-agreed
+p1-ru-028,final,management,10,10;11;12,ai-agreed
+p1-ru-028,final,closing,no,15;16,ai-agreed
+p1-ru-028,final,violations,no,10;12;14;16,ai-agreed
+p1-ru-029,final,opening,yes,10,ai-agreed
+p1-ru-029,final,understanding,na,1;4;12,human: dauka: 
+p1-ru-029,final,verification,na,1;12,ai-agreed
+p1-ru-029,final,guidance,20,12;13,ai-agreed
+p1-ru-029,final,empathy,no,10;13;14,ai-agreed
+p1-ru-029,final,management,0,,human: dauka: 
+p1-ru-029,final,closing,no,13;14,ai-agreed
+p1-ru-029,final,violations,yes,10,ai-agreed
+p1-kz-003,final,opening,yes,11,ai-agreed
+p1-kz-003,final,understanding,yes,1;10;11;14;17;18,human: dauka: 
+p1-kz-003,final,verification,yes,11;13;14,ai-agreed
+p1-kz-003,final,guidance,20,14;19;22;24;26,ai-agreed
+p1-kz-003,final,empathy,yes,11,ai-agreed
+p1-kz-003,final,management,10,11;14;17;19;26,ai-agreed
+p1-kz-003,final,closing,yes,25;26,ai-agreed
+p1-kz-003,final,violations,no,11;14;17;19;22;24;26,ai-agreed
+p1-kz-008,final,opening,no,10,ai-agreed
+p1-kz-008,final,understanding,no,5;10;11,ai-agreed
+p1-kz-008,final,verification,na,1;12,ai-agreed
+p1-kz-008,final,guidance,20,12;13,ai-agreed
+p1-kz-008,final,empathy,yes,10;11;12,human: dauka: 
+p1-kz-008,final,management,7,10;11;12,ai-agreed
+p1-kz-008,final,closing,no,12;13,human: dauka: 
+p1-kz-008,final,violations,no,10;12,ai-agreed
+p1-kz-011,final,opening,yes,10,ai-agreed
+p1-kz-011,final,understanding,na,1;5;10,ai-agreed
+p1-kz-011,final,verification,na,1;10;12,ai-agreed
+p1-kz-011,final,guidance,20,10;12;13,ai-agreed
+p1-kz-011,final,empathy,yes,10;12,ai-agreed
+p1-kz-011,final,management,10,10;12,ai-agreed
+p1-kz-011,final,closing,na,13;14,ai-agreed
+p1-kz-011,final,violations,no,10;12,ai-agreed
+p1-en-008,final,opening,yes,11,ai-agreed
+p1-en-008,final,understanding,na,1;5;10;11,ai-agreed
+p1-en-008,final,verification,na,1;11;16,ai-agreed
+p1-en-008,final,guidance,15,11;13;16;17;18,human: dauka: 
+p1-en-008,final,empathy,yes,11;13;20,ai-agreed
+p1-en-008,final,management,7,17;18,human: dauka: 
+p1-en-008,final,closing,no,19;20,ai-agreed
+p1-en-008,final,violations,no,11;13;16;18;20,ai-agreed
+p1-en-009,final,opening,yes,10,ai-agreed
+p1-en-009,final,understanding,na,1;10,ai-agreed
+p1-en-009,final,verification,na,1;10,ai-agreed
+p1-en-009,final,guidance,20,10;11,ai-agreed
+p1-en-009,final,empathy,yes,10,ai-agreed
+p1-en-009,final,management,10,10,ai-agreed
+p1-en-009,final,closing,na,11;12,ai-agreed
+p1-en-009,final,violations,no,10,ai-agreed
+p1-en-014,final,opening,yes,11,ai-agreed
+p1-en-014,final,understanding,na,1;10;11,ai-agreed
+p1-en-014,final,verification,no,11;12;13,ai-agreed
+p1-en-014,final,guidance,15,13;14;15,human: dauka: 
+p1-en-014,final,empathy,no,12;13;14;15,ai-agreed
+p1-en-014,final,management,7,13;14;15,human: dauka: 
+p1-en-014,final,closing,no,14;15,ai-agreed
+p1-en-014,final,violations,no,11,ai-agreed
+p1-ru-012,final,opening,yes,10,ai-agreed
+p1-ru-012,final,understanding,na,1;5;10,ai-agreed
+p1-ru-012,final,verification,na,1;10,ai-agreed
+p1-ru-012,final,guidance,20,5;10;11,human: dauka: 
+p1-ru-012,final,empathy,yes,10,ai-agreed
+p1-ru-012,final,management,10,10;11,ai-agreed
+p1-ru-012,final,closing,na,11;12,ai-agreed
+p1-ru-012,final,violations,no,10,ai-agreed
+p1-kz-012,final,opening,yes,10,ai-agreed
+p1-kz-012,final,understanding,yes,5;10;12,human: dauka: 
+p1-kz-012,final,verification,na,10;12;14,human: dauka: 
+p1-kz-012,final,guidance,20,12;14,ai-agreed
+p1-kz-012,final,empathy,yes,10;12;14,ai-agreed
+p1-kz-012,final,management,10,10;12;14,ai-agreed
+p1-kz-012,final,closing,yes,14,ai-agreed
+p1-kz-012,final,violations,no,10;12;14,ai-agreed
+p1-kz-013,final,opening,yes,10,ai-agreed
+p1-kz-013,final,understanding,na,1;5;10,ai-agreed
+p1-kz-013,final,verification,na,1;10,ai-agreed
+p1-kz-013,final,guidance,15,1;5;10;12,human: dauka: 
+p1-kz-013,final,empathy,no,,human: dauka: 
+p1-kz-013,final,management,4,,human: dauka: 
+p1-kz-013,final,closing,no,13;14,ai-agreed
+p1-kz-013,final,violations,yes,12,ai-agreed
+p1-en-001,final,opening,yes,10,ai-agreed
+p1-en-001,final,understanding,na,1;5;10,ai-agreed
+p1-en-001,final,verification,na,1;10,ai-agreed
+p1-en-001,final,guidance,20,10;11,ai-agreed
+p1-en-001,final,empathy,yes,10;12,ai-agreed
+p1-en-001,final,management,10,10;12,ai-agreed
+p1-en-001,final,closing,no,11;12,ai-agreed
+p1-en-001,final,violations,no,10;12,ai-agreed
+p1-en-004,final,opening,yes,10,ai-agreed
+p1-en-004,final,understanding,na,1;5;10,ai-agreed
+p1-en-004,final,verification,na,1;10;12,ai-agreed
+p1-en-004,final,guidance,20,10;12;13,ai-agreed
+p1-en-004,final,empathy,yes,10;14,ai-agreed
+p1-en-004,final,management,10,10;12,ai-agreed
+p1-en-004,final,closing,no,13;14,ai-agreed
+p1-en-004,final,violations,no,10;12;14,ai-agreed
