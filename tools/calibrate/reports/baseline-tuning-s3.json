@@ -1,0 +1,232 @@
+{
+  "name": "baseline-tuning-s3",
+  "run": {
+    "promptVersion": "p-ec2a86d6",
+    "provider": "hf-router",
+    "model": "Qwen/Qwen3.8-27B:cerebras",
+    "set": "tuning",
+    "samples": 3,
+    "temperature": 0.6,
+    "commit": "8f1de24"
+  },
+  "dialogs": 14,
+  "evaluated": 14,
+  "failed": [],
+  "distribution": {
+    "opening": {
+      "yes": 13,
+      "no": 1
+    },
+    "understanding": {
+      "yes": 5,
+      "no": 2,
+      "na": 7
+    },
+    "verification": {
+      "na": 11,
+      "yes": 2,
+      "no": 1
+    },
+    "guidance": {
+      "10": 3,
+      "0": 1,
+      "na": 1,
+      "20": 7,
+      "15": 2
+    },
+    "empathy": {
+      "yes": 11,
+      "no": 3
+    },
+    "management": {
+      "10": 8,
+      "4": 1,
+      "7": 5
+    },
+    "closing": {
+      "no": 8,
+      "yes": 2,
+      "na": 4
+    },
+    "violations": {
+      "no": 11,
+      "yes": 3
+    }
+  },
+  "byLanguage": {
+    "opening": {
+      "RU": {
+        "yes": 8
+      },
+      "KZ": {
+        "yes": 2,
+        "no": 1
+      },
+      "EN": {
+        "yes": 3
+      }
+    },
+    "understanding": {
+      "RU": {
+        "yes": 3,
+        "no": 2,
+        "na": 3
+      },
+      "KZ": {
+        "yes": 1,
+        "na": 2
+      },
+      "EN": {
+        "na": 2,
+        "yes": 1
+      }
+    },
+    "verification": {
+      "RU": {
+        "na": 7,
+        "yes": 1
+      },
+      "KZ": {
+        "yes": 1,
+        "na": 2
+      },
+      "EN": {
+        "na": 2,
+        "no": 1
+      }
+    },
+    "guidance": {
+      "RU": {
+        "10": 2,
+        "0": 1,
+        "na": 1,
+        "20": 3,
+        "15": 1
+      },
+      "KZ": {
+        "20": 3
+      },
+      "EN": {
+        "15": 1,
+        "20": 1,
+        "10": 1
+      }
+    },
+    "empathy": {
+      "RU": {
+        "yes": 6,
+        "no": 2
+      },
+      "KZ": {
+        "yes": 3
+      },
+      "EN": {
+        "yes": 2,
+        "no": 1
+      }
+    },
+    "management": {
+      "RU": {
+        "10": 4,
+        "4": 1,
+        "7": 3
+      },
+      "KZ": {
+        "10": 2,
+        "7": 1
+      },
+      "EN": {
+        "10": 2,
+        "7": 1
+      }
+    },
+    "closing": {
+      "RU": {
+        "no": 5,
+        "yes": 1,
+        "na": 2
+      },
+      "KZ": {
+        "yes": 1,
+        "no": 1,
+        "na": 1
+      },
+      "EN": {
+        "no": 2,
+        "na": 1
+      }
+    },
+    "violations": {
+      "RU": {
+        "no": 6,
+        "yes": 2
+      },
+      "KZ": {
+        "no": 3
+      },
+      "EN": {
+        "no": 2,
+        "yes": 1
+      }
+    }
+  },
+  "stability": {
+    "opening": {
+      "n": 14,
+      "unanimous": 14,
+      "rate": 1.0
+    },
+    "understanding": {
+      "n": 14,
+      "unanimous": 11,
+      "rate": 0.7857142857142857
+    },
+    "verification": {
+      "n": 14,
+      "unanimous": 14,
+      "rate": 1.0
+    },
+    "guidance": {
+      "n": 14,
+      "unanimous": 13,
+      "rate": 0.9285714285714286
+    },
+    "empathy": {
+      "n": 14,
+      "unanimous": 13,
+      "rate": 0.9285714285714286
+    },
+    "management": {
+      "n": 14,
+      "unanimous": 8,
+      "rate": 0.5714285714285714
+    },
+    "closing": {
+      "n": 14,
+      "unanimous": 12,
+      "rate": 0.8571428571428571
+    },
+    "violations": {
+      "n": 14,
+      "unanimous": 14,
+      "rate": 1.0
+    }
+  },
+  "violations": {
+    "flagged": ["p1-en-014", "p1-ru-022", "p1-ru-029"],
+    "knownCaught": ["p1-ru-022", "p1-ru-029"],
+    "knownMissed": [],
+    "unexpected": ["p1-en-014"]
+  },
+  "totals": {
+    "n": 14,
+    "mean": 78.77,
+    "min": 20,
+    "max": 100
+  },
+  "cost": {
+    "totalUsd": 0.2959,
+    "meanLatencyS": 4.61,
+    "calls": 41
+  }
+}
