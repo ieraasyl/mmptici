@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from "./routes/__root"
 import { Route as IndexRouteImport } from "./routes/index"
 import { Route as AppealsRouteImport } from "./routes/appeals"
 import { Route as ChecklistsRouteImport } from "./routes/checklists"
+import { Route as DashboardRouteImport } from "./routes/dashboard"
 import { Route as ConversationsIdRouteImport } from "./routes/conversations.$id"
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const ChecklistsRoute = ChecklistsRouteImport.update({
   path: "/checklists",
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: "/dashboard",
+  path: "/dashboard",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConversationsIdRoute = ConversationsIdRouteImport.update({
   id: "/conversations/$id",
   path: "/conversations/$id",
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute
   "/appeals": typeof AppealsRoute
   "/checklists": typeof ChecklistsRoute
+  "/dashboard": typeof DashboardRoute
   "/conversations/$id": typeof ConversationsIdRoute
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
   "/appeals": typeof AppealsRoute
   "/checklists": typeof ChecklistsRoute
+  "/dashboard": typeof DashboardRoute
   "/conversations/$id": typeof ConversationsIdRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,29 @@ export interface FileRoutesById {
   "/": typeof IndexRoute
   "/appeals": typeof AppealsRoute
   "/checklists": typeof ChecklistsRoute
+  "/dashboard": typeof DashboardRoute
   "/conversations/$id": typeof ConversationsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: "/" | "/appeals" | "/checklists" | "/conversations/$id"
+  fullPaths:
+    "/" | "/appeals" | "/checklists" | "/dashboard" | "/conversations/$id"
   fileRoutesByTo: FileRoutesByTo
-  to: "/" | "/appeals" | "/checklists" | "/conversations/$id"
-  id: "__root__" | "/" | "/appeals" | "/checklists" | "/conversations/$id"
+  to: "/" | "/appeals" | "/checklists" | "/dashboard" | "/conversations/$id"
+  id:
+    | "__root__"
+    | "/"
+    | "/appeals"
+    | "/checklists"
+    | "/dashboard"
+    | "/conversations/$id"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppealsRoute: typeof AppealsRoute
   ChecklistsRoute: typeof ChecklistsRoute
+  DashboardRoute: typeof DashboardRoute
   ConversationsIdRoute: typeof ConversationsIdRoute
 }
 
@@ -92,6 +109,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ChecklistsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/dashboard": {
+      id: "/dashboard"
+      path: "/dashboard"
+      fullPath: "/dashboard"
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/conversations/$id": {
       id: "/conversations/$id"
       path: "/conversations/$id"
@@ -106,6 +130,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppealsRoute: AppealsRoute,
   ChecklistsRoute: ChecklistsRoute,
+  DashboardRoute: DashboardRoute,
   ConversationsIdRoute: ConversationsIdRoute,
 }
 export const routeTree = rootRouteImport

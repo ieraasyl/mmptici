@@ -9,6 +9,7 @@ import { answerLabel, type Turn } from "@app/contracts";
 import {
   appealsQuery,
   cqa,
+  dashboardQuery,
   evaluationQuery,
   pointLabel,
   scoreLabel,
@@ -260,6 +261,7 @@ function AppealForm({
       onSubmitted();
       void client.invalidateQueries(query);
       void client.invalidateQueries(appealsQuery);
+      void client.invalidateQueries(dashboardQuery);
     },
   });
 

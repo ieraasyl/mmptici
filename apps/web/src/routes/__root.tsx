@@ -38,6 +38,7 @@ export const Route = createRootRoute({
 });
 
 const destinations = [
+  { to: "/dashboard", label: "Dashboard", icon: AnalyticsUpIcon },
   { to: "/", label: "Conversations", icon: Chat01Icon },
   { to: "/checklists", label: "Checklists", icon: CheckListIcon },
   { to: "/appeals", label: "Appeals", icon: JusticeScale01Icon },

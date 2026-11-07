@@ -47,9 +47,19 @@ async function importExample(headers: { Cookie: string }) {
 
 test("imports conversations once and isolates browser workspaces", async () => {
   expect((await cqa.conversations.$get()).status).toBe(401);
+  expect((await cqa.dashboard.$get()).status).toBe(401);
   const headers = await openWorkspace();
   const other = await openWorkspace();
   const id = await importExample(headers);
+
+  const dashboard = await cqa.dashboard.$get({}, { headers });
+  expect(dashboard.headers.get("cache-control")).toContain("no-store");
+  expect(await dashboard.json()).toMatchObject({
+    conversations: [{ id, evaluation: null, pendingAppeals: 0 }],
+  });
+  expect(await (await cqa.dashboard.$get({}, { headers: other })).json()).toEqual({
+    conversations: [],
+  });
 
   const duplicate = await cqa.conversations.$post({ json: example }, { headers });
   expect(await duplicate.json()).toEqual({ imported: 0, skipped: 1 });
@@ -107,6 +117,44 @@ test("loads the bundled DEV dataset once per workspace", async () => {
   expect(await (await cqa.conversations.$get({}, { headers: other })).json()).toEqual({
     conversations: [],
   });
+});
+
+test("dashboard handles empty workspaces and evaluations with only violation flags", async () => {
+  const headers = await openWorkspace();
+  expect(await (await cqa.dashboard.$get({}, { headers })).json()).toEqual({ conversations: [] });
+  const conversationId = await importExample(headers);
+  const { checklists } = await (await cqa.checklists.$get({}, { headers })).json();
+  const created = await cqa.checklists.$post(
+    {
+      json: {
+        name: "Violation review",
+        criteria: [{ ...checklists[0].criteria.at(-1)!, id: "risk" }],
+      },
+    },
+    { headers },
+  );
+  if (created.status !== 201) throw new Error(await created.text());
+  const { checklist } = await created.json();
+  const evaluationId = crypto.randomUUID();
+  const result = await cqa.conversations[":id"].evaluations.$post(
+    {
+      param: { id: conversationId },
+      json: { id: evaluationId, checklistId: checklist.id },
+    },
+    { headers: { ...headers, "X-CQA-Test-Model": "valid" } },
+  );
+  expect(result.status).toBe(201);
+  const dashboard = await (await cqa.dashboard.$get({}, { headers })).json();
+  expect(dashboard).toMatchObject({
+    conversations: [
+      {
+        id: conversationId,
+        pendingAppeals: 0,
+        evaluation: { id: evaluationId, total: null, seriousViolation: true },
+      },
+    ],
+  });
+  expect(dashboard.conversations[0]).not.toHaveProperty("transcript");
 });
 
 test("returns JSON errors for malformed and invalid imports", async () => {
@@ -219,6 +267,11 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
   expect(submitted.status).toBe(201);
   expect((await evaluationEndpoint.appeals.$post(appeal, { headers })).status).toBe(409);
   const { appeals } = await (await cqa.appeals.$get({}, { headers })).json();
+  expect(await (await cqa.dashboard.$get({}, { headers })).json()).toMatchObject({
+    conversations: [
+      { id: conversationId, pendingAppeals: 1, evaluation: { id: newId, total: 75 } },
+    ],
+  });
   expect(appeals[0]).toMatchObject({
     comment: appeal.json.comment,
     original: { answer: "no" },
@@ -254,5 +307,22 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
     originalPoints: 0,
     finalAnswer: "yes",
     finalPoints: 10,
+  });
+
+  // A decision on an older evaluation clears its appeal without changing the latest score.
+  expect(await (await cqa.dashboard.$get({}, { headers })).json()).toMatchObject({
+    conversations: [{ pendingAppeals: 0, evaluation: { id: newId, total: 75 } }],
+  });
+  const latestAppeal = await evaluationEndpoint.appeals.$post(
+    { ...appeal, param: { id: newId } },
+    { headers },
+  );
+  if (latestAppeal.status !== 201) throw new Error(await latestAppeal.text());
+  const latestAppealId = (await latestAppeal.json()).appeal.id;
+  expect(
+    (await decision.$put({ ...review, param: { id: latestAppealId } }, { headers })).status,
+  ).toBe(200);
+  expect(await (await cqa.dashboard.$get({}, { headers })).json()).toMatchObject({
+    conversations: [{ pendingAppeals: 0, evaluation: { id: newId, total: 100, revision: 2 } }],
   });
 });

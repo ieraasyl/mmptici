@@ -32,7 +32,14 @@ import {
   Task01Icon,
 } from "@hugeicons/core-free-icons";
 import { datasetFileSchema } from "@app/contracts";
-import { cqa, appealsQuery, channelName, conversationsQuery, languageName } from "@/lib/cqa";
+import {
+  cqa,
+  appealsQuery,
+  channelName,
+  conversationsQuery,
+  dashboardQuery,
+  languageName,
+} from "@/lib/cqa";
 import { request } from "@/lib/request";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,6 +105,7 @@ export function ConversationList() {
       setGroup("");
       setPage(0);
       void queryClient.invalidateQueries(conversationsQuery);
+      void queryClient.invalidateQueries(dashboardQuery);
     },
     onError: (error) => {
       toast.add({

@@ -27,6 +27,7 @@ import {
   conversationsQuery,
   cqa,
   dateLabel,
+  dashboardQuery,
   evaluationQuery,
   languageName,
   speakerName,
@@ -122,6 +123,7 @@ function Detail({
       onSelectEvaluation(id);
       void queryClient.invalidateQueries(conversationQuery(conversation.id));
       void queryClient.invalidateQueries(conversationsQuery);
+      void queryClient.invalidateQueries(dashboardQuery);
     },
   });
 

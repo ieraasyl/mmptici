@@ -5,6 +5,16 @@ import { request } from "./request";
 
 export const cqa = api.cqa;
 
+export const dashboardQuery = queryOptions({
+  queryKey: ["dashboard"],
+  queryFn: ({ signal }) => request((init) => cqa.dashboard.$get({}, { init }), { signal }),
+});
+
+export type DashboardConversation = InferResponseType<
+  typeof cqa.dashboard.$get,
+  200
+>["conversations"][number];
+
 export const conversationsQuery = queryOptions({
   queryKey: ["conversations"],
   queryFn: ({ signal }) => request((init) => cqa.conversations.$get({}, { init }), { signal }),

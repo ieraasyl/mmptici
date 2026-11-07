@@ -29,6 +29,7 @@ import {
   InferenceApiError,
 } from "../inference/index.ts";
 import { resolveRecordingUrl } from "../recording.ts";
+import { readDashboard } from "../dashboard.ts";
 
 type Db = ReturnType<typeof createDb>;
 type CqaEnv = { Bindings: Bindings; Variables: { workspace: string; db: Db } };
@@ -149,6 +150,10 @@ export const cqaRoutes = new Hono<CqaEnv>()
     return c.json({ ready: true });
   })
   .use("*", workspace)
+  .get("/dashboard", async (c) => {
+    const conversations = await readDashboard(c.get("db"), c.get("workspace"));
+    return c.json({ conversations });
+  })
   .get("/conversations", async (c) => {
     const db = c.get("db");
     const evaluations = db

@@ -14,7 +14,15 @@ import { Link } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
 import { answerLabel, answerOptions, type Answer } from "@app/contracts";
-import { appealsQuery, cqa, dateLabel, evaluationQuery, speakerName, type Appeal } from "@/lib/cqa";
+import {
+  appealsQuery,
+  cqa,
+  dashboardQuery,
+  dateLabel,
+  evaluationQuery,
+  speakerName,
+  type Appeal,
+} from "@/lib/cqa";
 import { ApiRequestError, request } from "@/lib/request";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -204,6 +212,7 @@ function DecisionForm({ appeal, onDecided }: { appeal: Appeal; onDecided?: () =>
       );
       void client.invalidateQueries(appealsQuery);
       void client.invalidateQueries(evaluationQuery(appeal.evaluationId));
+      void client.invalidateQueries(dashboardQuery);
       onDecided?.();
     },
   });
