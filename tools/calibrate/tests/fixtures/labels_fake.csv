@@ -1,0 +1,73 @@
+conversation_id,labeler,criterion_id,answer,evidence_turns,note
+p1-ru-003,dauka,opening,yes,,dauka note
+p1-ru-003,dauka,understanding,yes,,dauka note
+p1-ru-003,dauka,verification,na,,dauka note
+p1-ru-003,dauka,guidance,15,,dauka note
+p1-ru-003,dauka,empathy,yes,,dauka note
+p1-ru-003,dauka,management,7,,dauka note
+p1-ru-003,dauka,closing,yes,,dauka note
+p1-ru-003,dauka,violations,no,,dauka note
+p1-ru-003,ml-a,opening,yes,1;3,
+p1-ru-003,ml-a,understanding,no,1;3,
+p1-ru-003,ml-a,verification,na,1;3,
+p1-ru-003,ml-a,guidance,15,1;3,
+p1-ru-003,ml-a,empathy,yes,1;3,
+p1-ru-003,ml-a,management,10,1;3,
+p1-ru-003,ml-a,closing,yes,1;3,
+p1-ru-003,ml-a,violations,no,1;3,
+p1-ru-003,final,opening,yes,,
+p1-ru-003,final,understanding,yes,,
+p1-ru-003,final,verification,na,,
+p1-ru-003,final,guidance,15,,
+p1-ru-003,final,empathy,yes,,
+p1-ru-003,final,management,7,,
+p1-ru-003,final,closing,yes,,
+p1-ru-003,final,violations,no,,
+p1-ru-022,dauka,opening,yes,,dauka note
+p1-ru-022,dauka,understanding,na,,dauka note
+p1-ru-022,dauka,verification,yes,,dauka note
+p1-ru-022,dauka,guidance,10,,dauka note
+p1-ru-022,dauka,empathy,no,,dauka note
+p1-ru-022,dauka,management,4,,dauka note
+p1-ru-022,dauka,closing,na,,dauka note
+p1-ru-022,dauka,violations,no,,dauka note
+p1-ru-022,ml-a,opening,no,1;3,
+p1-ru-022,ml-a,understanding,na,1;3,
+p1-ru-022,ml-a,verification,yes,1;3,
+p1-ru-022,ml-a,guidance,20,1;3,
+p1-ru-022,ml-a,empathy,no,1;3,
+p1-ru-022,ml-a,management,4,1;3,
+p1-ru-022,ml-a,closing,na,1;3,
+p1-ru-022,ml-a,violations,yes,1;3,
+p1-ru-022,final,opening,yes,,
+p1-ru-022,final,understanding,na,,
+p1-ru-022,final,verification,yes,,
+p1-ru-022,final,guidance,10,,
+p1-ru-022,final,empathy,no,,
+p1-ru-022,final,management,4,,
+p1-ru-022,final,closing,na,,
+p1-ru-022,final,violations,no,,
+p1-ru-025,dauka,opening,no,,dauka note
+p1-ru-025,dauka,understanding,yes,,dauka note
+p1-ru-025,dauka,verification,no,,dauka note
+p1-ru-025,dauka,guidance,5,,dauka note
+p1-ru-025,dauka,empathy,yes,,dauka note
+p1-ru-025,dauka,management,10,,dauka note
+p1-ru-025,dauka,closing,yes,,dauka note
+p1-ru-025,dauka,violations,no,,dauka note
+p1-ru-025,ml-a,opening,no,1;3,
+p1-ru-025,ml-a,understanding,yes,1;3,
+p1-ru-025,ml-a,verification,yes,1;3,
+p1-ru-025,ml-a,guidance,5,1;3,
+p1-ru-025,ml-a,empathy,yes,1;3,
+p1-ru-025,ml-a,management,7,1;3,
+p1-ru-025,ml-a,closing,yes,1;3,
+p1-ru-025,ml-a,violations,no,1;3,
+p1-ru-025,final,opening,no,,
+p1-ru-025,final,understanding,yes,,
+p1-ru-025,final,verification,no,,
+p1-ru-025,final,guidance,5,,
+p1-ru-025,final,empathy,yes,,
+p1-ru-025,final,management,10,,
+p1-ru-025,final,closing,yes,,
+p1-ru-025,final,violations,no,,

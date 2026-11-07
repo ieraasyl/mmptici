@@ -1,0 +1,439 @@
+{
+  "promptVersion": "fake-v1",
+  "provider": "fake",
+  "model": "fake-model",
+  "dialogs": [
+    {
+      "conversationId": "p1-ru-003",
+      "ratings": [
+        {
+          "criterionId": "opening",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            "yes",
+            "yes"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "understanding",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            "yes",
+            "yes"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "verification",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            "yes",
+            "yes"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "guidance",
+          "answer": "10",
+          "confidence": 0.8,
+          "votes": [
+            "10",
+            "10"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "empathy",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            "yes",
+            "yes"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "management",
+          "answer": "7",
+          "confidence": 0.8,
+          "votes": [
+            "7",
+            "7"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "closing",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            "yes",
+            "yes"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "violations",
+          "answer": "no",
+          "confidence": 0.8,
+          "votes": [
+            "no",
+            "no"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        }
+      ],
+      "total": null,
+      "seriousViolation": false,
+      "run": {
+        "latencyMs": 1000,
+        "usage": {
+          "promptTokens": 1000,
+          "completionTokens": 200
+        },
+        "costUsd": 0.01,
+        "failedSamples": 0
+      }
+    },
+    {
+      "conversationId": "p1-ru-022",
+      "ratings": [
+        {
+          "criterionId": "opening",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            {
+              "answer": "yes",
+              "model": "m1"
+            },
+            {
+              "answer": "yes",
+              "model": "m2"
+            }
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "understanding",
+          "answer": "N/A",
+          "confidence": 0.8,
+          "votes": [
+            {
+              "answer": "N/A",
+              "model": "m1"
+            },
+            {
+              "answer": "N/A",
+              "model": "m2"
+            }
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "verification",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            {
+              "answer": "yes",
+              "model": "m1"
+            },
+            {
+              "answer": "yes",
+              "model": "m2"
+            }
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "guidance",
+          "answer": 10,
+          "confidence": 0.8,
+          "votes": [
+            {
+              "answer": "10",
+              "model": "m1"
+            },
+            {
+              "answer": "10",
+              "model": "m2"
+            }
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "empathy",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            {
+              "answer": "yes",
+              "model": "m1"
+            },
+            {
+              "answer": "yes",
+              "model": "m2"
+            }
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "management",
+          "answer": 4,
+          "confidence": 0.8,
+          "votes": [
+            {
+              "answer": "4",
+              "model": "m1"
+            },
+            {
+              "answer": "4",
+              "model": "m2"
+            }
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "closing",
+          "answer": "na",
+          "confidence": 0.8,
+          "votes": [
+            {
+              "answer": "na",
+              "model": "m1"
+            },
+            {
+              "answer": "na",
+              "model": "m2"
+            }
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "violations",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            {
+              "answer": "yes",
+              "model": "m1"
+            },
+            {
+              "answer": "yes",
+              "model": "m2"
+            }
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        }
+      ],
+      "total": null,
+      "seriousViolation": false,
+      "run": {
+        "latencyMs": 2000,
+        "usage": {
+          "promptTokens": 1000,
+          "completionTokens": 200
+        },
+        "costUsd": 0.02,
+        "failedSamples": 1
+      }
+    },
+    {
+      "conversationId": "p1-ru-025",
+      "ratings": [
+        {
+          "criterionId": "opening",
+          "answer": "no",
+          "confidence": 0.8,
+          "votes": [
+            "no",
+            "no"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "understanding",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            "yes",
+            "yes"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "verification",
+          "answer": "no",
+          "confidence": 0.8,
+          "votes": [
+            "no",
+            "no"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "guidance",
+          "answer": 5,
+          "confidence": 0.8,
+          "votes": [
+            "5",
+            "5"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "empathy",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            "yes",
+            "yes"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "management",
+          "answer": 7,
+          "confidence": 0.8,
+          "votes": [
+            "7",
+            "7"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "closing",
+          "answer": "yes",
+          "confidence": 0.8,
+          "votes": [
+            "yes",
+            "yes"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        },
+        {
+          "criterionId": "violations",
+          "answer": "no",
+          "confidence": 0.8,
+          "votes": [
+            "no",
+            "no"
+          ],
+          "evidence": [
+            1,
+            2
+          ],
+          "explanation": "fake explanation"
+        }
+      ],
+      "total": null,
+      "seriousViolation": false,
+      "run": {
+        "latencyMs": 3000,
+        "usage": {
+          "promptTokens": 1000,
+          "completionTokens": 200
+        },
+        "costUsd": 0.03,
+        "failedSamples": 0
+      }
+    }
+  ]
+}
