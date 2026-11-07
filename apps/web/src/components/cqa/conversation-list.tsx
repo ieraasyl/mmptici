@@ -153,6 +153,11 @@ export function ConversationList() {
         timeout: 8_000,
       });
     },
+    // The conversations may have been saved even when the bundled scores failed to load.
+    onSettled: () => {
+      void queryClient.invalidateQueries(conversationsQuery);
+      void queryClient.invalidateQueries(dashboardQuery);
+    },
   });
 
   const conversations = list.data?.conversations ?? [];

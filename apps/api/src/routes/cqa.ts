@@ -202,7 +202,18 @@ export const cqaRoutes = new Hono<CqaEnv>()
   })
   .post("/evaluations/import-dev", async (c) => {
     const data = precomputedEvaluationsSchema.parse(devEvaluations);
-    const result = await importPrecomputed(c.get("db"), c.get("workspace"), defaultChecklist, data);
+    const sources = new Map(
+      datasetFileSchema
+        .parse(devDataset)
+        .records.map((record) => [record.conversation_id, record.transcript]),
+    );
+    const result = await importPrecomputed(
+      c.get("db"),
+      c.get("workspace"),
+      defaultChecklist,
+      data,
+      sources,
+    );
     return c.json(result, 201);
   })
   .get("/conversations/:id/recording", async (c) => {

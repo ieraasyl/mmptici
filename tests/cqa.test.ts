@@ -100,6 +100,61 @@ test("imports conversations once and isolates browser workspaces", async () => {
   ).toBe(403);
 });
 
+test("attaches bundled evaluations once, only to matching DEV transcripts", async () => {
+  const headers = await openWorkspace();
+  const other = await openWorkspace();
+  const loadScores = cqa.evaluations["import-dev"].$post;
+  expect((await loadScores()).status).toBe(401);
+
+  // A conversation with a DEV source ID but another transcript, in DEV and in another group.
+  const shared = {
+    ...example.records[0],
+    conversation_id: "p1-ru-001",
+    channel: "agent chat" as const,
+    language: "RU" as const,
+    audio_url: null,
+  };
+  for (const group of ["CONTROL", "DEV"]) {
+    const imported = await cqa.conversations.$post(
+      { json: { group, records: [shared] } },
+      { headers },
+    );
+    expect(imported.status, await imported.clone().text()).toBe(201);
+  }
+  expect((await cqa.conversations["import-dev"].$post({}, { headers })).status).toBe(201);
+  expect((await cqa.conversations["import-dev"].$post({}, { headers: other })).status).toBe(201);
+
+  // Two imports at once insert each bundled evaluation only once.
+  const [one, two] = await Promise.all([loadScores({}, { headers }), loadScores({}, { headers })]);
+  expect([one.status, two.status]).toEqual([201, 201]);
+  const results = [await one.json(), await two.json()];
+  const total = results.reduce((sum, { imported }) => sum + imported, 0);
+  const models = 3;
+  expect(total).toBe(64 * models);
+  for (const result of results) {
+    expect(result.mismatched).toHaveLength(models);
+    expect(result.mismatched[0]).toMatchObject({ conversation_id: "p1-ru-001" });
+  }
+  // A repeated import adds nothing.
+  const again = await (await loadScores({}, { headers })).json();
+  expect(again).toMatchObject({ imported: 0, skipped: 64 * models });
+
+  const { conversations } = await (await cqa.conversations.$get({}, { headers })).json();
+  expect(conversations).toHaveLength(66);
+  const modified = conversations.filter(({ sourceId }) => sourceId === "p1-ru-001");
+  expect(modified).toHaveLength(2);
+  expect(modified.every(({ evaluated }) => !evaluated)).toBe(true);
+  expect(conversations.filter(({ evaluated }) => evaluated)).toHaveLength(64);
+  const dashboard = await (await cqa.dashboard.$get({}, { headers })).json();
+  const latest = dashboard.conversations.find(({ sourceId }) => sourceId === "p1-ru-002");
+  expect(latest?.evaluation?.model).toBe("Qwen/Qwen3.8-27B:cerebras");
+
+  // The other workspace holds the same DEV conversations and received nothing.
+  const elsewhere = await (await cqa.conversations.$get({}, { headers: other })).json();
+  expect(elsewhere.conversations).toHaveLength(65);
+  expect(elsewhere.conversations.some(({ evaluated }) => evaluated)).toBe(false);
+});
+
 test("loads the bundled DEV dataset once per workspace", async () => {
   const load = cqa.conversations["import-dev"].$post;
   expect((await load()).status).toBe(401);
