@@ -83,7 +83,7 @@ On success, `isSuccess` is `true`, and `data.records` contains the conversations
 
 Use the same checklist for chats in Russian, Kazakh, and English. The first seven criteria have a combined weight of 100. The eighth flags serious violations separately.
 
-The participant guide includes calls in the DEV dataset and provides for recording playback or a link to a player. The Q&A adds a call-specific exception to the chat checklist below. If a recording starts after the operator's greeting, rate opening as `N/A`. [Q&A message 2978](https://t.me/c/4473389149/732/2978)
+The participant guide includes calls in the DEV dataset and provides for recording playback or a link to a player. The Q&A adds a call-specific exception to the chat checklist below: if a recording starts after the operator's greeting, rate opening as `N/A`. However, the results appendix published on 7 November permits only `true` or `false` for the corresponding `contact` criterion. How to represent this exception in the DEV submission remains unresolved; the appendix does not permit `null` for `contact`. [Q&A message 2978](https://t.me/c/4473389149/732/2978)
 
 | #   | Criterion                                                     | Allowed answers        |    Weight | How to evaluate                                                                                                                                                                |
 | --- | ------------------------------------------------------------- | ---------------------- | --------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -137,11 +137,75 @@ The three-minute first-response threshold, tags, and attachments are outside the
 
 The live product can run locally or be hosted. Judges must be able to interact with the UI in real time. Organizers said they would read the README. At later stages, they may ask to use the running application on a team's laptop. [Q&A message 2968](https://t.me/c/4473389149/732/2968), [message 2980](https://t.me/c/4473389149/732/2980), [message 2991](https://t.me/c/4473389149/732/2991)
 
-| When                     | What happens                                                                                                                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 23 hours after the start | Organizers release the control transcripts. Start processing them in time to have the results ready for the demo.                                       |
-| Before the code freeze   | Commit the solution to a public Git repository, include a README with clear startup steps, and send the repository link to the organizers.              |
-| 24 hours after the start | Freeze the final commit. Judges review that version. Teams can still process data and change the checklist through the interface on the frozen version. |
+| When                     | What happens                                                                                                                                                          |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 23 hours after the start | Organizers release the 10 control chats and announce access details. The final hour includes fetching, evaluation, JSON validation, and pushing the results.          |
+| Before the code freeze   | Commit and push the solution and both results files to the public repository whose link was provided to organizers. Include a README with clear startup steps.        |
+| 24 hours after the start | Code freeze. Both results files must already be available in Git. Later processing and checklist changes through the frozen interface remain part of the live checks. |
+
+### Results submission
+
+Source: `CQA_Student_Guide_Appendix_Results.pdf`, distributed by Nikolay Borovinskiy on 7 November 2026. His accompanying announcement reiterates the file paths, the one-hour control window, and the requirement to push before code freeze. This appendix adds a results deadline to the original guide: having results only in the running application, local files, or an unpushed commit is insufficient.
+
+Prepare the export before the control set arrives. Place these files in the repository root:
+
+```text
+results/
+  dev/
+    results.json
+  prod/
+    results.json
+```
+
+- `results/dev/results.json` contains one result for each of the 65 DEV conversations: 60 chats and 5 calls.
+- `results/prod/results.json` contains one result for each of the 10 control chats, including any evaluation failures.
+- Preserve each original API `conversation_id` exactly. Do not substitute internal database IDs, omit conversations, or duplicate IDs.
+- Use the same JSON structure for both files. The directory determines the dataset.
+- Validate UTF-8 JSON with no comments or trailing commas, then commit and push both files before code freeze.
+
+### Results JSON 1.0
+
+Each file is one object with these fields. Keep the prescribed field names, criterion IDs, and value types.
+
+| Field            | Required content                                                                                                                                                             |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `schema_version` | The string `"1.0"`.                                                                                                                                                          |
+| `team_name`      | The team's name.                                                                                                                                                             |
+| `model`          | An object with `mode` and `name`. `mode` is `"local"`, `"external_api"`, or `"hybrid"`. `name` identifies the actual model used; list the names if multiple models are used. |
+| `results`        | An array with one result per conversation in the dataset.                                                                                                                    |
+
+A successful result has `conversation_id`, `status: "ok"`, `criteria`, and `score`. Its `criteria` array contains exactly eight objects, each with `criterion_id`, `value`, `rationale`, and `evidence_turns`. Include each criterion below exactly once.
+
+| `criterion_id`   | Criterion                                                     | Allowed `value`                    |    Weight |
+| ---------------- | ------------------------------------------------------------- | ---------------------------------- | --------: |
+| `contact`        | Opening the conversation                                      | `true`, `false`                    |        10 |
+| `discovery`      | Understanding the customer's needs                            | `true`, `false`, `null`            |        15 |
+| `identification` | Identity verification                                         | `true`, `false`, `null`            |        20 |
+| `consultation`   | Correct and complete guidance                                 | `0`, `5`, `10`, `15`, `20`, `null` |        20 |
+| `empathy`        | Empathy and customer focus                                    | `true`, `false`                    |        15 |
+| `dialogue`       | Conversation management, response speed, and language quality | `0`, `4`, `7`, `10`                |        15 |
+| `closure`        | Closing the conversation                                      | `true`, `false`, `null`            |         5 |
+| `critical`       | Serious violations                                            | `true`, `false`                    | No points |
+
+- `value`: use `true` for Yes, `false` for No, and `null` for N/A where allowed. Numeric values are raw criterion ratings before applying weights: `dialogue: 7` means 7 out of 10, with weight 15.
+- `rationale`: briefly explain the rating, including why a criterion is N/A.
+- `evidence_turns`: an array of supporting turn numbers, starting at 1 in the original full transcript. Include client, operator, bot, and system entries when counting; do not renumber operator replies separately.
+- `score`: an object with `final_score` and `critical_flag`. `final_score` is between 0 and 100, rounded to two decimal places using the scoring rules above. Exclude N/A criteria and redistribute their weight proportionally.
+- `critical_flag`: must equal the `value` of `critical`. A serious violation is reported separately and does not automatically set the total to zero.
+
+If evaluation fails, keep the conversation's ID and include `status: "error"`, an empty `criteria` array, `score: null`, and an `error` string explaining the failure. Do not hide failures or substitute a zero score. This illustrative result uses a placeholder ID; replace it with the original ID from the dataset:
+
+```json
+{
+  "conversation_id": "demo-002",
+  "status": "error",
+  "criteria": [],
+  "score": null,
+  "error": "The model did not return an evaluation."
+}
+```
+
+### Live demo
 
 The demo has a five-minute limit. Organizers will announce the exact schedule and team count separately. The guide suggests this allocation.
 
