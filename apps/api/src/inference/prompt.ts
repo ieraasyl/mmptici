@@ -33,7 +33,9 @@ export const systemPrompt = [
   "Evidence: cite one to five turn numbers. A turn number is the position in the full transcript, starting at 1 and counting every turn, including customer, bot, and system turns. Never renumber the operator's turns separately.",
   "For a missing required action, cite the turn or turns where it should have happened. For na, cite the turns that show why the criterion does not apply. For the absence of a serious violation, cite representative operator turns.",
   "Explanation: one or two short sentences in Russian, whatever the language of the conversation, saying what the cited turns show.",
-  "For voice calls, the transcript comes from speech recognition: do not judge spelling, and do not infer tone, diction, or audio quality.",
+  "",
+  "Voice call transcripts come from speech recognition and some words are misrecognized: read for the intended meaning and never count recognition errors against the operator (a garbled name in the greeting still counts as an introduction).",
+  "Do not infer tone, diction, or audio quality.",
   "",
   'Respond with JSON only: {"ratings":{"<criterionId>":{"answer":"yes","explanation":"Краткое пояснение.","evidence":[1,2]}}}. Write all answers as strings. Do not calculate points or a total.',
 ].join("\n");

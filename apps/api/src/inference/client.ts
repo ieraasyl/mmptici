@@ -4,7 +4,7 @@
 export const HF_ROUTER_URL = "https://router.huggingface.co/v1/chat/completions";
 export const DEFAULT_MODEL = "Qwen/Qwen3.8-27B:cerebras";
 /** Qwen is a reasoning model: below ~6000 the answer can be cut off inside its reasoning. */
-export const DEFAULT_MAX_TOKENS = 8000;
+export const DEFAULT_MAX_TOKENS = 16_000;
 
 export type ChatMessage = {
   role: "system" | "user" | "assistant";

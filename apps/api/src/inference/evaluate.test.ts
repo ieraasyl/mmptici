@@ -227,3 +227,9 @@ test("an invalid-evidence reply triggers the repair retry", async () => {
   expect(calls[1].at(-1)?.content).toContain("opening: no valid evidence");
   expect(run.ratings.find((r) => r.criterionId === "opening")?.evidence).toEqual([2]);
 });
+
+test("voice calls are read with speech-recognition errors in mind", () => {
+  expect(systemPrompt).toMatch(/Voice call transcripts come from speech recognition/);
+  expect(systemPrompt).toMatch(/never count recognition errors against the operator/);
+  expect(systemPrompt).toMatch(/garbled name in the greeting still counts as an introduction/);
+});
