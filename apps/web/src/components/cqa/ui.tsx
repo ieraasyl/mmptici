@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "cn";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AlertCircleIcon, InboxIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert";
@@ -16,10 +17,12 @@ export function PageHeading({
   title,
   children,
   actions,
+  actionsClassName,
 }: {
   title: string;
   children?: ReactNode;
   actions?: ReactNode;
+  actionsClassName?: string;
 }) {
   return (
     <header className="flex flex-wrap items-end justify-between gap-4">
@@ -27,7 +30,9 @@ export function PageHeading({
         <h1 className="font-heading text-3xl font-semibold tracking-tight">{title}</h1>
         {children && <p className="text-sm text-muted-foreground">{children}</p>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      {actions && (
+        <div className={cn("flex flex-wrap items-center gap-2", actionsClassName)}>{actions}</div>
+      )}
     </header>
   );
 }

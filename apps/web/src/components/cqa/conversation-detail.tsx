@@ -39,6 +39,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
 import { EvaluationResult } from "./evaluation-result";
+import { RecordingPlayer } from "./recording-player";
 
 export function ConversationDetail({
   id,
@@ -136,18 +137,31 @@ function Detail({
     <>
       <PageHeading
         title={conversation.sourceId}
+        actionsClassName="w-full min-w-0 lg:w-auto lg:flex-1 lg:justify-end"
         actions={
           conversation.audioUrl && (
-            <Button
-              variant="outline"
-              size="lg"
-              nativeButton={false}
-              render={<a href={conversation.audioUrl} target="_blank" rel="noopener noreferrer" />}
-            >
-              <HugeiconsIcon icon={HeadphonesIcon} data-icon="inline-start" aria-hidden="true" />{" "}
-              Open recording
-              <HugeiconsIcon icon={ArrowUpRight01Icon} data-icon="inline-end" aria-hidden="true" />
-            </Button>
+            <>
+              <RecordingPlayer
+                key={conversation.audioUrl}
+                src={cqa.conversations[":id"].recording.$path({ param: { id: conversation.id } })}
+              />
+              <Button
+                variant="outline"
+                size="lg"
+                nativeButton={false}
+                render={
+                  <a href={conversation.audioUrl} target="_blank" rel="noopener noreferrer" />
+                }
+              >
+                <HugeiconsIcon icon={HeadphonesIcon} data-icon="inline-start" aria-hidden="true" />{" "}
+                Open recording
+                <HugeiconsIcon
+                  icon={ArrowUpRight01Icon}
+                  data-icon="inline-end"
+                  aria-hidden="true"
+                />
+              </Button>
+            </>
           )
         }
       >

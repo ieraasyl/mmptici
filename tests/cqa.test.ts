@@ -65,6 +65,16 @@ test("imports conversations once and isolates browser workspaces", async () => {
   expect((await cqa.conversations[":id"].$get({ param: { id } }, { headers: other })).status).toBe(
     404,
   );
+  const recording = cqa.conversations[":id"].recording;
+  expect((await recording.$get({ param: { id } })).status).toBe(401);
+  expect((await recording.$get({ param: { id } }, { headers: other })).status).toBe(404);
+  const playback = await recording.$get(
+    { param: { id } },
+    { headers, init: { redirect: "manual" } },
+  );
+  expect(playback.status).toBe(302);
+  expect(playback.headers.get("location")).toBe(example.records[0].audio_url);
+  expect(playback.headers.get("cache-control")).toContain("no-store");
   expect(await (await cqa.conversations.$get({}, { headers: other })).json()).toEqual({
     conversations: [],
   });

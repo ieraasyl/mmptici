@@ -23,6 +23,7 @@ import type { Bindings } from "../env.ts";
 import { validationError } from "../errors.ts";
 import { scoreEvaluation } from "../evaluation.ts";
 import { createHfClient, evaluateConversation, EvaluationError } from "../inference/index.ts";
+import { resolveRecordingUrl } from "../recording.ts";
 
 type Db = ReturnType<typeof createDb>;
 type CqaEnv = { Bindings: Bindings; Variables: { workspace: string; db: Db } };
@@ -185,6 +186,13 @@ export const cqaRoutes = new Hono<CqaEnv>()
     const dataset = datasetFileSchema.parse(devDataset);
     const result = await importConversations(c.get("db"), c.get("workspace"), dataset);
     return c.json(result, 201);
+  })
+  .get("/conversations/:id/recording", async (c) => {
+    const conversation = await findConversation(c.get("db"), c.get("workspace"), c.req.param("id"));
+    if (!conversation?.audioUrl) throw new HTTPException(404, { message: "Recording not found." });
+
+    const source = await resolveRecordingUrl(conversation.audioUrl).catch(() => null);
+    return source ? c.redirect(source, 302) : c.body(null, 502);
   })
   .get("/conversations/:id", async (c) => {
     const db = c.get("db");
