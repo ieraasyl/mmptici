@@ -1,37 +1,37 @@
 {
-  "generatedAt": "2026-11-07T16:06:54.500Z",
-  "report": "prompt-before-vs-manual",
-  "promptVersion": "p-433387c8",
+  "generatedAt": "2026-11-07T17:24:27.954Z",
+  "report": "prompt-checks-vs-manual",
+  "promptVersion": "p-ffbe6d0e",
   "provider": "hf-router",
   "model": "Qwen/Qwen3.8-27B:cerebras",
   "referenceLabeler": "manual",
   "dialogs": 59,
   "pooled": {
-    "exact": 416,
+    "exact": 420,
     "n": 454,
-    "rate": 0.9162995594713657,
-    "ci": [0.8845315904139434, 0.9470198675496688]
+    "rate": 0.9251101321585903,
+    "ci": [0.8934782608695652, 0.954248366013072]
   },
   "perCriterion": {
     "opening": {
       "n": 59,
-      "exactRate": 1,
-      "kappa": 1
+      "exactRate": 0.9830508474576272,
+      "kappa": 0.8483290488431879
     },
     "understanding": {
       "n": 56,
       "exactRate": 0.8571428571428571,
-      "kappa": 0.6906077348066297
+      "kappa": 0.6888888888888888
     },
     "verification": {
       "n": 53,
-      "exactRate": 0.9056603773584906,
-      "kappa": 0.7207586933614332
+      "exactRate": 0.8867924528301887,
+      "kappa": 0.6528384279475983
     },
     "guidance": {
       "n": 57,
-      "exactRate": 0.8771929824561403,
-      "kappa": 0.7037861915367483
+      "exactRate": 0.9122807017543859,
+      "kappa": 0.782442748091603
     },
     "empathy": {
       "n": 59,
@@ -40,13 +40,13 @@
     },
     "management": {
       "n": 56,
-      "exactRate": 0.8214285714285714,
-      "kappa": 0.6241610738255032
+      "exactRate": 0.875,
+      "kappa": 0.7424441524310118
     },
     "closing": {
       "n": 55,
-      "exactRate": 0.8909090909090909,
-      "kappa": 0.7679324894514767
+      "exactRate": 0.9090909090909091,
+      "kappa": 0.8066104078762306
     },
     "violations": {
       "n": 59,
@@ -55,8 +55,8 @@
     }
   },
   "totals": {
-    "mae": 6.227954545454546,
-    "maxError": 31.680000000000007,
+    "mae": 5.168636363636363,
+    "maxError": 32.44,
     "n": 44
   },
   "violations": {
@@ -70,11 +70,11 @@
     "language": {
       "RU": {
         "n": 254,
-        "exactRate": 0.8858267716535433
+        "exactRate": 0.905511811023622
       },
       "KZ": {
         "n": 100,
-        "exactRate": 0.97
+        "exactRate": 0.96
       },
       "EN": {
         "n": 100,
@@ -84,7 +84,7 @@
     "channel": {
       "agent chat": {
         "n": 425,
-        "exactRate": 0.9223529411764706
+        "exactRate": 0.9317647058823529
       },
       "voice call": {
         "n": 29,
@@ -114,11 +114,11 @@
     {
       "provider": "hf-router",
       "model": "Qwen/Qwen3.8-27B:cerebras",
-      "promptVersion": "p-433387c8",
-      "report": "prompt-before-vs-manual",
-      "pooledRate": 0.9162995594713657,
-      "meanLatencyMs": 3110.2203389830506,
-      "costUsd": 0.39824771
+      "promptVersion": "p-ffbe6d0e",
+      "report": "prompt-checks-vs-manual",
+      "pooledRate": 0.9251101321585903,
+      "meanLatencyMs": 7757.5084745762715,
+      "costUsd": 0.58615286
     }
   ]
 }

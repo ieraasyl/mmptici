@@ -86,7 +86,7 @@ function byCreated(a: Loaded, b: Loaded) {
 export function main(argv: string[], io: Io) {
   const { options: o } = parseCli(argv, {
     "reports-dir": { type: "string", default: DEFAULT_REPORTS },
-    latest: { type: "string", default: "prompt-before-vs-manual" },
+    latest: { type: "string", default: "prompt-checks-vs-manual" },
     ceiling: { type: "string", default: "ai-labeler-agreement" },
   });
   const dir = o["reports-dir"]!;

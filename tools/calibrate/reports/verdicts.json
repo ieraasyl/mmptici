@@ -1,12 +1,54 @@
 {
-  "prompt-before-vs-manual": { "verdict": "baseline", "note": "prompt on main" },
-  "prompt-after-vs-manual": { "verdict": "rejected", "note": "within noise or worse than main" },
-  "prompt-v3-vs-manual": { "verdict": "rejected", "note": "wider verification rule over-triggers" },
-  "prompt-v4-vs-manual": { "verdict": "rejected", "note": "within noise of main" },
-  "prompt-v5-vs-manual": { "verdict": "rejected", "note": "within noise or worse than main" },
-  "prompt-before-vs-final": { "verdict": "info", "note": "same run against the final labels" },
-  "prompt-after-vs-final": { "verdict": "info", "note": "same run against the final labels" },
-  "baseline-s1-vs-final": { "verdict": "info", "note": "earlier baseline" },
-  "baseline-s3-vs-final": { "verdict": "info", "note": "earlier baseline, 3 samples" },
-  "pr4-s1-vs-final": { "verdict": "info", "note": "PR 4 prompt" }
+  "prompt-before-vs-manual": {
+    "verdict": "info",
+    "note": "prompt on main"
+  },
+  "prompt-after-vs-manual": {
+    "verdict": "rejected",
+    "note": "within noise or worse than main"
+  },
+  "prompt-v3-vs-manual": {
+    "verdict": "rejected",
+    "note": "wider verification rule over-triggers"
+  },
+  "prompt-v4-vs-manual": {
+    "verdict": "rejected",
+    "note": "within noise of main"
+  },
+  "prompt-v5-vs-manual": {
+    "verdict": "rejected",
+    "note": "within noise or worse than main"
+  },
+  "prompt-before-vs-final": {
+    "verdict": "info",
+    "note": "same run against the final labels"
+  },
+  "prompt-after-vs-final": {
+    "verdict": "info",
+    "note": "same run against the final labels"
+  },
+  "baseline-s1-vs-final": {
+    "verdict": "info",
+    "note": "earlier baseline"
+  },
+  "baseline-s3-vs-final": {
+    "verdict": "info",
+    "note": "earlier baseline, 3 samples"
+  },
+  "pr4-s1-vs-final": {
+    "verdict": "info",
+    "note": "PR 4 prompt"
+  },
+  "prompt-main-vs-manual": {
+    "verdict": "baseline",
+    "note": "prompt on main, same-day baseline for round 2"
+  },
+  "prompt-checks-vs-manual": {
+    "verdict": "accepted",
+    "note": "per-criterion checks before each answer"
+  },
+  "prompt-analysis-vs-manual": {
+    "verdict": "rejected",
+    "note": "analysis object first, lost 7 cells"
+  }
 }

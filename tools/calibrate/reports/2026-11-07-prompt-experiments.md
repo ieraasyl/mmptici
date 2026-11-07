@@ -16,15 +16,31 @@ v3 and v4 are scored on 449 cells because `p4-ru-003` is missing from their runs
 
 ## Findings
 
-1. **No version beats the prompt on main.** The differences of 1 to 2 points are within run-to-run noise. In v5, management errors rose from 10 to 14 although its guidance was identical to main's. The PR therefore keeps main's prompt.
+1. **No guidance rewrite beats the prompt on main.** v5 lost 9 cells against `before`, and its management errors rose from 10 to 14 even though its management guidance was identical to main's, so small wording changes move answers in other criteria.
 2. **A wider verification rule hurts badly.** In v3, the model demanded verification on 23 general questions that the sheet marks N/A. The sheet's verification No on `p1-ru-017` (app navigation for buying a bond) and `p1-ru-026` (where to find the funding details) cannot be taught without this over-triggering.
 3. **Main's prompt already matches the sheet on gross violations.** It flags `p1-ru-009` and `p1-en-014`, the restriction disclosures. Adding an explicit confidentiality rule made the model also flag `p1-kz-015` and `p1-ru-018`.
 4. **The sheet contradicts itself on one cell.** `p1-kz-015` is the same scenario as `p1-ru-009` and `p1-en-014`, yet it is marked violations No. That cell is one where Qwen and Jev agreed, so it was never reviewed by hand.
-5. **Measurement noise is the limit.** The prompt sits near 90%, and single-sample runs differ by about 2 points even at T=0. A prompt change cannot be shown to help unless it moves the score by more than that, or several runs are averaged.
+5. **Runs at T=0 repeat exactly.** Two runs of the same prompt on the same day gave identical answers, for main's prompt and for each round-2 variant. The gaps in the table are between prompt versions, including main's later speech-recognition change (416 for `before`, 413 for the current main). Repeating a run adds no evidence. The uncertainty is in which dialogs happen to change, so compare versions with a paired test over dialogs.
+
+## Round 2: how the model reasons
+
+Round 2 leaves the criterion guidance alone and changes what the model writes before each answer. Both variants change only the output instructions at the end of the system prompt.
+
+| Version  | What changed                                                                                                                                                       |       All cells | Decided cells |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------: | ------------: |
+| main     | The prompt on main today, run again for a same-day baseline                                                                                                        | 413/454 (91.0%) |         34/62 |
+| analysis | An `analysis` object first: every client request with its turns and whether it was resolved, and the operator's key actions                                        | 406/454 (89.4%) |         30/62 |
+| checks   | Each rating starts with `checks`: the conditions in that criterion's guidance, including its N/A condition, each with whether it is met and the turns that show it | 420/454 (92.5%) |         39/62 |
+
+`analysis` failed `p1-kz-003` on its first try, and that dialog's cells count as wrong. `checks` failed `p1-ru-013` on one run and passed on a rerun. The reports are `prompt-main-vs-manual.md`, `prompt-analysis-vs-manual.md`, and `prompt-checks-vs-manual.md`.
+
+**`checks` is adopted.** Against `main` it fixes 13 cells and breaks 6: management +4, guidance +2, closing +1, empathy +1, understanding −1. The paired gain is 7 cells, and a dialog bootstrap with 2000 resamples gives a 95% interval of −1 to +16 cells. That is promising but just short of conclusive. Because the checks come from each criterion's own guidance, the change also works for an edited or replaced criterion. It costs about 50% more ($0.59 against $0.39 for the 59 dialogs), and the mean time per dialog rises from 2.7 s to 7.8 s.
+
+**`analysis` is rejected.** It lost 7 cells, mostly in guidance and management.
 
 ## Recommendations
 
-- Keep main's prompt for the control run unless a change wins on at least two runs.
+- Use the `checks` prompt from round 2 for the control run.
 - Decide the 21 undecided cells and recheck `p1-kz-015`, so that the reference has no gaps.
-- To reduce noise, compare versions on 3-sample runs (`--samples 3`). If the voted result is steadier, use voting in the app.
+- Voting over 3 samples at T=0.6 did not beat one sample (411 against 413 cells, with one violation missed), so the app stays at one sample.
 - The 78-turn call `p4-ru-003` still runs out of tokens at 12,000 under some prompts. The evaluator gives up after two attempts, so it never reaches its 16,000 cap. That only matters for calls, and the control set is chats only.
