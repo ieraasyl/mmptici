@@ -1,5 +1,6 @@
 {
   "npm.scriptRunner": "vp",
+  "vitest.rootConfig": "vite.config.ts",
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "[javascript]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
