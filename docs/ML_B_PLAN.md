@@ -11,12 +11,14 @@ ML B does not write prompts. Prompt changes belong to ML A. ML B decides whether
 | Labeling guide | `docs/LABELING_GUIDE.md` | All labelers, ML A for the prompt |
 | Dialog printer | `tools/calibrate/print_dialogs.py` | Labelers |
 | Labels | `tools/calibrate/labels/labels.csv` | Calibration |
-| Run script | `tools/calibrate/run.ts` | Calibration |
+| Run script | `tools/calibrate/run.ts`, output in `tools/calibrate/runs/` (ignored) | Calibration |
 | Scoring and metrics | `tools/calibrate/compare.py`, `tools/calibrate/score.py` | Calibration |
 | Reports | `tools/calibrate/reports/<date>-<prompt>-<provider>.md` and `.json` | ML A, Fullstack calibration page |
 | Local provider config | `apps/api/.dev.vars` and Worker secrets, values given to Fullstack | ML A, Fullstack |
 
-Labels and reports are our own work, so they are committed. They become the proof of process in the demo. The organizer dataset stays in `data/` and out of git.
+Labels and aggregate reports are our own work, so they are committed. They become the proof of process in the demo. Reports hold metrics, confusion tables, and mismatches as dialog IDs and answers only.
+
+Raw model outputs, explanations, and cited turn text stay in `tools/calibrate/runs/`, which git ignores. The DEV dataset is read from `data/invoke.json`, which is tracked on main. The control set and any new organizer dataset go only through the app, never into `tools/calibrate`.
 
 ## Fixed inputs
 
@@ -60,7 +62,7 @@ Each scenario family sits entirely in one split, so a prompt tuned on the Russia
 
 The mix is 7 RU, 5 KZ, 5 EN, and 3 calls.
 
-The held-out six are run only when ML A declares a prompt candidate, and nobody reads their model outputs while editing prompts. Budget: at most four held-out runs over the hackathon.
+Prompts are selected on the 14 tuning dialogs only. The held-out six run once, after ML A freezes the prompt, for each provider. Nobody looks at them before that run.
 
 ## Phase 1, T+0 to T+3
 
@@ -139,7 +141,7 @@ p1-ru-007,dauka,closing,no,13,"Closed without goodbye after a second question"
 
 Agreement and total MAE get 95% bootstrap intervals over dialogs, with 1000 resamples. With 14 dialogs the intervals will be wide, and the report must show that.
 
-**`mismatches.csv`** has one row per disagreement. It holds the human answer, the model answer and its votes, the model explanation, and the text of the cited turns. A `bucket` column takes one of three values: `rubric` (the guide or prompt is ambiguous), `evidence` (the model missed or misread something), or `label` (the human was wrong).
+**`runs/<run>-mismatches.csv`** has one row per disagreement and stays out of git, because it holds model text and transcript text. It holds the human answer, the model answer and its votes, the model explanation, and the text of the cited turns. A `bucket` column takes one of three values: `rubric` (the guide or prompt is ambiguous), `evidence` (the model missed or misread something), or `label` (the human was wrong).
 
 Python dependencies are pandas and scikit-learn, in a venv inside `tools/calibrate`.
 
@@ -181,7 +183,7 @@ After labeling:
     "run": { "latencyMs": 4800, "usage": { "promptTokens": 2900, "completionTokens": 4100 }, "costUsd": 0.009, "failedSamples": 0 } }] }
 ```
 
-Flags: `--set tuning|heldout|all|<ids>`, `--provider cerebras|local`, and `--samples n`.
+Flags: `--set tuning|heldout|all|<ids>`, `--provider cerebras|local`, and `--samples n`. `--set heldout` refuses to run unless `--frozen <prompt-version>` is given, so the held-out set can't be run by accident.
 
 ### B3. First report, about 1 h
 
@@ -200,7 +202,6 @@ Each candidate prompt goes through these steps, about 10 minutes per cycle:
 1. ML A names a candidate version.
 2. ML B runs the tuning set and writes the report.
 3. The candidate is accepted when tuning agreement improves and no criterion loses more than one dialog.
-4. Every third accepted version, ML B runs the held-out set. If the held-out results get worse, ML B reverts to the last version that held.
 
 ML B keeps a table in `tools/calibrate/reports/INDEX.md` with one row per version: prompt version, provider, agreement per criterion, total MAE, and accepted or rejected.
 
@@ -223,7 +224,7 @@ Run the tuning set on the self-hosted Qwen with the accepted prompt. The report 
 
 ## Phase 5, T+17 to the control release at hour 23
 
-1. **Final held-out run** on the frozen prompt, for both providers. These are the numbers that go into the README and the demo.
+1. **Final held-out run, the only one,** on the frozen prompt for both providers. These are the numbers that go into the README and the demo. The prompt does not change after this run.
 2. **Control run at hour 23.** Run the 10 control dialogs through the app as soon as they are released. Check that none failed and list the low-confidence criteria for the demo. Nobody edits a model result by hand. Corrections go only through the appeal flow, so the original AI result stays intact.
 
 ## Risks
@@ -232,6 +233,7 @@ Run the tuning set on the self-hosted Qwen with the accepted prompt. The report 
 | --- | --- |
 | Humans disagree on closing or understanding | Report the ceiling, ask the organizers, and do not tune on that criterion until they answer |
 | 14 dialogs are too few to separate two prompts | Accept a change only on clear gains. Show the bootstrap intervals. |
+| The held-out result is worse than tuning | Report it honestly in the README. Do not reopen prompt tuning, since that would turn the held-out set into tuning data. |
 | No one on the team reads Kazakh well | Label KZ with a Russian gloss of each operator turn and mark those labels low-confidence |
 | Modal cold start during the demo | Warm the endpoint before the demo and keep cloud as the default |
 | The evaluator package lands late | Phase 1 and labeling do not depend on it. Only B2b and later wait for it. |

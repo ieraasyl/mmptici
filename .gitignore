@@ -40,5 +40,6 @@ dist-ssr
 !.vscode/extensions.json
 .vitest/
 
-# Hackathon data and evaluation runs
-data/
+# Calibration raw outputs and printed dialogs
+tools/calibrate/runs/
+tools/calibrate/print/
