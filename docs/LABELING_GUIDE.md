@@ -18,7 +18,7 @@ The organizers' control set is 10 chats, and they compare answers per criterion.
 2. Print your dialogs:
 
    ```
-   python3 tools/calibrate/print_dialogs.py --set p1-ru-003,p1-ru-007
+   vp run calibrate:print --set p1-ru-003,p1-ru-007
    ```
 
    `--set` also takes `tuning`, `heldout` or `all20`. Each dialog becomes a Markdown file in `tools/calibrate/print/`, turns numbered `[n] speaker timestamp: text`.
@@ -26,7 +26,7 @@ The organizers' control set is 10 chats, and they compare answers per criterion.
 3. Write your CSV template:
 
    ```
-   python3 tools/calibrate/print_dialogs.py --template <labeler>
+   vp run calibrate:print --template <labeler>
    ```
 
    This writes `tools/calibrate/print/labels-<labeler>.csv` with one row per assigned dialog and criterion. It covers `primary` and `second`. For an `unassigned` dialog, add the eight rows yourself.
@@ -207,7 +207,7 @@ Second example: `p1-ru-029`, **yes**, turns `10`. «Вы вообще читат
 
 ## 7. Disagreements
 
-1. Each labeler sends their filled CSV to ML B. ML B runs the agreement report with all files: `python3 tools/calibrate/compare.py --pairs --name <name> --labels a.csv b.csv c.csv d.csv`. Rows with an empty answer are skipped with a warning, so finish every row before you send.
+1. Each labeler sends their filled CSV to ML B. ML B runs the agreement report with all files: `vp run calibrate:compare --pairs --name <name> --labels a.csv b.csv c.csv d.csv`. Rows with an empty answer are skipped with a warning, so finish every row before you send.
 2. Disagreements are settled in a short call with the labelers involved.
 3. If a disagreement exposes a gap in a rule, this guide is updated.
 4. ML B writes one `final` row per dialog and criterion. Those rows are what we measure the LLM against.

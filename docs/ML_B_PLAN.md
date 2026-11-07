@@ -9,10 +9,10 @@ ML B does not write prompts. Prompt changes belong to ML A. ML B decides whether
 | Item                  | Path                                                                  | Used by                           |
 | --------------------- | --------------------------------------------------------------------- | --------------------------------- |
 | Labeling guide        | `docs/LABELING_GUIDE.md`                                              | All labelers, ML A for the prompt |
-| Dialog printer        | `tools/calibrate/print_dialogs.py`                                    | Labelers                          |
+| Dialog printer        | `tools/calibrate/print-dialogs.ts` (`vp run calibrate:print`)         | Labelers                          |
 | Labels                | `tools/calibrate/labels/labels.csv`                                   | Calibration                       |
 | Run script            | `tools/calibrate/run.ts`, output in `tools/calibrate/runs/` (ignored) | Calibration                       |
-| Scoring and metrics   | `tools/calibrate/compare.py`, `tools/calibrate/score.py`              | Calibration                       |
+| Scoring and metrics   | `tools/calibrate/compare.ts` (`vp run calibrate:compare`)             | Calibration                       |
 | Reports               | `tools/calibrate/reports/<date>-<prompt>-<provider>.md` and `.json`   | ML A, Fullstack calibration page  |
 | Local provider config | `apps/api/.dev.vars` and Worker secrets, values given to Fullstack    | ML A, Fullstack                   |
 
@@ -91,7 +91,7 @@ This goes first because ML A needs the answer before building providers.
 
 ### B1. Labeling guide and dialog printer, 1.5 h
 
-`print_dialogs.py` takes a list of IDs and writes one Markdown file per dialog to `tools/calibrate/print/`. Each file shows numbered turns as `[n] speaker timestamp: text`, followed by an empty answer table with the eight criteria. Labelers read these instead of raw JSON.
+`vp run calibrate:print` takes a list of IDs and writes one Markdown file per dialog to `tools/calibrate/print/`. Each file shows numbered turns as `[n] speaker timestamp: text`, followed by an empty answer table with the eight criteria. Labelers read these instead of raw JSON.
 
 `docs/LABELING_GUIDE.md` gives one decision rule per criterion. Draft rules follow. They are provisional until the organizers answer, and the guide marks which question each one depends on.
 
@@ -123,9 +123,9 @@ p1-ru-007,dauka,guidance,10,12;13,"Second question about re-submitting the withd
 
 `answer` is `yes`, `no`, `na`, or a scale number. `evidence_turns` lists 1-based turn numbers separated by `;`.
 
-**`score.py`** is a Python port of `scoreEvaluation`, used to compute the totals of human labels. It must reproduce both cases in `apps/api/src/evaluation.test.ts` exactly: 84.17 and 88.75. Otherwise the total comparisons are meaningless.
+Totals of human labels come from the app's own `scoreEvaluation` in `apps/api/src/evaluation.ts`, so they match both cases in `apps/api/src/evaluation.test.ts`: 84.17 and 88.75. Otherwise the total comparisons are meaningless.
 
-**`compare.py`** takes two sources, either two labelers or labels and a run file. It prints the metrics below and writes them to the `.md` and `.json` reports.
+**`vp run calibrate:compare`** takes two sources, either two labelers or labels and a run file. It prints the metrics below and writes them to the `.md` and `.json` reports.
 
 | Metric                         | Applies to               | Note                                                            |
 | ------------------------------ | ------------------------ | --------------------------------------------------------------- |
@@ -134,7 +134,7 @@ p1-ru-007,dauka,guidance,10,12;13,"Second question about re-submitting the withd
 | Quadratic weighted kappa       | `guidance`, `management` | Only on rows where both sides are not N/A                       |
 | N/A agreement                  | Criteria that allow N/A  | Both N/A or both not N/A                                        |
 | Confusion table                | Every criterion          | Printed, not just summarized                                    |
-| Total MAE and max error        | Per dialog               | Uses `score.py` on both sides                                   |
+| Total MAE and max error        | Per dialog               | Uses `scoreEvaluation` on both sides                            |
 | Violation precision and recall | `violations`             |                                                                 |
 | Breakdown                      | Language and channel     | KZ row is required                                              |
 | Run health                     | Model runs               | Failed samples, retries, mean latency, cost                     |
@@ -143,9 +143,9 @@ Agreement and total MAE get 95% bootstrap intervals over dialogs, with 1000 resa
 
 **`runs/<run>-mismatches.csv`** has one row per disagreement and stays out of git, because it holds model text and transcript text. It holds the human answer, the model answer and its votes, the model explanation, and the text of the cited turns. A `bucket` column takes one of three values: `rubric` (the guide or prompt is ambiguous), `evidence` (the model missed or misread something), or `label` (the human was wrong).
 
-Python dependencies are pandas and scikit-learn, in a venv inside `tools/calibrate`.
+The tools are TypeScript run on Node through `vp run`. They import the app's checklist, scorer, and evaluator, and add only `csv-parse` for reading CSV files.
 
-**Done when** `compare.py` runs on a hand-made labels file and a fake run file, and `score.py` matches the two test totals.
+**Done when** `vp run calibrate:compare` runs on a hand-made labels file and a fake run file, and its totals match the two test totals.
 
 ## Phase 2, T+3 to T+7
 
@@ -166,7 +166,7 @@ Expect about 3 minutes per chat and 15 per call, roughly 40 to 60 minutes each.
 
 After labeling:
 
-1. Run `compare.py` between the two labelers on the 10 double-labeled dialogs. This human agreement is the ceiling for the model. A criterion where humans disagree cannot be tuned. It needs a guide change or an organizer answer.
+1. Run `vp run calibrate:compare --pairs` between the two labelers on the 10 double-labeled dialogs. This human agreement is the ceiling for the model. A criterion where humans disagree cannot be tuned. It needs a guide change or an organizer answer.
 2. Settle every disagreement in a short call. Update the guide, then write one final label per dialog with `labeler=final`.
 
 **Done when** `labels.csv` holds final labels for all 20 dialogs and the human agreement report is committed.

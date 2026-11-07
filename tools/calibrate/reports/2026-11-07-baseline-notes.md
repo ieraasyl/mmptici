@@ -28,10 +28,10 @@ There is one endpoint: the Hugging Face router, `https://router.huggingface.co/v
 ## How to reproduce
 
 ```
-node tools/calibrate/run.ts --set dev --concurrency 4
-node tools/calibrate/run.ts --rerun-failed tools/calibrate/runs/<name>.json
-node tools/calibrate/run.ts --set tuning --samples 3
-python3 tools/calibrate/summarize_run.py tools/calibrate/runs/<name>.json --name <name>
+vp run calibrate:run --set dev --concurrency 4
+vp run calibrate:run --rerun-failed tools/calibrate/runs/<name>.json
+vp run calibrate:run --set tuning --samples 3
+vp run calibrate:summarize tools/calibrate/runs/<name>.json --name <name>
 ```
 
-Once labels exist: `python3 tools/calibrate/compare.py --run tools/calibrate/runs/<name>.json --set tuning --name <name>`.
+Once labels exist: `vp run calibrate:compare --run tools/calibrate/runs/<name>.json --set tuning --name <name>`.
