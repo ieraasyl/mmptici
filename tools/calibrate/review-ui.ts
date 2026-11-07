@@ -88,7 +88,7 @@ function writeDecisions(rows: Record<string, string>[]) {
   const lines = [DECISION_HEADER.join(",")];
   for (const r of rows) lines.push(DECISION_HEADER.map((h) => csvField(r[h] ?? "")).join(","));
   const tmp = `${decisionsPath}.tmp`;
-  writeFileSync(tmp, `${lines.join("\n")}\n`);
+  writeFileSync(tmp, `${lines.join("\r\n")}\r\n`);
   renameSync(tmp, decisionsPath);
 }
 
@@ -178,7 +178,7 @@ textarea{width:100%;min-height:70px}.save{background:var(--accent);color:#fff;bo
 <script>
 let data, cur = 0, pick = "";
 const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 try { $("reviewer").value = localStorage.getItem("reviewer") || ""; } catch {}
 $("reviewer").oninput = () => { try { localStorage.setItem("reviewer", $("reviewer").value); } catch {} };
 $("onlyTodo").onchange = renderList;
@@ -233,6 +233,16 @@ const server = createServer((req, res) => {
     res.end(typeof body === "string" ? body : JSON.stringify(body));
   };
   try {
+    const ports = [`127.0.0.1:${args.port}`, `localhost:${args.port}`];
+    if (!ports.includes(req.headers.host ?? "")) return send(403, { error: "Bad Host header." });
+    if (req.method === "POST") {
+      const origin = req.headers.origin;
+      if (origin !== undefined && !ports.some((h) => origin === `http://${h}`))
+        return send(403, { error: "Bad Origin header." });
+      const type = (req.headers["content-type"] ?? "").split(";")[0].trim().toLowerCase();
+      if (type !== "application/json")
+        return send(415, { error: "Content-Type must be application/json." });
+    }
     if (req.method === "GET" && req.url === "/") return send(200, page, "text/html");
     if (req.method === "GET" && req.url === "/api/data") return send(200, payload());
     if (req.method === "POST" && req.url === "/api/decision") {
