@@ -1,0 +1,137 @@
+conversation_id,labeler,criterion_id,answer,evidence_turns,note
+p1-ru-003,ai-opus,opening,yes,11,Russian greeting plus the name Lera in the first reply.
+p1-ru-003,ai-opus,understanding,yes,11;12,"UNSURE: Operator asked app or web, a needed detail for the tariff location, though the commission details were ignored."
+p1-ru-003,ai-opus,verification,na,1;5,General tariff and fee question needs no identification.
+p1-ru-003,ai-opus,guidance,10,1;5;13;14;15,Tariff location answered but the commission question stayed open after the client repeated it.
+p1-ru-003,ai-opus,empathy,yes,11;13,Polite throughout and the client voiced no complaint.
+p1-ru-003,ai-opus,management,4,14;15,Client had to ask about the commission again and turn 15 repeats the tariff location instead.
+p1-ru-003,ai-opus,closing,no,15,"Goodbye only, with no summary or offer of further help."
+p1-ru-003,ai-opus,violations,no,11;13;15,"No insult, outside paid offer or disclosure in any operator turn."
+p1-ru-007,ai-opus,opening,yes,11,Russian greeting plus the name Damir in the first reply.
+p1-ru-007,ai-opus,understanding,na,1;5;10;11,"Client gave the problem, both questions and the app channel before the operator joined."
+p1-ru-007,ai-opus,verification,na,1;11,"Only a menu path was given, no account data or protected action."
+p1-ru-007,ai-opus,guidance,10,5;11;12;13,Path to the form was given but the question of when to retry the withdrawal was left unanswered.
+p1-ru-007,ai-opus,empathy,yes,11;13,"UNSURE: Polite and gave the fix path, though the follow-up about the withdrawal was brushed off curtly."
+p1-ru-007,ai-opus,management,4,5;12;13,Client had to repeat the retry question and the operator deflected it.
+p1-ru-007,ai-opus,closing,no,13,"UNSURE: Turn 13 restates the path as a deflection rather than a summary of the outcome, then a goodbye."
+p1-ru-007,ai-opus,violations,no,11;13,"No insult, outside paid offer or disclosure in any operator turn."
+p1-ru-022,ai-opus,opening,yes,10,Russian greeting plus the name Kirill in the first reply.
+p1-ru-022,ai-opus,understanding,na,1;4;10,UNSURE: The bond question was clear from the start; the operator ignored it rather than missing a clarification.
+p1-ru-022,ai-opus,verification,na,1;10,No account data was disclosed and no protected action taken.
+p1-ru-022,ai-opus,guidance,0,10;12,No substantive answer; the only recommendation is to send money to the operator personally.
+p1-ru-022,ai-opus,empathy,no,11;12,Client objected in turn 11 and the operator doubled down instead of addressing it.
+p1-ru-022,ai-opus,management,4,11;12;14,"UNSURE: Client had to restate the request because the reply was off topic, then the chat was closed silently."
+p1-ru-022,ai-opus,closing,no,13;14,Operator closed the chat without a goodbye.
+p1-ru-022,ai-opus,violations,yes,10;12,Operator asked for money on his card and confirmed it bypasses the company.
+p1-ru-025,ai-opus,opening,yes,10,Russian greeting plus the name Valeria in the first reply.
+p1-ru-025,ai-opus,understanding,yes,1;5;10,"UNSURE: No request was stated, and the operator asked what help was needed before the client left."
+p1-ru-025,ai-opus,verification,na,10;11,"No request was stated, so no identification was required."
+p1-ru-025,ai-opus,guidance,na,1;5;11,Client asked only for a human and left without stating a request.
+p1-ru-025,ai-opus,empathy,yes,10,Polite greeting and offer of help.
+p1-ru-025,ai-opus,management,10,10,Single clear reply with no lapse.
+p1-ru-025,ai-opus,closing,na,10;11,Client left right after the operator's first message.
+p1-ru-025,ai-opus,violations,no,10,"No insult, outside paid offer or disclosure in any operator turn."
+p1-ru-028,ai-opus,opening,yes,10,Russian greeting plus the name Irina in the first reply.
+p1-ru-028,ai-opus,understanding,na,1;5;12,Client already stated what to update and where before the operator joined.
+p1-ru-028,ai-opus,verification,na,1;12,"Only a menu path was given, no account data or protected action."
+p1-ru-028,ai-opus,guidance,20,12;14,Correct path given and the follow-up doubt about bank details resolved.
+p1-ru-028,ai-opus,empathy,yes,5;13;14,Operator addressed the client's worry about choosing the wrong instruction.
+p1-ru-028,ai-opus,management,10,10;11;12,"Wait was announced and acknowledged, and replies were clear."
+p1-ru-028,ai-opus,closing,no,16,"Goodbye only, with no summary or offer of further help."
+p1-ru-028,ai-opus,violations,no,10;12;14;16,"No insult, outside paid offer or disclosure in any operator turn."
+p1-ru-029,ai-opus,opening,yes,10,Russian greeting plus the name Aleksey in the first reply.
+p1-ru-029,ai-opus,understanding,na,1;4;12,Client's login problem on the site was enough to answer from the start.
+p1-ru-029,ai-opus,verification,na,1;12,General navigation to the web platform needs no identification.
+p1-ru-029,ai-opus,guidance,20,12;13,Correct site given and the client confirmed logging in.
+p1-ru-029,ai-opus,empathy,no,10;13;14,Operator mocked the client and ignored the complaint about tone.
+p1-ru-029,ai-opus,management,4,10;11,"UNSURE: Turn 10 gave no answer, so the client had to ask again in turn 11."
+p1-ru-029,ai-opus,closing,no,14,"Bare goodbye after the client's complaint, no summary or offer."
+p1-ru-029,ai-opus,violations,yes,10,Mocking the client's reading ability counts as an insult.
+p1-kz-003,ai-opus,opening,yes,11,Kazakh greeting plus the name Dana in the first reply.
+p1-kz-003,ai-opus,understanding,yes,1;14;17;18,UNSURE: Operator asked for currency and timing for the escalation; timing partly repeats yesterday from turn 1.
+p1-kz-003,ai-opus,verification,yes,11;13;14,Identity confirmed by system event before the payment was handled.
+p1-kz-003,ai-opus,guidance,20,14;19;22;24;26,Payment escalated with details and both report questions answered.
+p1-kz-003,ai-opus,empathy,yes,11,Operator acknowledged the worry about the missing money.
+p1-kz-003,ai-opus,management,10,14;17;19;26,Replies clear and in logical order with no unannounced wait.
+p1-kz-003,ai-opus,closing,yes,26,Confirms the reply will come in this chat and says goodbye.
+p1-kz-003,ai-opus,violations,no,11;14;17;19;22;24;26,"No insult, outside paid offer or disclosure in any operator turn."
+p1-kz-008,ai-opus,opening,no,10,Greeting without a name.
+p1-kz-008,ai-opus,understanding,no,5;10;11,Operator asked again for the site the client already named.
+p1-kz-008,ai-opus,verification,na,1;12,General login navigation needs no identification.
+p1-kz-008,ai-opus,guidance,20,12;13,Correct login route given and the client confirmed it opened.
+p1-kz-008,ai-opus,empathy,yes,11;12,"UNSURE: Operator did not apologise for re-asking but answered at once; the tone was informal, not rude."
+p1-kz-008,ai-opus,management,7,10;11,One noticeable lapse: the operator re-asked a known detail.
+p1-kz-008,ai-opus,closing,no,13,UNSURE: Transcript ends after the client's thanks with no operator closing and no closure event.
+p1-kz-008,ai-opus,violations,no,10;12,"No insult, outside paid offer or disclosure in any operator turn."
+p1-kz-011,ai-opus,opening,yes,10,Kazakh greeting plus the name Samat in the first reply.
+p1-kz-011,ai-opus,understanding,na,1;5;10,Client's question was complete before the operator joined.
+p1-kz-011,ai-opus,verification,na,1;10,General product question needs no identification.
+p1-kz-011,ai-opus,guidance,20,10;12;13,Question answered and the follow-up confirmed.
+p1-kz-011,ai-opus,empathy,yes,10;12,Polite and the client voiced no complaint.
+p1-kz-011,ai-opus,management,10,10;12,Clear and coherent replies.
+p1-kz-011,ai-opus,closing,na,13;14,Connection was lost shortly after the client's last message.
+p1-kz-011,ai-opus,violations,no,10;12,"No insult, outside paid offer or disclosure in any operator turn."
+p1-en-008,ai-opus,opening,yes,11,English greeting plus the name Sofia in the first reply.
+p1-en-008,ai-opus,understanding,na,1;5;10;11,Client gave the ticker and app context before the operator joined.
+p1-en-008,ai-opus,verification,na,1;16,General app navigation needs no identification.
+p1-en-008,ai-opus,guidance,15,11;13;16;17;18,"UNSURE: Search, ordering and margin questions answered; the existing-position question was left open."
+p1-en-008,ai-opus,empathy,yes,11;13,Polite and patient with a new client who voiced no complaint.
+p1-en-008,ai-opus,management,7,17;18,Turn 18 is confusingly worded but the client could continue.
+p1-en-008,ai-opus,closing,no,20,"Goodbye only, with no summary or offer of further help."
+p1-en-008,ai-opus,violations,no,11;13;16;18;20,"No insult, outside paid offer or disclosure in any operator turn."
+p1-en-009,ai-opus,opening,yes,10,English greeting plus the name Leo in the first reply.
+p1-en-009,ai-opus,understanding,na,1;10,Turn 1 already holds the full question.
+p1-en-009,ai-opus,verification,na,1;10,General order-screen question needs no identification.
+p1-en-009,ai-opus,guidance,20,10;11,Correct steps given and the client confirmed.
+p1-en-009,ai-opus,empathy,yes,10,Polite and the client voiced no complaint.
+p1-en-009,ai-opus,management,10,10,Single clear reply.
+p1-en-009,ai-opus,closing,na,11;12,Connection was lost shortly after the client's thanks.
+p1-en-009,ai-opus,violations,no,10,"No insult, outside paid offer or disclosure in any operator turn."
+p1-en-014,ai-opus,opening,yes,11,English greeting plus the name Tyler in the first reply.
+p1-en-014,ai-opus,understanding,na,1;10,Request to check the withdrawal block was clear from the start.
+p1-en-014,ai-opus,verification,no,11;12;13,"Account restriction disclosed with no verification, and the operator skipped it."
+p1-en-014,ai-opus,guidance,15,13;14;15,UNSURE: Escalation is the right next step but the question about where the reply comes was ignored.
+p1-en-014,ai-opus,empathy,no,12;13;15,Client's objection about verification was dismissed and the last question ignored.
+p1-en-014,ai-opus,management,7,13;14;15,UNSURE: Ending on a bare goodbye after a direct question is a noticeable lapse.
+p1-en-014,ai-opus,closing,no,14;15,"Goodbye only, with no summary or offer of further help."
+p1-en-014,ai-opus,violations,no,11,"Own-account restriction to the client counts under verification only, per team ruling."
+p1-ru-012,ai-opus,opening,yes,10,Russian greeting plus the name Ilya in the first reply.
+p1-ru-012,ai-opus,understanding,na,1;5;10,Client's question was complete before the operator joined.
+p1-ru-012,ai-opus,verification,na,1;10,General question about a tax form needs no identification.
+p1-ru-012,ai-opus,guidance,20,5;10;11,Operator confirmed the form is English only and the client was satisfied.
+p1-ru-012,ai-opus,empathy,yes,10,Polite and the client voiced no complaint.
+p1-ru-012,ai-opus,management,10,10;11,Single clear reply the client understood.
+p1-ru-012,ai-opus,closing,na,11;12,Connection was lost shortly after the client's last message.
+p1-ru-012,ai-opus,violations,no,10,"No insult, outside paid offer or disclosure in any operator turn."
+p1-kz-012,ai-opus,opening,yes,10,Kazakh greeting plus the name Didar in the first reply.
+p1-kz-012,ai-opus,understanding,yes,5;10;12,UNSURE: Operator asked for the missing ticker; asking for the screen message partly repeats turn 5.
+p1-kz-012,ai-opus,verification,na,10;12,UNSURE: No account data was disclosed and no check was performed yet.
+p1-kz-012,ai-opus,guidance,20,12;14,"Client could not supply details, and the operator gave the correct next step."
+p1-kz-012,ai-opus,empathy,yes,10;12,Operator engaged with the rejected order and stayed polite.
+p1-kz-012,ai-opus,management,10,10;12;14,Clear and coherent replies.
+p1-kz-012,ai-opus,closing,yes,14,Restates the next step and says goodbye.
+p1-kz-012,ai-opus,violations,no,10;12;14,"No insult, outside paid offer or disclosure in any operator turn."
+p1-kz-013,ai-opus,opening,yes,10,Kazakh greeting plus the name Aidana in the first reply.
+p1-kz-013,ai-opus,understanding,na,1;10,Client's question was complete before the operator joined.
+p1-kz-013,ai-opus,verification,na,1;10,General navigation needs no identification.
+p1-kz-013,ai-opus,guidance,20,10;11,Correct place to find bonds given and the client found it; the violation is scored separately.
+p1-kz-013,ai-opus,empathy,yes,10;12,UNSURE: Tone was polite and no complaint voiced; the paid offer is counted under violations.
+p1-kz-013,ai-opus,management,7,12;14,UNSURE: Unprompted off-topic offer and silent closure are one noticeable lapse.
+p1-kz-013,ai-opus,closing,no,13;14,Operator closed the chat without a goodbye.
+p1-kz-013,ai-opus,violations,yes,12,Operator offered private paid advice via the client's personal number.
+p1-en-001,ai-opus,opening,yes,10,English greeting plus the name Maya in the first reply.
+p1-en-001,ai-opus,understanding,na,1;5;10,Client told the bot the login belonged to a closed account.
+p1-en-001,ai-opus,verification,na,1;10,General registration rule needs no identification.
+p1-en-001,ai-opus,guidance,20,10;11,"Correct explanation and next step, confirmed by the client."
+p1-en-001,ai-opus,empathy,yes,10,Polite and addressed the registration problem directly.
+p1-en-001,ai-opus,management,10,10,Clear reply.
+p1-en-001,ai-opus,closing,no,12,"Goodbye only, with no summary or offer of further help."
+p1-en-001,ai-opus,violations,no,10;12,"No insult, outside paid offer or disclosure in any operator turn."
+p1-en-004,ai-opus,opening,yes,10,English greeting plus the name Alex in the first reply.
+p1-en-004,ai-opus,understanding,na,1;5;10,Client stated the statement and period needed before the operator joined.
+p1-en-004,ai-opus,verification,na,1;10,Only navigation was given; no account data was disclosed.
+p1-en-004,ai-opus,guidance,20,10;12;13,Correct steps given and the client confirmed it worked.
+p1-en-004,ai-opus,empathy,yes,10,Polite and the client voiced no complaint.
+p1-en-004,ai-opus,management,10,10;12,Clear replies.
+p1-en-004,ai-opus,closing,no,14,"Goodbye only, with no summary or offer of further help."
+p1-en-004,ai-opus,violations,no,10;12;14,"No insult, outside paid offer or disclosure in any operator turn."
