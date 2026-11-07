@@ -19,7 +19,7 @@ The organizers use the accuracy comparison as their main guide and exercise judg
 
 ### Configure a checklist and run an evaluation
 
-1. **Configure and save a checklist.** Use the supplied checklist as the starting configuration. Users must be able to add and edit criteria in the interface, including their wording, weights, answer types, numeric scales, and whether `N/A` is allowed.
+1. **Configure and save a checklist.** Start with the [initial chat quality checklist](#initial-chat-quality-checklist). Users must be able to add and edit criteria in the interface, including their wording, weights, answer types, numeric scales, and whether `N/A` is allowed.
 2. **Evaluate a conversation.** Let users load a transcript, select a checklist, and start an evaluation. Support Russian, Kazakh, and English. Evaluate the operator's work and use bot messages and system events as context.
 3. **Show the result.** For each criterion, show the answer, points, weight, explanation, and supporting message or call segment. When an action is missing, point to the part of the conversation where it was expected. For `N/A`, explain why the criterion does not apply. Show the total, any section scores, and a separate flag for serious violations.
 
@@ -42,7 +42,9 @@ In a separate check, organizers will ask the team to replace one criterion. Save
 
 The `DEV` set contains 65 conversations, including 60 synthetic chats and 5 real calls. It includes 35 Russian (`RU`), 15 Kazakh (`KZ`), and 15 English (`EN`) conversations. Call records include a transcript and a link to the recording.
 
-The temporary API returns a dataset in response to a GET request with a `group_id` parameter. Copy the signed `DEV` URL from the “Открыть GET для DEV” button on page 3 of the student guide to make the request from a terminal. Organizers will provide a different `group_id` for the control set. If the browser blocks the request because of CORS, make it from the backend or use a local adapter.
+The full DEV API response is available locally at `data/invoke.json`. Git ignores this file. If it is missing from your checkout, ask the organizers for the JSON response or signed DEV URL, then place the JSON at that path.
+
+The temporary API returns a dataset in response to a GET request with a `group_id` parameter. Organizers will provide a different `group_id` for the control set. If the browser blocks the request because of CORS, make it from the backend or use a local adapter.
 
 On success, `isSuccess` is `true`, and `data.records` contains the conversations. This example from the guide shows one record.
 

@@ -2,7 +2,7 @@
 
 A starter with React, Hono, Better Auth, and Cloudflare D1. Includes typed API calls, routing, data fetching, and Workers AI. The UI and API deploy together as one Cloudflare Worker.
 
-This starter is the foundation for the Freedom Broker Conversation Quality Analytics (CQA) hackathon prototype. The planned workflows cover configurable checklists, transcript evaluation with evidence, and appeals. See the [hackathon brief](CQA_HACKATHON.md) for requirements.
+This starter is the foundation for the Freedom Broker Conversation Quality Analytics (CQA) hackathon prototype. The planned workflows cover configurable checklists, transcript evaluation with evidence, and appeals. See the [hackathon requirements summary](CQA_HACKATHON.md).
 
 [Live app](https://mmptici.ieraasyl.workers.dev)
 
@@ -39,6 +39,8 @@ vp run dev
 Open <http://127.0.0.1:5173>. Development uses local bindings by default through `CLOUDFLARE_VITE_FORCE_LOCAL=true` in `apps/web/.env.development.local`, so no Cloudflare login is needed. Local D1 data lives in `.wrangler/state`.
 
 For real Workers AI, set `CLOUDFLARE_VITE_FORCE_LOCAL=false` in `apps/web/.env.development.local`, run `vp -C apps/api exec wrangler login`, and restart the dev server. AI calls use your account's allowance or billing.
+
+The local DEV dataset is at `data/invoke.json`. See [Datasets and API](CQA_HACKATHON.md#datasets-and-api) for the response format and how to get a copy if the file is missing.
 
 ## Checks and tools
 
