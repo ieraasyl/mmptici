@@ -1,5 +1,12 @@
-export { createHfClient, DEFAULT_MODEL, HF_ROUTER_URL } from "./client.ts";
-export type { ChatMessage, LlmClient, ModelReply, ModelUsage } from "./client.ts";
+export {
+  createHfClient,
+  DEFAULT_MAX_TOKENS,
+  DEFAULT_MODEL,
+  EmptyReplyError,
+  HF_ROUTER_URL,
+  InferenceApiError,
+} from "./client.ts";
+export type { ChatMessage, CompleteOptions, LlmClient, ModelReply, ModelUsage } from "./client.ts";
 export { buildPrompt } from "./prompt.ts";
 export type { ConversationInput } from "./prompt.ts";
 export { extractJson, validateRatings } from "./validate.ts";

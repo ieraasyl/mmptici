@@ -3,7 +3,7 @@ import type { Checklist } from "@app/contracts";
 import { defaultChecklist } from "../checklist.ts";
 import type { ChatMessage, LlmClient } from "./client.ts";
 import { evaluateConversation, EvaluationError } from "./evaluate.ts";
-import { buildPrompt } from "./prompt.ts";
+import { buildPrompt, systemPrompt } from "./prompt.ts";
 import { validateRatings } from "./validate.ts";
 
 const conversation = {
@@ -130,4 +130,100 @@ test("validation reports every problem", () => {
   expect(errors.some((e) => e.startsWith("closing:") && e.includes("missing"))).toBe(true);
   expect(errors.some((e) => e.includes('Unknown criterionId "made_up"'))).toBe(true);
   expect(warnings.some((w) => w.startsWith("empathy:"))).toBe(true);
+});
+
+test("the missing-action 'no' rule is limited to yes/no criteria; scales use their steps", () => {
+  const noRule = systemPrompt.split("\n").find((line) => line.includes('Answer "no" when'));
+  expect(noRule).toMatch(/^- yes_no:/);
+  expect(systemPrompt).toMatch(/- scale: .*never "yes" or "no".*lowest step/);
+
+  const custom: Checklist = {
+    ...defaultChecklist,
+    criteria: [
+      ...defaultChecklist.criteria,
+      {
+        id: "tone",
+        title: "Tone",
+        section: "Managing and closing",
+        guidance: "1: rude. 3: neutral. 5: warm.",
+        weight: 10,
+        kind: "numeric",
+        scale: [1, 3, 5],
+        allowNA: false,
+      },
+    ],
+  };
+  const [, user] = buildPrompt(conversation, custom);
+  const byId = Object.fromEntries(
+    JSON.parse(user.content).criteria.map((c: { criterionId: string }) => [c.criterionId, c]),
+  );
+  expect(byId.guidance).toMatchObject({
+    answerType: "scale",
+    allowedAnswers: ["0", "5", "10", "15", "20", "na"],
+  });
+  expect(byId.management).toMatchObject({
+    answerType: "scale",
+    allowedAnswers: ["0", "4", "7", "10"],
+  });
+  expect(byId.tone).toMatchObject({ answerType: "scale", allowedAnswers: ["1", "3", "5"] });
+  expect(byId.opening.answerType).toBe("yes_no");
+  expect(byId.violations.answerType).toBe("flag");
+});
+
+test("'no' on a scale criterion is rejected with a hint to use the lowest step", () => {
+  const { errors } = validateRatings(
+    { ratings: { ...validRatings, guidance: { answer: "no", explanation: "x", evidence: [2] } } },
+    defaultChecklist,
+    conversation.transcript.length,
+  );
+  expect(errors).toHaveLength(1);
+  expect(errors[0]).toMatch(/^guidance: .*scale value.*lowest value \(0\)/);
+});
+
+test("malformed evidence can never become a citation", () => {
+  const check = (evidence: unknown) =>
+    validateRatings(
+      { ratings: { ...validRatings, opening: { answer: "yes", explanation: "x", evidence } } },
+      defaultChecklist,
+      conversation.transcript.length,
+    );
+
+  for (const bad of [[true], [[2]], [{ turn: 2 }], [2.5], [null], "2"]) {
+    const { errors, ratings } = check(bad);
+    expect(errors.some((e) => e.startsWith("opening: no valid evidence"))).toBe(true);
+    expect(ratings.find((r) => r.criterionId === "opening")).toBeUndefined();
+  }
+
+  const mixed = check([true, 3, "2", [1], 3]);
+  expect(mixed.errors).toEqual([]);
+  expect(mixed.warnings.some((w) => w.startsWith("opening: ignored 2"))).toBe(true);
+  expect(mixed.ratings.find((r) => r.criterionId === "opening")?.evidence).toEqual([2, 3]);
+});
+
+test("valid citations keep the range, deduplication, sorting, and count rules", () => {
+  const { errors, warnings, ratings } = validateRatings(
+    {
+      ratings: {
+        ...validRatings,
+        opening: { answer: "yes", explanation: "x", evidence: [3, 1, 3, 0, 9, 2] },
+      },
+    },
+    defaultChecklist,
+    conversation.transcript.length,
+  );
+  expect(errors).toEqual([]);
+  expect(warnings.some((w) => w.includes("outside 1–3"))).toBe(true);
+  expect(ratings.find((r) => r.criterionId === "opening")?.evidence).toEqual([1, 2, 3]);
+});
+
+test("an invalid-evidence reply triggers the repair retry", async () => {
+  const bad = { ...validRatings, opening: { ...validRatings.opening, evidence: [true] } };
+  const { llm, calls } = fakeLlm([
+    JSON.stringify({ ratings: bad }),
+    JSON.stringify({ ratings: validRatings }),
+  ]);
+  const run = await evaluateConversation(llm, conversation, defaultChecklist);
+  expect(calls).toHaveLength(2);
+  expect(calls[1].at(-1)?.content).toContain("opening: no valid evidence");
+  expect(run.ratings.find((r) => r.criterionId === "opening")?.evidence).toEqual([2]);
 });
