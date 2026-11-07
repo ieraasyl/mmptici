@@ -138,7 +138,7 @@ Rules: `answerType` is `yes_no` or `scale`. A `scale` criterion lists its steps 
 }
 ```
 
-`answer` is `yes`, `no`, `na`, or `scale`. `evidence` always points to turn indices in the original transcript array, never to copied text alone, so the UI can scroll to a turn or seek audio by that turn's timestamp. For a missed action `expectedAt` gives the span the model checked. For `na` the `naReason` quotes the checklist condition that applies. `raw` keeps the prompt and model outputs so the judges can verify the process.
+`answer` is `yes`, `no`, `na`, or `scale`. `evidence` always points to turn indices in the original transcript array, never to copied text alone, so the UI can scroll to and highlight the turn. For a missed action `expectedAt` gives the span the model checked. For `na` the `naReason` quotes the checklist condition that applies. `raw` keeps the prompt and model outputs so the judges can verify the process.
 
 Reviewer decisions do not mutate this object. They are a separate record `{ evaluationId, criterionId, newAnswer, newScaleValue, reason, reviewer }` and the final result is `applyDecisions(evaluation, decisions)` run through the same scoring function.
 
@@ -172,7 +172,7 @@ Test cases to encode: the example from the brief, all N/A on one section, a dial
 - c07: No when the operator closed without a goodbye, N/A only when the system closed the chat before the operator could.
 - c08: the offer alone is enough; quote it.
 
-**Voice calls.** IVR bot turns and system events are kept as context. The prompt states that the transcript is automatic speech recognition and that spelling must not be judged. Timestamps are ISO, the UI maps a turn to a seek offset from the first turn.
+**Voice calls.** IVR bot turns and system events are kept as context. The prompt states that the transcript is automatic speech recognition and that spelling must not be judged. No audio is evaluated: the organizers provide transcripts only, so the card shows the `audio_url` as a link to the organizer's player page and nothing more.
 
 **Accuracy boosters, in order of implementation.**
 
@@ -196,11 +196,11 @@ Prompt changes are judged only by this report. The DEV JSON lives in `data/raw/d
 
 **Tables.** `conversations` (id, group_id, channel, language, transcript JSON, audio_url, imported_at), `checklists` (id, name, version, config JSON, created_at, is_active), `evaluations` (id, conversation_id, checklist_id, checklist_version, result JSON, status, created_at), `appeals` (id, evaluation_id, criterion_id, comment, status, created_at), `decisions` (id, appeal_id, new_answer, new_scale_value, reason, reviewer, created_at). Final results are computed on read with `applyDecisions`, not stored twice.
 
-**Routes, all public.** `POST /api/datasets/import {groupId}` fetches the organizer URL server-side (base URL in a secret, `group_id` appended) and upserts conversations. `GET /api/conversations`, `GET /api/conversations/:id`. `GET|POST|PUT /api/checklists`. `POST /api/conversations/:id/evaluate {checklistId}` calls `evaluate()` and stores the result. `GET /api/evaluations/:id` returns original, decisions, and final. `POST /api/appeals`, `POST /api/appeals/:id/decide`. `GET /api/conversations/:id/audio` fetches the organizer's player page and returns the signed mp3 URL found in it, valid one hour, so the UI uses a native `<audio>` with seek.
+**Routes, all public.** `POST /api/datasets/import {groupId}` fetches the organizer URL server-side (base URL in a secret, `group_id` appended) and upserts conversations. `GET /api/conversations`, `GET /api/conversations/:id`. `GET|POST|PUT /api/checklists`. `POST /api/conversations/:id/evaluate {checklistId}` calls `evaluate()` and stores the result. `GET /api/evaluations/:id` returns original, decisions, and final. `POST /api/appeals`, `POST /api/appeals/:id/decide`.
 
 Batch "evaluate all" is driven from the browser, one request per conversation with concurrency 4, so no single Worker request runs long.
 
-**Screens.** Conversation list with language and channel filters, per-row total, gross flag, status, and "evaluate" and "evaluate all". Conversation card: transcript left with turn anchors, scorecard right with per-criterion answer, points, weight, effective weight, explanation, evidence links, N/A reason, confidence, section totals, total, gross flag, cost. Clicking evidence scrolls to and highlights the turn, or seeks the audio. Appeal drawer: pick criterion, comment, submit. Reviewer panel: lists appeals, shows the disputed criterion, comment, and the cited turns, confirm or change with reason, and shows original, decision, final side by side. Checklist editor: edit title, description, weight, answer type, scale steps, allow N/A, N/A condition, add and remove criteria, save as new version, set active.
+**Screens.** Conversation list with language and channel filters, per-row total, gross flag, status, and "evaluate" and "evaluate all". Conversation card: transcript left with turn anchors, scorecard right with per-criterion answer, points, weight, effective weight, explanation, evidence links, N/A reason, confidence, section totals, total, gross flag, cost. Clicking evidence scrolls to and highlights the turn. For calls the card shows a link to the organizer's player page. Appeal drawer: pick criterion, comment, submit. Reviewer panel: lists appeals, shows the disputed criterion, comment, and the cited turns, confirm or change with reason, and shows original, decision, final side by side. Checklist editor: edit title, description, weight, answer type, scale steps, allow N/A, N/A condition, add and remove criteria, save as new version, set active.
 
 ## Plan
 
@@ -215,9 +215,8 @@ Batch "evaluate all" is driven from the browser, one request per conversation wi
 | 7 | Checklist editor with versioning | App | Demo part 4 works |
 | 8 | Hand labels, agreement report, prompt iteration | AI core plus labelers | Per-criterion agreement stable |
 | 9 | Voting and confidence, verifier | AI core | Confidence visible on the card |
-| 10 | Audio resolver and native player | App | A call seeks to a turn |
-| 11 | README, cost statement, demo dry run | Both | Five-minute run-through under time |
-| 12 | Bonus features | Both | Whatever is left |
+| 10 | README, cost statement, demo dry run | Both | Five-minute run-through under time |
+| 11 | Bonus features | Both | Whatever is left |
 
 Bonus candidates, ranked by judge value: second-opinion model toggle, operator and language analytics page, per-criterion confidence and needs-review queue, export of evaluations, prompt and response viewer on the card for the process-validity check.
 
@@ -235,5 +234,5 @@ Bonus candidates, ranked by judge value: second-opinion model toggle, operator a
 6. Criterion 05: with no complaint, is politeness alone a Yes?
 7. Criterion 06: what counts as an explicit wait that needs a warning?
 8. Criterion 08: separate flag only, or does it change the total?
-9. Voice calls: ignore ASR noise for literacy, and is diction or intonation expected from the audio?
-10. Will the control set come through the same API with a new group_id, and will audio links keep working during the demo?
+9. Voice calls: should ASR noise be ignored when judging literacy?
+10. Will the control set come through the same API with a new group_id?
