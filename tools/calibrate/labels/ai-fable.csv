@@ -1,0 +1,137 @@
+conversation_id,labeler,criterion_id,answer,evidence_turns,note
+p1-ru-003,ai-fable,opening,yes,11,Greeting in Russian plus a name in the first operator reply.
+p1-ru-003,ai-fable,understanding,yes,1;5;11;12,Operator asked only the missing detail (app or web) and did not re-ask anything stated earlier.
+p1-ru-003,ai-fable,verification,na,1;5;13,General questions about tariff commission and where the tariff name is shown; no account data disclosed.
+p1-ru-003,ai-fable,guidance,10,1;5;13;14;15,Tariff location answered but the commission question asked twice stays open.
+p1-ru-003,ai-fable,empathy,yes,11;15,Operator is polite and the client voiced no complaint or inconvenience.
+p1-ru-003,ai-fable,management,7,13;14;15,UNSURE: turn 15 repeats the tariff location in reply to the commission question; one off-target reply but the chat stays understandable.
+p1-ru-003,ai-fable,closing,no,15,Only a goodbye with no summary and no offer of further help.
+p1-ru-003,ai-fable,violations,no,11;15,"No insult, outside offer, or disclosure."
+p1-ru-007,ai-fable,opening,yes,11,Greeting in Russian plus a name in the first operator reply.
+p1-ru-007,ai-fable,understanding,na,1;5;10;11,"Client stated the problem, both questions and the platform before the operator replied; nothing needed clarifying."
+p1-ru-007,ai-fable,verification,na,11,Only a general navigation path was given; no account data disclosed.
+p1-ru-007,ai-fable,guidance,10,5;11;12;13,The path was given but the question about when to retry the withdrawal was asked twice and never answered.
+p1-ru-007,ai-fable,empathy,yes,11;13,"UNSURE: polite wording and no complaint voiced, but turn 13 dismisses the open question rather than addressing it."
+p1-ru-007,ai-fable,management,10,11;13,UNSURE: replies are clear and coherent; the refusal to answer in turn 13 is treated as a guidance lapse rather than a communication lapse.
+p1-ru-007,ai-fable,closing,no,12;13,UNSURE: goodbye with only a brush-off recap of what was already said; treated as no summary or offer of help.
+p1-ru-007,ai-fable,violations,no,11;13,"No insult, outside offer, or disclosure."
+p1-ru-022,ai-fable,opening,yes,10,Greeting in Russian plus a name in the first operator reply.
+p1-ru-022,ai-fable,understanding,no,1;10;11,Operator ignored the stated request for bond guidance and neither used it nor clarified it before replying.
+p1-ru-022,ai-fable,verification,na,10;12,No account data disclosed and no protected action taken.
+p1-ru-022,ai-fable,guidance,0,10;12,No substantive answer; the only recommendation is to send money to the operator personally.
+p1-ru-022,ai-fable,empathy,no,11;12,Client objected in turn 11 and the operator doubled down instead of responding to the objection.
+p1-ru-022,ai-fable,management,4,10;11;12,UNSURE: client had to ask what was going on because the reply ignored the request; replies are coherent but off the thread.
+p1-ru-022,ai-fable,closing,no,13;14,Operator closed the chat without any goodbye after the client declined.
+p1-ru-022,ai-fable,violations,yes,10;12,Operator offers to invest the client's money personally outside the company; the offer alone qualifies.
+p1-ru-025,ai-fable,opening,yes,10,Greeting in Russian plus a name and company in the first operator reply.
+p1-ru-025,ai-fable,understanding,yes,10;11,UNSURE: no request was stated and the operator asked for it; the client left before answering.
+p1-ru-025,ai-fable,verification,na,10;11,No request stated and nothing disclosed.
+p1-ru-025,ai-fable,guidance,na,1;5;11,Client left in turn 11 without ever stating the actual question.
+p1-ru-025,ai-fable,empathy,yes,10,Operator is polite and the client voiced nothing.
+p1-ru-025,ai-fable,management,10,10,Single clear reply; no wait involved.
+p1-ru-025,ai-fable,closing,na,10;11,Client left right after the operator's first message.
+p1-ru-025,ai-fable,violations,no,10,"No insult, outside offer, or disclosure."
+p1-ru-028,ai-fable,opening,yes,10,Greeting in Russian plus a name in the first operator reply.
+p1-ru-028,ai-fable,understanding,na,1;5;12,Client stated the task and the app before the operator replied; no clarification was needed.
+p1-ru-028,ai-fable,verification,na,12;14,Only a navigation path in the app; no account data disclosed.
+p1-ru-028,ai-fable,guidance,20,12;14,Exact path given and the follow-up doubt about the wrong item resolved.
+p1-ru-028,ai-fable,empathy,yes,5;10;14,Polite and the client's worry about picking the wrong item is answered directly in turn 14.
+p1-ru-028,ai-fable,management,10,10;11;12,Wait was announced in turn 10 and acknowledged after; replies are clear.
+p1-ru-028,ai-fable,closing,no,15;16,Only a goodbye with no summary and no offer of further help.
+p1-ru-028,ai-fable,violations,no,10;16,"No insult, outside offer, or disclosure."
+p1-ru-029,ai-fable,opening,yes,10,Greeting in Russian plus a name in the first operator reply despite the rude continuation.
+p1-ru-029,ai-fable,understanding,na,1;4;12,UNSURE: the login question was answerable from the start and no re-asking occurred; turn 10 is a tone problem not a clarification problem.
+p1-ru-029,ai-fable,verification,na,12,General instruction on where to log in; no account data disclosed.
+p1-ru-029,ai-fable,guidance,20,12;13,Correct login address given and the client logged in.
+p1-ru-029,ai-fable,empathy,no,10;13;14,Rude remark in turn 10 and the complaint about tone in turn 13 is ignored.
+p1-ru-029,ai-fable,management,4,10;11;12,Client had to ask again in turn 11 because turn 10 gave no usable reply.
+p1-ru-029,ai-fable,closing,no,13;14,Only a bare goodbye with no summary or offer of help.
+p1-ru-029,ai-fable,violations,yes,10,Asking whether the client can read at all mocks the client; counted as an insult.
+p1-kz-003,ai-fable,opening,yes,11,Greeting in Kazakh plus a name in the first operator reply.
+p1-kz-003,ai-fable,understanding,yes,1;10;11;14;17,UNSURE: operator used the stated details and asked for currency and time; turn 17 partly re-asks the timing the client gave in turn 1.
+p1-kz-003,ai-fable,verification,yes,11;13,Identification requested in turn 11 and confirmed by the system in turn 13 before the payment is handled.
+p1-kz-003,ai-fable,guidance,20,14;19;22;24,Transfer question escalated with details and the report question answered fully.
+p1-kz-003,ai-fable,empathy,yes,11,Operator acknowledges the client's worry about the missing money before asking for identification.
+p1-kz-003,ai-fable,management,10,11;14;17;26,Clear and orderly replies; no unannounced waits.
+p1-kz-003,ai-fable,closing,yes,25;26,Confirms the reply will come in this chat and says goodbye.
+p1-kz-003,ai-fable,violations,no,11;26,"No insult, outside offer, or disclosure."
+p1-kz-008,ai-fable,opening,no,10,Greeting only; the operator gives no name.
+p1-kz-008,ai-fable,understanding,no,5;10;11,Operator re-asks which site although the client named it to the bot in turn 5.
+p1-kz-008,ai-fable,verification,na,12,General login guidance; no account data disclosed.
+p1-kz-008,ai-fable,guidance,20,12;13,Correct explanation and login path; the client got in.
+p1-kz-008,ai-fable,empathy,yes,10;11;12,"UNSURE: polite enough and the request is solved, but the client's annoyance at repeating in turn 11 is not acknowledged."
+p1-kz-008,ai-fable,management,7,10;11;12,"One noticeable lapse: the client has to repeat the site, then the answer is clear."
+p1-kz-008,ai-fable,closing,no,12;13,UNSURE: the chat ends on the client's thanks with no cut-off event and no operator closing.
+p1-kz-008,ai-fable,violations,no,10;12,"No insult, outside offer, or disclosure."
+p1-kz-011,ai-fable,opening,yes,10,Greeting in Kazakh plus a name in the first operator reply.
+p1-kz-011,ai-fable,understanding,na,1;5;10,Both questions were fully stated before the operator replied.
+p1-kz-011,ai-fable,verification,na,10;12,General product information; no account data disclosed.
+p1-kz-011,ai-fable,guidance,20,10;12,Both stated questions answered correctly; the client accepted.
+p1-kz-011,ai-fable,empathy,yes,10;12,Polite and the client voiced nothing.
+p1-kz-011,ai-fable,management,10,10;12,Short clear replies; no wait involved.
+p1-kz-011,ai-fable,closing,na,13;14,Connection lost shortly after the client's last message before the operator closed.
+p1-kz-011,ai-fable,violations,no,10;12,"No insult, outside offer, or disclosure."
+p1-en-008,ai-fable,opening,yes,11,Greeting in English plus a name in the first operator reply.
+p1-en-008,ai-fable,understanding,na,1;5;10;11,Client already gave the ticker and the app context; the operator could answer at once.
+p1-en-008,ai-fable,verification,na,11;16,General app navigation; no account data disclosed.
+p1-en-008,ai-fable,guidance,15,11;13;16;17;18,UNSURE: main questions answered but turn 18 leaves the question about an existing position vague.
+p1-en-008,ai-fable,empathy,yes,11;20,Polite throughout and the client voiced no complaint.
+p1-en-008,ai-fable,management,10,11;13;16;18,Replies are clear and in order; no wait involved.
+p1-en-008,ai-fable,closing,no,19;20,Only a goodbye with no summary and no offer of further help.
+p1-en-008,ai-fable,violations,no,11;20,"No insult, outside offer, or disclosure."
+p1-en-009,ai-fable,opening,yes,10,Greeting in English plus a name in the first operator reply.
+p1-en-009,ai-fable,understanding,na,1;10,Turn 1 already holds the full question and the operator answers it directly.
+p1-en-009,ai-fable,verification,na,10,General instruction about an order setting; no account data disclosed.
+p1-en-009,ai-fable,guidance,20,10;11,Exact steps given and the client found the setting.
+p1-en-009,ai-fable,empathy,yes,10,Polite and the client voiced nothing.
+p1-en-009,ai-fable,management,10,10,Single clear reply; no wait involved.
+p1-en-009,ai-fable,closing,na,11;12,Connection lost shortly after the client's thanks before the operator closed.
+p1-en-009,ai-fable,violations,no,10,"No insult, outside offer, or disclosure."
+p1-en-014,ai-fable,opening,yes,11,Greeting in English plus a name in the first operator reply.
+p1-en-014,ai-fable,understanding,na,1;10;11,The request was fully stated before the operator replied; no clarification needed.
+p1-en-014,ai-fable,verification,no,11;12;13,Account restriction disclosed in turn 11 with no check and the check is explicitly skipped in turn 13.
+p1-en-014,ai-fable,guidance,15,13;14;15,UNSURE: escalation to the team is a valid next step but the question about where the reply will come is left unanswered.
+p1-en-014,ai-fable,empathy,no,12;13;14;15,Client's concern about verification is brushed off and the final question is ignored.
+p1-en-014,ai-fable,management,7,13;14;15,One noticeable lapse: the final question gets a bare goodbye.
+p1-en-014,ai-fable,closing,no,14;15,Only a goodbye in reply to an open question; no summary or offer of help.
+p1-en-014,ai-fable,violations,no,11,Only the client's own account restriction is disclosed; per team ruling this is a verification failure not a confidentiality violation.
+p1-ru-012,ai-fable,opening,yes,10,Greeting in Russian plus a name in the first operator reply.
+p1-ru-012,ai-fable,understanding,na,5;10,The question about a Russian version was fully stated before the operator replied.
+p1-ru-012,ai-fable,verification,na,10,General information about a tax form; no account data disclosed.
+p1-ru-012,ai-fable,guidance,20,5;10;11,"UNSURE: the reply only repeats that the form is in English, which answers the Russian-version question implicitly and satisfied the client."
+p1-ru-012,ai-fable,empathy,yes,10,Polite and the client voiced nothing.
+p1-ru-012,ai-fable,management,10,10,Single clear reply; no wait involved.
+p1-ru-012,ai-fable,closing,na,11;12,Connection lost shortly after the client's last message before the operator closed.
+p1-ru-012,ai-fable,violations,no,10,"No insult, outside offer, or disclosure."
+p1-kz-012,ai-fable,opening,yes,10,Greeting in Kazakh plus a name in the first operator reply.
+p1-kz-012,ai-fable,understanding,yes,5;10;12,UNSURE: ticker was missing and asked for; turn 12 also asks for the screen message already given in turn 5.
+p1-kz-012,ai-fable,verification,na,10;12;14,UNSURE: an order check would need identification but no data was disclosed and no action taken before the client left.
+p1-kz-012,ai-fable,guidance,20,12;14,Correct next step given: send ticker and message for a check.
+p1-kz-012,ai-fable,empathy,yes,10;14,Polite and accommodates the client being busy.
+p1-kz-012,ai-fable,management,10,10;12;14,Clear and orderly replies; no wait involved.
+p1-kz-012,ai-fable,closing,yes,14,Restates the next step and says goodbye.
+p1-kz-012,ai-fable,violations,no,10;14,"No insult, outside offer, or disclosure."
+p1-kz-013,ai-fable,opening,yes,10,Greeting in Kazakh plus a name in the first operator reply.
+p1-kz-013,ai-fable,understanding,na,1;5;10,The question about where to see bonds was fully stated before the operator replied.
+p1-kz-013,ai-fable,verification,na,10,General navigation; no account data disclosed.
+p1-kz-013,ai-fable,guidance,15,1;5;10;12,UNSURE: location answered but the first-time buyer's request for an explanation is redirected to a paid channel instead of being covered.
+p1-kz-013,ai-fable,empathy,yes,10;12;14,UNSURE: polite wording and no complaint voiced; the outside offer is scored under violations.
+p1-kz-013,ai-fable,management,10,10;12,Replies are clear; no wait involved.
+p1-kz-013,ai-fable,closing,no,13;14,Operator closed the chat without any goodbye.
+p1-kz-013,ai-fable,violations,yes,12,Asks for a personal number to give paid advice after hours outside the company.
+p1-en-001,ai-fable,opening,yes,10,Greeting in English plus a name in the first operator reply.
+p1-en-001,ai-fable,understanding,na,1;5;10,Client stated the problem and that the old account was closed before the operator replied.
+p1-en-001,ai-fable,verification,na,10,General registration rule; no account data disclosed.
+p1-en-001,ai-fable,guidance,20,10;11,Explains why the login is taken and gives the correct next step.
+p1-en-001,ai-fable,empathy,yes,10;12,Polite and the client voiced nothing.
+p1-en-001,ai-fable,management,10,10;12,Clear replies; no wait involved.
+p1-en-001,ai-fable,closing,no,11;12,Only a goodbye with no summary and no offer of further help.
+p1-en-001,ai-fable,violations,no,10;12,"No insult, outside offer, or disclosure."
+p1-en-004,ai-fable,opening,yes,10,Greeting in English plus a name in the first operator reply.
+p1-en-004,ai-fable,understanding,na,1;10,The request for last year's statement was fully stated before the operator replied.
+p1-en-004,ai-fable,verification,na,10;12,Only navigation steps in the app; no account data disclosed.
+p1-en-004,ai-fable,guidance,20,10;12;13,Full steps given and confirmed; the client got the report.
+p1-en-004,ai-fable,empathy,yes,10;14,Polite and the client voiced nothing.
+p1-en-004,ai-fable,management,10,10;12,Clear replies in order; no wait involved.
+p1-en-004,ai-fable,closing,no,13;14,Only a goodbye with no summary and no offer of further help.
+p1-en-004,ai-fable,violations,no,10;14,"No insult, outside offer, or disclosure."
