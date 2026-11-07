@@ -58,10 +58,16 @@ export async function readDashboard(db: ReturnType<typeof createDb>, workspaceId
       pendingAppeals: pendingByConversation.get(conversation.id) ?? 0,
     };
     if (!evaluation) return { ...summary, evaluation: null };
+    const evaluationAppeals = byEvaluation.get(evaluation.id) ?? [];
     const { total, seriousViolation, criteria } = scoreEvaluation(
       evaluation.checklist,
       evaluation.ratings,
-      byEvaluation.get(evaluation.id) ?? [],
+      evaluationAppeals,
+    );
+    const decisions = new Map(
+      evaluationAppeals.flatMap(({ criterionId, decision }) =>
+        decision ? [[criterionId, decision] as const] : [],
+      ),
     );
     return {
       ...summary,
@@ -84,19 +90,25 @@ export async function readDashboard(db: ReturnType<typeof createDb>, workspaceId
         })),
         failures: criteria
           .filter(isFailure)
-          .map(({ criterion, original, finalAnswer, finalPoints }) => ({
-            criterionId: criterion.id,
-            title: criterion.title,
-            kind: criterion.kind,
-            answer: finalAnswer,
-            lost: criterion.kind === "flag" ? null : criterion.weight - (finalPoints ?? 0),
-            weight: criterion.weight,
-            explanation: original.explanation,
-            evidence: original.evidence.flatMap((number) => {
-              const turn = transcript[number - 1];
-              return turn ? [{ number, speaker: turn.speaker, text: turn.text }] : [];
-            }),
-          })),
+          .map(({ criterion, original, finalAnswer, finalPoints }) => {
+            const decision = decisions.get(criterion.id) ?? null;
+            return {
+              criterionId: criterion.id,
+              title: criterion.title,
+              kind: criterion.kind,
+              answer: finalAnswer,
+              lost: criterion.kind === "flag" ? null : criterion.weight - (finalPoints ?? 0),
+              weight: criterion.weight,
+              // The reviewer's reason explains a reviewed verdict; the model's explanation stays under `model`.
+              reviewed: decision !== null,
+              explanation: decision?.reason ?? original.explanation,
+              model: { answer: original.answer, explanation: original.explanation },
+              evidence: original.evidence.flatMap((number) => {
+                const turn = transcript[number - 1];
+                return turn ? [{ number, speaker: turn.speaker, text: turn.text }] : [];
+              }),
+            };
+          }),
       },
     };
   });

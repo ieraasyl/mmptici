@@ -782,9 +782,22 @@ function FailureItem({
           </span>
         )}
       </div>
-      <p className="text-sm text-muted-foreground">{failure.explanation}</p>
+      {failure.reviewed ? (
+        <div className="space-y-1 text-sm">
+          <p>
+            <Badge variant="secondary">Reviewer decision</Badge>{" "}
+            <span className="text-muted-foreground">{failure.explanation}</span>
+          </p>
+          <p className="text-muted-foreground">
+            <span className="font-medium">Model rating {answerLabel(failure.model.answer)}</span> ·{" "}
+            {failure.model.explanation}
+          </p>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">{failure.explanation}</p>
+      )}
       {failure.evidence.length > 0 && (
-        <ul className="flex flex-col gap-1.5">
+        <ul className="flex flex-col gap-1.5" aria-label="Evidence cited by the model">
           {failure.evidence.map(({ number, speaker, text }) => (
             <li key={number} className="rounded-md border bg-muted/40 px-3 py-2 text-sm">
               <span className="mr-2 text-xs font-medium text-muted-foreground">

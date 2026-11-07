@@ -381,3 +381,84 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
     conversations: [{ pendingAppeals: 0, evaluation: { id: newId, total: 100, revision: 2 } }],
   });
 });
+
+test("dashboard failures follow reviewer decisions and keep the model's explanation", async () => {
+  const headers = await openWorkspace();
+  const conversationId = await importExample(headers);
+  const { defaultId } = await (await cqa.checklists.$get({}, { headers })).json();
+  const evaluationId = crypto.randomUUID();
+  const run = await cqa.conversations[":id"].evaluations.$post(
+    { param: { id: conversationId }, json: { id: evaluationId, checklistId: defaultId } },
+    { headers: { ...headers, "X-CQA-Test-Model": "valid" } },
+  );
+  expect(run.status).toBe(201);
+  const failures = async () => {
+    const { conversations } = await (await cqa.dashboard.$get({}, { headers })).json();
+    return conversations[0].evaluation!;
+  };
+  // The test model answers No for opening, 10 for management, Yes for empathy, No for violations.
+  const before = await failures();
+  expect(before.total).toBe(75);
+  expect(before.failures.map(({ criterionId }) => criterionId)).toEqual(["opening"]);
+  expect(before.failures[0]).toMatchObject({ reviewed: false, model: { answer: "no" } });
+  expect(before.failures[0].explanation).toBe(before.failures[0].model.explanation);
+
+  const appeal = async (criterionId: string) => {
+    const response = await cqa.evaluations[":id"].appeals.$post(
+      {
+        param: { id: evaluationId },
+        json: { criterionId, comment: `Please review ${criterionId}.` },
+      },
+      { headers },
+    );
+    expect(response.status, await response.clone().text()).toBe(201);
+    const body = await response.json();
+    if (!("appeal" in body)) throw new Error(body.error.message);
+    return body.appeal.id;
+  };
+  const decide = async (id: string, answer: "yes" | "no" | "na" | number, reason: string) => {
+    const response = await cqa.appeals[":id"].decision.$put(
+      { param: { id }, json: { answer, reason } },
+      { headers },
+    );
+    expect(response.status, await response.clone().text()).toBe(200);
+  };
+
+  // A pending appeal changes nothing yet.
+  const closingAppeal = await appeal("closing");
+  const pending = await failures();
+  expect(pending.total).toBe(75);
+  expect(pending.failures.map(({ criterionId }) => criterionId)).toEqual(["opening"]);
+
+  await decide(await appeal("empathy"), "no", "The customer's complaint was ignored.");
+  await decide(await appeal("opening"), "yes", "The greeting and name are in turn 2.");
+  await decide(await appeal("management"), 4, "The customer had to ask twice.");
+  await decide(await appeal("violations"), "yes", "The operator shared another client's balance.");
+  await decide(closingAppeal, "na", "The chat was cut off.");
+
+  const after = await failures();
+  // opening 10 + empathy 0 + management 6 of 40 applicable points.
+  expect(after.total).toBe(40);
+  expect(after.seriousViolation).toBe(true);
+  const byId = new Map(after.failures.map((failure) => [failure.criterionId, failure]));
+  expect([...byId.keys()].sort()).toEqual(["empathy", "management", "violations"]);
+  expect(byId.get("empathy")).toMatchObject({
+    answer: "no",
+    lost: 15,
+    reviewed: true,
+    explanation: "The customer's complaint was ignored.",
+    model: { answer: "yes" },
+    evidence: [{ number: 2 }],
+  });
+  expect(byId.get("empathy")!.model.explanation).toContain("Checked");
+  expect(byId.get("management")).toMatchObject({ answer: 4, lost: 9, reviewed: true });
+  expect(byId.get("violations")).toMatchObject({
+    kind: "flag",
+    answer: "yes",
+    lost: null,
+    reviewed: true,
+    explanation: "The operator shared another client's balance.",
+  });
+  // The same state is served again after a reload.
+  expect(await failures()).toEqual(after);
+});
