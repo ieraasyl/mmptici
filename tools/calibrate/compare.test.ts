@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { describe, expect, test } from "vite-plus/test";
 import { defaultChecklist } from "../../apps/api/src/checklist.ts";
-import { main } from "./compare.ts";
+import { main, selectConversations } from "./compare.ts";
 import { checkLabels, readLabels, scoreAnswers, turns } from "./labels.ts";
 import { capture, csvRows, FIXTURES, tempDir } from "./test-helpers.ts";
 
@@ -33,6 +33,13 @@ function go(...extra: string[]) {
   expect(existsSync(`${r.dir}/r/t.md`)).toBe(true);
   return { report, rows: csvRows(`${r.dir}/u/t-mismatches.csv`), dir: r.dir };
 }
+
+describe("selectConversations", () => {
+  test("chats17 is tuning plus heldout without p4- calls", () => {
+    const sets = { tuning: ["a", "p4-x", "b"], heldout: ["c", "d"] } as never;
+    expect(selectConversations("chats17", sets, ["a", "p4-x", "b", "c"])).toEqual(["a", "b", "c"]);
+  });
+});
 
 describe("compare", () => {
   test("pairs", () => {

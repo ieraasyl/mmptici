@@ -43,6 +43,7 @@ import {
   type RunFile,
   type Sets,
 } from "./labels.ts";
+import { resolveSet } from "./review.ts";
 import { bootstrapCi, cohenKappa, precisionRecall, quadraticWeightedKappa } from "./metrics.ts";
 
 const LANGUAGES = ["RU", "KZ", "EN"];
@@ -75,13 +76,7 @@ export function selectConversations(spec: string, sets: Sets, available: Iterabl
   const have = new Set(available);
   let chosen: string[];
   if (spec === "all") chosen = [...have];
-  else if (spec === "tuning" || spec === "heldout") chosen = sets[spec].filter((c) => have.has(c));
-  else {
-    chosen = spec
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s && have.has(s));
-  }
+  else chosen = resolveSet(spec, sets).filter((c) => have.has(c));
   return [...new Set(chosen)].sort();
 }
 
