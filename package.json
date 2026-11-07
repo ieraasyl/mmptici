@@ -24,7 +24,10 @@
     "calibrate:print": "node tools/calibrate/print-dialogs.ts",
     "calibrate:summarize": "node tools/calibrate/summarize-run.ts",
     "calibrate:review": "node tools/calibrate/review.ts",
-    "calibrate:index": "node tools/calibrate/index.ts"
+    "calibrate:index": "node tools/calibrate/index.ts",
+    "submission:validate": "node tools/submission/validate.ts",
+    "submission:run": "node tools/submission/run.ts",
+    "submission:export": "node tools/submission/export.ts"
   },
   "devDependencies": {
     "@app/api": "workspace:*",
