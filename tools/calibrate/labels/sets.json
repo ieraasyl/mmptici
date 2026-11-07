@@ -1,0 +1,106 @@
+{
+  "tuning": [
+    "p1-ru-003",
+    "p1-ru-007",
+    "p1-ru-022",
+    "p1-ru-025",
+    "p1-ru-028",
+    "p1-ru-029",
+    "p1-kz-003",
+    "p1-kz-008",
+    "p1-kz-011",
+    "p1-en-008",
+    "p1-en-009",
+    "p1-en-014",
+    "p4-ru-001",
+    "p4-ru-003"
+  ],
+  "heldout": [
+    "p1-ru-012",
+    "p1-kz-012",
+    "p1-kz-013",
+    "p1-en-001",
+    "p1-en-004",
+    "p4-ru-002"
+  ],
+  "families": {
+    "p1-ru-003": "commission",
+    "p1-ru-007": "withdrawal-profile-update",
+    "p1-ru-022": "investment-advice",
+    "p1-ru-025": "human-request",
+    "p1-ru-028": "update-personal-data",
+    "p1-ru-029": "signin-location",
+    "p1-kz-003": "deposit-missing",
+    "p1-kz-008": "signin-location",
+    "p1-kz-011": "d-account",
+    "p1-en-008": "similar-securities",
+    "p1-en-009": "margin",
+    "p1-en-014": "withdrawal-blocked",
+    "p4-ru-001": "call-p4-ru-001",
+    "p4-ru-003": "call-p4-ru-003",
+    "p1-ru-012": "form-1042s",
+    "p1-kz-012": "bond-order-rejected",
+    "p1-kz-013": "find-bonds",
+    "p1-en-001": "login-taken",
+    "p1-en-004": "broker-report",
+    "p4-ru-002": "call-p4-ru-002"
+  },
+  "assignments": {
+    "dauka": {
+      "primary": [
+        "p1-ru-003",
+        "p1-ru-007",
+        "p1-ru-022",
+        "p1-ru-025",
+        "p4-ru-001"
+      ],
+      "second": [
+        "p1-kz-003",
+        "p1-en-014"
+      ]
+    },
+    "ml-a": {
+      "primary": [
+        "p1-ru-028",
+        "p1-ru-029",
+        "p1-en-008",
+        "p1-en-009"
+      ],
+      "second": [
+        "p1-ru-003",
+        "p1-ru-022",
+        "p4-ru-001"
+      ]
+    },
+    "ml-c": {
+      "primary": [
+        "p1-kz-003",
+        "p1-kz-008",
+        "p1-kz-011",
+        "p4-ru-003"
+      ],
+      "second": [
+        "p1-ru-007",
+        "p1-en-009"
+      ]
+    },
+    "fullstack": {
+      "primary": [
+        "p1-en-014",
+        "p1-ru-012",
+        "p1-en-001",
+        "p1-en-004"
+      ],
+      "second": [
+        "p1-ru-025",
+        "p1-kz-008",
+        "p1-ru-028"
+      ]
+    }
+  },
+  "unassigned": [
+    "p1-kz-012",
+    "p1-kz-013",
+    "p4-ru-002"
+  ]
+}
