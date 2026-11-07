@@ -23,7 +23,7 @@ export function createAppRouter() {
     scrollRestoration: true,
   });
 
-  // Wrap the router's route commit so only the main content participates in the transition.
+  // Animate the main content while the workspace navigation stays in place.
   router.startViewTransition = (update) => {
     const enabled = router.shouldViewTransition !== false;
     router.shouldViewTransition = undefined;
@@ -42,14 +42,29 @@ export function createAppRouter() {
       return update();
     }
 
-    const main = document.querySelector<ViewTransitionScope>("#main-content");
-    if (!main?.startViewTransition) return update();
-
     const from = workspaceDestinationIndex(fromLocation.pathname);
     const to = workspaceDestinationIndex(toLocation.pathname);
     const types =
       from < 0 || to < 0 || from === to ? [] : [from < to ? "slide-from-right" : "slide-from-left"];
-    const transition = main.startViewTransition({ update, types });
+    const main = document.querySelector<ViewTransitionScope>("#main-content");
+    if (!main) return update();
+
+    // Chromium can stretch the frozen scope snapshot at mobile viewport sizes.
+    const useDocumentTransition =
+      window.matchMedia("(width < 40rem)").matches &&
+      CSS.supports("selector(:active-view-transition-type(workspace-mobile))");
+    const transition: ViewTransition | undefined = useDocumentTransition
+      ? document.startViewTransition?.({
+          update: () => {
+            // Give each page its own snapshot position when navigation restores scroll.
+            transition?.types.add("workspace-incoming");
+            return update();
+          },
+          types: ["workspace-mobile", ...types],
+        })
+      : main.startViewTransition?.({ update, types });
+    if (!transition) return update();
+
     // A second navigation can skip an active animation.
     void transition.ready.catch(() => {});
     return transition.updateCallbackDone;

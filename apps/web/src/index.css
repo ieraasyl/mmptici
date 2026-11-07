@@ -133,38 +133,76 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  #main-content:active-view-transition-type(slide-from-left, slide-from-right) {
+  :root:active-view-transition-type(workspace-mobile) {
+    view-transition-name: none;
+
+    #main-content {
+      view-transition-name: workspace-page-outgoing;
+    }
+
+    &:active-view-transition-type(workspace-incoming) #main-content {
+      view-transition-name: workspace-page-incoming;
+    }
+
+    [data-slot="navigation-menu"] {
+      view-transition-name: workspace-navigation;
+    }
+  }
+
+  :is(:root, #main-content):active-view-transition-type(slide-from-left, slide-from-right) {
     --workspace-page-rise: 0px;
     --workspace-page-edge-opacity: 1;
     --workspace-slide-duration: 380ms;
   }
 
-  #main-content:active-view-transition-type(slide-from-left) {
+  :is(:root, #main-content):active-view-transition-type(slide-from-left) {
     --workspace-page-offset: -100%;
   }
 
-  #main-content:active-view-transition-type(slide-from-right) {
+  :is(:root, #main-content):active-view-transition-type(slide-from-right) {
     --workspace-page-offset: 100%;
   }
 
-  #main-content::view-transition {
+  #main-content::view-transition,
+  ::view-transition {
     pointer-events: none;
   }
 
-  #main-content::view-transition-group(root) {
+  #main-content::view-transition-group(root),
+  ::view-transition-group(workspace-page-outgoing),
+  ::view-transition-group(workspace-page-incoming),
+  ::view-transition-new(workspace-navigation) {
     animation: none;
   }
 
-  #main-content::view-transition-image-pair(root) {
+  #main-content::view-transition-group(root) {
+    /* The scope is already positioned at main. Ignore Chromium's browser toolbar offset. */
+    transform: none;
+  }
+
+  ::view-transition-group(workspace-navigation) {
+    z-index: 1;
+    animation: none;
+  }
+
+  ::view-transition-old(workspace-navigation) {
+    display: none;
+  }
+
+  #main-content::view-transition-image-pair(root),
+  ::view-transition-image-pair(workspace-page-outgoing),
+  ::view-transition-image-pair(workspace-page-incoming) {
     overflow-x: clip;
   }
 
-  #main-content::view-transition-old(root) {
+  #main-content::view-transition-old(root),
+  ::view-transition-old(workspace-page-outgoing) {
     animation: workspace-page-exit var(--workspace-slide-duration, var(--motion-fast))
       var(--motion-ease) both;
   }
 
-  #main-content::view-transition-new(root) {
+  #main-content::view-transition-new(root),
+  ::view-transition-new(workspace-page-incoming) {
     animation: workspace-page-enter var(--workspace-slide-duration, 300ms) var(--motion-ease) both;
   }
 }
