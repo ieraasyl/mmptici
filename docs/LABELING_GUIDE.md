@@ -12,7 +12,7 @@ For the four labelers of the 20 DEV dialogs. Budget: about an hour each.
 
 ## 2. How to label
 
-1. Find your dialogs in `tools/calibrate/labels/sets.json` under `assignments.<you>`. Your IDs are `dauka`, `ml-a`, `ml-c` or `fullstack`. Do `primary` first, then `second`. If you finish early, take a dialog from `unassigned`.
+1. Find your dialogs in `tools/calibrate/labels/sets.json` under `assignments.<you>`. Your IDs are `dauka`, `ml-a`, `ml-c` or `fullstack`. Do `primary` first, then `second`. If you finish early, take a dialog from `unassigned`. Dialogs in `unassigned` are held out: whoever takes one must not discuss it with ML A.
 2. Print your dialogs:
 
    ```
@@ -187,7 +187,7 @@ Second example: `p1-ru-029`, **yes**, turns `10`. «Вы вообще читат
 
 ## 6. Disagreements
 
-1. After everyone sends a CSV, ML B runs the agreement report: `python3 tools/calibrate/compare.py --pairs --name <name>`.
+1. Each labeler sends their filled CSV to ML B. ML B runs the agreement report with all files: `python3 tools/calibrate/compare.py --pairs --name <name> --labels a.csv b.csv c.csv d.csv`. Rows with an empty answer are skipped with a warning, so finish every row before you send.
 2. Disagreements are settled in a short call with the labelers involved.
 3. If a disagreement exposes a gap in a rule, this guide is updated.
 4. ML B writes one `final` row per dialog and criterion. Those rows are what we measure the LLM against.

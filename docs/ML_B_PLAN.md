@@ -118,7 +118,7 @@ Build the comparison side first. It needs only labels, and the same code measure
 
 ```
 conversation_id,labeler,criterion_id,answer,evidence_turns,note
-p1-ru-007,dauka,closing,no,13,"Closed without goodbye after a second question"
+p1-ru-007,dauka,guidance,10,12;13,"Second question about re-submitting the withdrawal left unanswered"
 ```
 
 `answer` is `yes`, `no`, `na`, or a scale number. `evidence_turns` lists 1-based turn numbers separated by `;`.
