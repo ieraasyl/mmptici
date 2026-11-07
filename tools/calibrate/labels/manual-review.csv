@@ -1,0 +1,500 @@
+conversation_id,labeler,criterion_id,answer,evidence_turns,note
+p1-en-015,manual,opening,no,,Qwen and Jev agreed
+p1-en-015,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-en-015,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-en-015,manual,guidance,20,,manual decision on a Qwen/Jev disagreement
+p1-en-015,manual,empathy,yes,,manual decision on a Qwen/Jev disagreement
+p1-en-015,manual,management,4,,manual decision on a Qwen/Jev disagreement
+p1-en-015,manual,closing,no,,Qwen and Jev agreed
+p1-en-015,manual,violations,no,,Qwen and Jev agreed
+p4-ru-002,manual,opening,yes,,manual decision on a Qwen/Jev disagreement
+p4-ru-002,manual,understanding,yes,,manual decision on a Qwen/Jev disagreement
+p4-ru-002,manual,verification,yes,,manual decision on a Qwen/Jev disagreement
+p4-ru-002,manual,guidance,20,,Qwen and Jev agreed
+p4-ru-002,manual,empathy,yes,,Qwen and Jev agreed
+p4-ru-002,manual,management,10,,manual decision on a Qwen/Jev disagreement
+p4-ru-002,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p4-ru-002,manual,violations,no,,Qwen and Jev agreed
+p1-en-007,manual,opening,yes,,Qwen and Jev agreed
+p1-en-007,manual,understanding,na,,Qwen and Jev agreed
+p1-en-007,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-en-007,manual,guidance,10,,Qwen and Jev agreed
+p1-en-007,manual,empathy,no,,manual decision on a Qwen/Jev disagreement
+p1-en-007,manual,management,10,,manual decision on a Qwen/Jev disagreement
+p1-en-007,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p1-en-007,manual,violations,no,,Qwen and Jev agreed
+p1-ru-003,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-003,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-003,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-003,manual,guidance,10,,Qwen and Jev agreed
+p1-ru-003,manual,empathy,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-003,manual,management,4,,manual decision on a Qwen/Jev disagreement
+p1-ru-003,manual,closing,no,,Qwen and Jev agreed
+p1-ru-003,manual,violations,no,,Qwen and Jev agreed
+p1-ru-007,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-007,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-007,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-007,manual,guidance,10,,Qwen and Jev agreed
+p1-ru-007,manual,empathy,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-007,manual,management,7,,manual decision on a Qwen/Jev disagreement
+p1-ru-007,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p1-ru-007,manual,violations,no,,Qwen and Jev agreed
+p1-ru-009,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-009,manual,understanding,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-009,manual,verification,no,,Qwen and Jev agreed
+p1-ru-009,manual,guidance,10,,Qwen and Jev agreed
+p1-ru-009,manual,empathy,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-009,manual,management,4,,manual decision on a Qwen/Jev disagreement
+p1-ru-009,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p1-ru-009,manual,violations,yes,,Qwen and Jev agreed
+p1-en-014,manual,opening,yes,,Qwen and Jev agreed
+p1-en-014,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-en-014,manual,verification,no,,Qwen and Jev agreed
+p1-en-014,manual,guidance,0,,manual decision on a Qwen/Jev disagreement
+p1-en-014,manual,empathy,no,,Qwen and Jev agreed
+p1-en-014,manual,management,0,,manual decision on a Qwen/Jev disagreement
+p1-en-014,manual,closing,no,,Qwen and Jev agreed
+p1-en-014,manual,violations,yes,,manual decision on a Qwen/Jev disagreement
+p1-kz-015,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-015,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-kz-015,manual,verification,no,,Qwen and Jev agreed
+p1-kz-015,manual,guidance,10,,Qwen and Jev agreed
+p1-kz-015,manual,empathy,no,,manual decision on a Qwen/Jev disagreement
+p1-kz-015,manual,management,7,,Qwen and Jev agreed
+p1-kz-015,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p1-kz-015,manual,violations,no,,Qwen and Jev agreed
+p4-ru-005,manual,opening,no,,Qwen and Jev agreed
+p4-ru-005,manual,understanding,yes,,Qwen and Jev agreed
+p4-ru-005,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p4-ru-005,manual,guidance,20,,Qwen and Jev agreed
+p4-ru-005,manual,empathy,yes,,Qwen and Jev agreed
+p4-ru-005,manual,management,10,,manual decision on a Qwen/Jev disagreement
+p4-ru-005,manual,closing,na,,manual decision on a Qwen/Jev disagreement
+p4-ru-005,manual,violations,no,,Qwen and Jev agreed
+p4-ru-004,manual,opening,yes,,Qwen and Jev agreed
+p4-ru-004,manual,understanding,yes,,Qwen and Jev agreed
+p4-ru-004,manual,verification,yes,,manual decision on a Qwen/Jev disagreement
+p4-ru-004,manual,guidance,20,,manual decision on a Qwen/Jev disagreement
+p4-ru-004,manual,empathy,yes,,Qwen and Jev agreed
+p4-ru-004,manual,management,4,,Qwen and Jev agreed
+p4-ru-004,manual,closing,na,,manual decision on a Qwen/Jev disagreement
+p4-ru-004,manual,violations,no,,Qwen and Jev agreed
+p4-ru-003,manual,opening,yes,,Qwen and Jev agreed
+p4-ru-003,manual,understanding,yes,,Qwen and Jev agreed
+p4-ru-003,manual,verification,yes,,Qwen and Jev agreed
+p4-ru-003,manual,empathy,yes,,Qwen and Jev agreed
+p4-ru-003,manual,violations,no,,Qwen and Jev agreed
+p1-ru-025,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-025,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-025,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-025,manual,guidance,na,,Qwen and Jev agreed
+p1-ru-025,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-025,manual,management,10,,Qwen and Jev agreed
+p1-ru-025,manual,closing,na,,Qwen and Jev agreed
+p1-ru-025,manual,violations,no,,Qwen and Jev agreed
+p1-kz-005,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-005,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-kz-005,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-kz-005,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-005,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-005,manual,management,10,,Qwen and Jev agreed
+p1-kz-005,manual,closing,no,,Qwen and Jev agreed
+p1-kz-005,manual,violations,no,,Qwen and Jev agreed
+p1-ru-017,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-017,manual,understanding,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-017,manual,verification,no,,manual decision on a Qwen/Jev disagreement
+p1-ru-017,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-017,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-017,manual,management,10,,Qwen and Jev agreed
+p1-ru-017,manual,closing,no,,Qwen and Jev agreed
+p1-ru-017,manual,violations,no,,Qwen and Jev agreed
+p1-ru-019,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-019,manual,understanding,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-019,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-019,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-019,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-019,manual,management,10,,Qwen and Jev agreed
+p1-ru-019,manual,closing,no,,Qwen and Jev agreed
+p1-ru-019,manual,violations,no,,Qwen and Jev agreed
+p1-kz-006,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-006,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-006,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-kz-006,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-006,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-006,manual,management,10,,Qwen and Jev agreed
+p1-kz-006,manual,closing,yes,,manual decision on a Qwen/Jev disagreement
+p1-kz-006,manual,violations,no,,Qwen and Jev agreed
+p1-ru-022,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-022,manual,understanding,no,,Qwen and Jev agreed
+p1-ru-022,manual,verification,no,,manual decision on a Qwen/Jev disagreement
+p1-ru-022,manual,guidance,0,,Qwen and Jev agreed
+p1-ru-022,manual,empathy,no,,Qwen and Jev agreed
+p1-ru-022,manual,management,0,,manual decision on a Qwen/Jev disagreement
+p1-ru-022,manual,closing,no,,Qwen and Jev agreed
+p1-ru-022,manual,violations,yes,,Qwen and Jev agreed
+p1-ru-023,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-023,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-023,manual,verification,no,,manual decision on a Qwen/Jev disagreement
+p1-ru-023,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-023,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-023,manual,management,0,,manual decision on a Qwen/Jev disagreement
+p1-ru-023,manual,closing,no,,Qwen and Jev agreed
+p1-ru-023,manual,violations,yes,,Qwen and Jev agreed
+p1-kz-014,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-014,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-014,manual,verification,na,,Qwen and Jev agreed
+p1-kz-014,manual,guidance,20,,manual decision on a Qwen/Jev disagreement
+p1-kz-014,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-014,manual,management,10,,manual decision on a Qwen/Jev disagreement
+p1-kz-014,manual,closing,no,,Qwen and Jev agreed
+p1-kz-014,manual,violations,no,,Qwen and Jev agreed
+p1-kz-008,manual,opening,no,,Qwen and Jev agreed
+p1-kz-008,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-kz-008,manual,verification,na,,Qwen and Jev agreed
+p1-kz-008,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-008,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-008,manual,management,7,,Qwen and Jev agreed
+p1-kz-008,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p1-kz-008,manual,violations,no,,Qwen and Jev agreed
+p1-ru-026,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-026,manual,understanding,no,,manual decision on a Qwen/Jev disagreement
+p1-ru-026,manual,verification,no,,Qwen and Jev agreed
+p1-ru-026,manual,guidance,0,,manual decision on a Qwen/Jev disagreement
+p1-ru-026,manual,empathy,no,,Qwen and Jev agreed
+p1-ru-026,manual,management,4,,Qwen and Jev agreed
+p1-ru-026,manual,closing,no,,Qwen and Jev agreed
+p1-ru-026,manual,violations,no,,Qwen and Jev agreed
+p1-en-008,manual,opening,yes,,Qwen and Jev agreed
+p1-en-008,manual,understanding,na,,Qwen and Jev agreed
+p1-en-008,manual,verification,na,,Qwen and Jev agreed
+p1-en-008,manual,guidance,15,,manual decision on a Qwen/Jev disagreement
+p1-en-008,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-008,manual,management,7,,manual decision on a Qwen/Jev disagreement
+p1-en-008,manual,closing,no,,Qwen and Jev agreed
+p1-en-008,manual,violations,no,,Qwen and Jev agreed
+p1-kz-003,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-003,manual,understanding,yes,,Qwen and Jev agreed
+p1-kz-003,manual,verification,yes,,manual decision on a Qwen/Jev disagreement
+p1-kz-003,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-003,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-003,manual,management,10,,Qwen and Jev agreed
+p1-kz-003,manual,closing,yes,,manual decision on a Qwen/Jev disagreement
+p1-kz-003,manual,violations,no,,Qwen and Jev agreed
+p1-ru-014,manual,opening,no,,Qwen and Jev agreed
+p1-ru-014,manual,understanding,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-014,manual,verification,na,,Qwen and Jev agreed
+p1-ru-014,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-014,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-014,manual,management,7,,manual decision on a Qwen/Jev disagreement
+p1-ru-014,manual,closing,no,,Qwen and Jev agreed
+p1-ru-014,manual,violations,no,,Qwen and Jev agreed
+p4-ru-001,manual,opening,yes,,Qwen and Jev agreed
+p4-ru-001,manual,understanding,na,,Qwen and Jev agreed
+p4-ru-001,manual,verification,na,,Qwen and Jev agreed
+p4-ru-001,manual,guidance,15,,manual decision on a Qwen/Jev disagreement
+p4-ru-001,manual,empathy,yes,,Qwen and Jev agreed
+p4-ru-001,manual,management,7,,manual decision on a Qwen/Jev disagreement
+p4-ru-001,manual,closing,na,,Qwen and Jev agreed
+p4-ru-001,manual,violations,no,,Qwen and Jev agreed
+p1-en-006,manual,opening,yes,,Qwen and Jev agreed
+p1-en-006,manual,guidance,20,,Qwen and Jev agreed
+p1-en-006,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-006,manual,management,10,,Qwen and Jev agreed
+p1-en-006,manual,closing,yes,,Qwen and Jev agreed
+p1-en-006,manual,violations,no,,Qwen and Jev agreed
+p1-en-001,manual,opening,yes,,Qwen and Jev agreed
+p1-en-001,manual,understanding,na,,Qwen and Jev agreed
+p1-en-001,manual,guidance,20,,Qwen and Jev agreed
+p1-en-001,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-001,manual,management,10,,Qwen and Jev agreed
+p1-en-001,manual,closing,no,,Qwen and Jev agreed
+p1-en-001,manual,violations,no,,Qwen and Jev agreed
+p1-kz-004,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-004,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-004,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-004,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-004,manual,management,10,,Qwen and Jev agreed
+p1-kz-004,manual,closing,no,,Qwen and Jev agreed
+p1-kz-004,manual,violations,no,,Qwen and Jev agreed
+p1-kz-007,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-007,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-007,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-007,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-007,manual,management,10,,Qwen and Jev agreed
+p1-kz-007,manual,closing,no,,Qwen and Jev agreed
+p1-kz-007,manual,violations,no,,Qwen and Jev agreed
+p1-kz-009,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-009,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-009,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-009,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-009,manual,management,10,,Qwen and Jev agreed
+p1-kz-009,manual,closing,no,,Qwen and Jev agreed
+p1-kz-009,manual,violations,no,,Qwen and Jev agreed
+p1-kz-013,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-013,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-013,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-013,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-013,manual,management,10,,Qwen and Jev agreed
+p1-kz-013,manual,closing,no,,Qwen and Jev agreed
+p1-kz-013,manual,violations,yes,,Qwen and Jev agreed
+p1-kz-012,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-012,manual,understanding,yes,,Qwen and Jev agreed
+p1-kz-012,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-012,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-012,manual,management,10,,Qwen and Jev agreed
+p1-kz-012,manual,closing,yes,,Qwen and Jev agreed
+p1-kz-012,manual,violations,no,,Qwen and Jev agreed
+p1-en-013,manual,opening,yes,,Qwen and Jev agreed
+p1-en-013,manual,understanding,na,,Qwen and Jev agreed
+p1-en-013,manual,guidance,20,,Qwen and Jev agreed
+p1-en-013,manual,empathy,no,,Qwen and Jev agreed
+p1-en-013,manual,management,7,,Qwen and Jev agreed
+p1-en-013,manual,closing,no,,Qwen and Jev agreed
+p1-en-013,manual,violations,yes,,Qwen and Jev agreed
+p1-en-002,manual,opening,yes,,Qwen and Jev agreed
+p1-en-002,manual,understanding,na,,Qwen and Jev agreed
+p1-en-002,manual,verification,na,,Qwen and Jev agreed
+p1-en-002,manual,guidance,20,,Qwen and Jev agreed
+p1-en-002,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-002,manual,management,10,,Qwen and Jev agreed
+p1-en-002,manual,violations,no,,Qwen and Jev agreed
+p1-ru-008,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-008,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-008,manual,verification,na,,Qwen and Jev agreed
+p1-ru-008,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-008,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-008,manual,management,10,,Qwen and Jev agreed
+p1-ru-008,manual,violations,no,,Qwen and Jev agreed
+p1-ru-015,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-015,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-015,manual,verification,na,,Qwen and Jev agreed
+p1-ru-015,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-015,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-015,manual,management,10,,Qwen and Jev agreed
+p1-ru-015,manual,violations,no,,Qwen and Jev agreed
+p1-ru-029,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-029,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-029,manual,verification,na,,Qwen and Jev agreed
+p1-ru-029,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-029,manual,empathy,no,,Qwen and Jev agreed
+p1-ru-029,manual,closing,no,,Qwen and Jev agreed
+p1-ru-029,manual,violations,yes,,Qwen and Jev agreed
+p1-ru-016,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-016,manual,understanding,no,,Qwen and Jev agreed
+p1-ru-016,manual,verification,na,,Qwen and Jev agreed
+p1-ru-016,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-016,manual,management,7,,Qwen and Jev agreed
+p1-ru-016,manual,closing,no,,Qwen and Jev agreed
+p1-ru-016,manual,violations,no,,Qwen and Jev agreed
+p1-ru-018,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-018,manual,understanding,no,,Qwen and Jev agreed
+p1-ru-018,manual,verification,no,,Qwen and Jev agreed
+p1-ru-018,manual,guidance,0,,Qwen and Jev agreed
+p1-ru-018,manual,empathy,no,,Qwen and Jev agreed
+p1-ru-018,manual,closing,no,,Qwen and Jev agreed
+p1-ru-018,manual,violations,no,,Qwen and Jev agreed
+p1-kz-002,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-002,manual,verification,na,,Qwen and Jev agreed
+p1-kz-002,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-002,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-002,manual,management,10,,Qwen and Jev agreed
+p1-kz-002,manual,closing,no,,Qwen and Jev agreed
+p1-kz-002,manual,violations,no,,Qwen and Jev agreed
+p1-ru-030,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-030,manual,verification,na,,Qwen and Jev agreed
+p1-ru-030,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-030,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-030,manual,management,10,,Qwen and Jev agreed
+p1-ru-030,manual,closing,no,,Qwen and Jev agreed
+p1-ru-030,manual,violations,no,,Qwen and Jev agreed
+p1-ru-010,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-010,manual,understanding,yes,,Qwen and Jev agreed
+p1-ru-010,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-010,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-010,manual,management,10,,Qwen and Jev agreed
+p1-ru-010,manual,closing,yes,,Qwen and Jev agreed
+p1-ru-010,manual,violations,no,,Qwen and Jev agreed
+p1-en-003,manual,opening,yes,,Qwen and Jev agreed
+p1-en-003,manual,understanding,na,,Qwen and Jev agreed
+p1-en-003,manual,verification,na,,Qwen and Jev agreed
+p1-en-003,manual,guidance,20,,Qwen and Jev agreed
+p1-en-003,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-003,manual,management,10,,Qwen and Jev agreed
+p1-en-003,manual,closing,no,,Qwen and Jev agreed
+p1-en-003,manual,violations,no,,Qwen and Jev agreed
+p1-en-004,manual,opening,yes,,Qwen and Jev agreed
+p1-en-004,manual,understanding,na,,Qwen and Jev agreed
+p1-en-004,manual,verification,na,,Qwen and Jev agreed
+p1-en-004,manual,guidance,20,,Qwen and Jev agreed
+p1-en-004,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-004,manual,management,10,,Qwen and Jev agreed
+p1-en-004,manual,closing,no,,Qwen and Jev agreed
+p1-en-004,manual,violations,no,,Qwen and Jev agreed
+p1-en-005,manual,opening,yes,,Qwen and Jev agreed
+p1-en-005,manual,understanding,na,,Qwen and Jev agreed
+p1-en-005,manual,verification,na,,Qwen and Jev agreed
+p1-en-005,manual,guidance,20,,Qwen and Jev agreed
+p1-en-005,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-005,manual,management,10,,Qwen and Jev agreed
+p1-en-005,manual,closing,no,,Qwen and Jev agreed
+p1-en-005,manual,violations,no,,Qwen and Jev agreed
+p1-en-009,manual,opening,yes,,Qwen and Jev agreed
+p1-en-009,manual,understanding,na,,Qwen and Jev agreed
+p1-en-009,manual,verification,na,,Qwen and Jev agreed
+p1-en-009,manual,guidance,20,,Qwen and Jev agreed
+p1-en-009,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-009,manual,management,10,,Qwen and Jev agreed
+p1-en-009,manual,closing,na,,Qwen and Jev agreed
+p1-en-009,manual,violations,no,,Qwen and Jev agreed
+p1-en-010,manual,opening,yes,,Qwen and Jev agreed
+p1-en-010,manual,understanding,na,,Qwen and Jev agreed
+p1-en-010,manual,verification,na,,Qwen and Jev agreed
+p1-en-010,manual,guidance,20,,Qwen and Jev agreed
+p1-en-010,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-010,manual,management,10,,Qwen and Jev agreed
+p1-en-010,manual,closing,no,,Qwen and Jev agreed
+p1-en-010,manual,violations,no,,Qwen and Jev agreed
+p1-en-011,manual,opening,yes,,Qwen and Jev agreed
+p1-en-011,manual,understanding,na,,Qwen and Jev agreed
+p1-en-011,manual,verification,na,,Qwen and Jev agreed
+p1-en-011,manual,guidance,20,,Qwen and Jev agreed
+p1-en-011,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-011,manual,management,10,,Qwen and Jev agreed
+p1-en-011,manual,closing,yes,,Qwen and Jev agreed
+p1-en-011,manual,violations,no,,Qwen and Jev agreed
+p1-en-012,manual,opening,yes,,Qwen and Jev agreed
+p1-en-012,manual,understanding,na,,Qwen and Jev agreed
+p1-en-012,manual,verification,na,,Qwen and Jev agreed
+p1-en-012,manual,guidance,20,,Qwen and Jev agreed
+p1-en-012,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-012,manual,management,10,,Qwen and Jev agreed
+p1-en-012,manual,closing,no,,Qwen and Jev agreed
+p1-en-012,manual,violations,no,,Qwen and Jev agreed
+p1-kz-001,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-001,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-001,manual,verification,na,,Qwen and Jev agreed
+p1-kz-001,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-001,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-001,manual,management,10,,Qwen and Jev agreed
+p1-kz-001,manual,closing,no,,Qwen and Jev agreed
+p1-kz-001,manual,violations,no,,Qwen and Jev agreed
+p1-kz-010,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-010,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-010,manual,verification,na,,Qwen and Jev agreed
+p1-kz-010,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-010,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-010,manual,management,10,,Qwen and Jev agreed
+p1-kz-010,manual,closing,no,,Qwen and Jev agreed
+p1-kz-010,manual,violations,no,,Qwen and Jev agreed
+p1-kz-011,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-011,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-011,manual,verification,na,,Qwen and Jev agreed
+p1-kz-011,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-011,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-011,manual,management,10,,Qwen and Jev agreed
+p1-kz-011,manual,closing,na,,Qwen and Jev agreed
+p1-kz-011,manual,violations,no,,Qwen and Jev agreed
+p1-ru-001,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-001,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-001,manual,verification,na,,Qwen and Jev agreed
+p1-ru-001,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-001,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-001,manual,management,10,,Qwen and Jev agreed
+p1-ru-001,manual,closing,no,,Qwen and Jev agreed
+p1-ru-001,manual,violations,no,,Qwen and Jev agreed
+p1-ru-002,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-002,manual,understanding,yes,,Qwen and Jev agreed
+p1-ru-002,manual,verification,na,,Qwen and Jev agreed
+p1-ru-002,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-002,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-002,manual,management,10,,Qwen and Jev agreed
+p1-ru-002,manual,closing,yes,,Qwen and Jev agreed
+p1-ru-002,manual,violations,no,,Qwen and Jev agreed
+p1-ru-004,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-004,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-004,manual,verification,na,,Qwen and Jev agreed
+p1-ru-004,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-004,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-004,manual,management,10,,Qwen and Jev agreed
+p1-ru-004,manual,closing,no,,Qwen and Jev agreed
+p1-ru-004,manual,violations,no,,Qwen and Jev agreed
+p1-ru-005,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-005,manual,understanding,yes,,Qwen and Jev agreed
+p1-ru-005,manual,verification,na,,Qwen and Jev agreed
+p1-ru-005,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-005,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-005,manual,management,4,,Qwen and Jev agreed
+p1-ru-005,manual,closing,yes,,Qwen and Jev agreed
+p1-ru-005,manual,violations,no,,Qwen and Jev agreed
+p1-ru-006,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-006,manual,understanding,yes,,Qwen and Jev agreed
+p1-ru-006,manual,verification,yes,,Qwen and Jev agreed
+p1-ru-006,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-006,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-006,manual,management,10,,Qwen and Jev agreed
+p1-ru-006,manual,closing,yes,,Qwen and Jev agreed
+p1-ru-006,manual,violations,no,,Qwen and Jev agreed
+p1-ru-011,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-011,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-011,manual,verification,na,,Qwen and Jev agreed
+p1-ru-011,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-011,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-011,manual,management,10,,Qwen and Jev agreed
+p1-ru-011,manual,closing,no,,Qwen and Jev agreed
+p1-ru-011,manual,violations,no,,Qwen and Jev agreed
+p1-ru-012,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-012,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-012,manual,verification,na,,Qwen and Jev agreed
+p1-ru-012,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-012,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-012,manual,management,10,,Qwen and Jev agreed
+p1-ru-012,manual,closing,na,,Qwen and Jev agreed
+p1-ru-012,manual,violations,no,,Qwen and Jev agreed
+p1-ru-013,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-013,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-013,manual,verification,na,,Qwen and Jev agreed
+p1-ru-013,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-013,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-013,manual,management,10,,Qwen and Jev agreed
+p1-ru-013,manual,closing,yes,,Qwen and Jev agreed
+p1-ru-013,manual,violations,no,,Qwen and Jev agreed
+p1-ru-020,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-020,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-020,manual,verification,na,,Qwen and Jev agreed
+p1-ru-020,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-020,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-020,manual,management,10,,Qwen and Jev agreed
+p1-ru-020,manual,closing,no,,Qwen and Jev agreed
+p1-ru-020,manual,violations,no,,Qwen and Jev agreed
+p1-ru-021,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-021,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-021,manual,verification,na,,Qwen and Jev agreed
+p1-ru-021,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-021,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-021,manual,management,10,,Qwen and Jev agreed
+p1-ru-021,manual,closing,yes,,Qwen and Jev agreed
+p1-ru-021,manual,violations,no,,Qwen and Jev agreed
+p1-ru-024,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-024,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-024,manual,verification,na,,Qwen and Jev agreed
+p1-ru-024,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-024,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-024,manual,management,10,,Qwen and Jev agreed
+p1-ru-024,manual,closing,no,,Qwen and Jev agreed
+p1-ru-024,manual,violations,no,,Qwen and Jev agreed
+p1-ru-027,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-027,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-027,manual,verification,na,,Qwen and Jev agreed
+p1-ru-027,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-027,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-027,manual,management,10,,Qwen and Jev agreed
+p1-ru-027,manual,closing,no,,Qwen and Jev agreed
+p1-ru-027,manual,violations,no,,Qwen and Jev agreed
+p1-ru-028,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-028,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-028,manual,verification,na,,Qwen and Jev agreed
+p1-ru-028,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-028,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-028,manual,management,10,,Qwen and Jev agreed
+p1-ru-028,manual,closing,no,,Qwen and Jev agreed
+p1-ru-028,manual,violations,no,,Qwen and Jev agreed

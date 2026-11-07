@@ -36,7 +36,10 @@ export interface LlmClient {
   complete(messages: ChatMessage[], options?: CompleteOptions): Promise<ModelReply>;
 }
 
-/** The provider answered with an HTTP error, e.g. 401 for a bad token. Not retried. */
+/**
+ * The provider answered with an HTTP error, e.g. 401 for a bad token. The client retries
+ * rate limits and server errors (see `isTransient`) before throwing one of these.
+ */
 export class InferenceApiError extends Error {
   readonly status: number;
 
@@ -49,6 +52,38 @@ export class InferenceApiError extends Error {
   get isAuthError() {
     return this.status === 401 || this.status === 403;
   }
+
+  /** A rate limit or a server error, which may pass if the request is sent again. */
+  get isTransient() {
+    return this.status === 429 || this.status >= 500;
+  }
+}
+
+/** Waits before each retry of a rate-limited or failed request. Two retries in about 8 s. */
+export const DEFAULT_RETRY_DELAYS_MS = [2_000, 6_000];
+/** A Retry-After header is honoured up to this long. */
+const MAX_RETRY_AFTER_MS = 10_000;
+
+function retryAfterMs(res: Response): number | undefined {
+  const seconds = Number(res.headers.get("retry-after"));
+  return Number.isFinite(seconds) && seconds > 0
+    ? Math.min(seconds * 1000, MAX_RETRY_AFTER_MS)
+    : undefined;
+}
+
+function sleep(ms: number, signal?: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason);
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(signal!.reason);
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
 }
 
 /**
@@ -83,6 +118,8 @@ export type HfClientOptions = {
   maxTokens?: number;
   temperature?: number;
   timeoutMs?: number;
+  /** Delays before retrying a 429 or 5xx reply. Defaults to DEFAULT_RETRY_DELAYS_MS; [] disables retries. */
+  retryDelaysMs?: readonly number[];
 };
 
 export function createHfClient(options: HfClientOptions): LlmClient {
@@ -93,24 +130,31 @@ export function createHfClient(options: HfClientOptions): LlmClient {
     model,
     maxTokens: defaultMaxTokens,
     async complete(messages, { signal, maxTokens = defaultMaxTokens } = {}) {
-      // Always keep the timeout, and also stop when the caller cancels.
-      const timeout = AbortSignal.timeout(options.timeoutMs ?? 90_000);
-      const res = await fetch(HF_ROUTER_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${options.apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          max_tokens: maxTokens,
-          temperature: options.temperature ?? 0,
-        }),
-        signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+      const body = JSON.stringify({
+        model,
+        messages,
+        max_tokens: maxTokens,
+        temperature: options.temperature ?? 0,
       });
-
-      if (!res.ok) throw new InferenceApiError(res.status, await res.text());
+      const delays = options.retryDelaysMs ?? DEFAULT_RETRY_DELAYS_MS;
+      let res: Response;
+      for (let attempt = 0; ; attempt++) {
+        // Each attempt gets its own timeout, and also stops when the caller cancels.
+        const timeout = AbortSignal.timeout(options.timeoutMs ?? 90_000);
+        res = await fetch(HF_ROUTER_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${options.apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body,
+          signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+        });
+        if (res.ok) break;
+        const error = new InferenceApiError(res.status, await res.text());
+        if (!error.isTransient || attempt >= delays.length) throw error;
+        await sleep(retryAfterMs(res) ?? delays[attempt]!, signal);
+      }
 
       const data = (await res.json()) as {
         choices?: { finish_reason?: string; message?: { content?: string | null } }[];

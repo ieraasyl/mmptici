@@ -1,0 +1,504 @@
+{
+  "name": "prompt-russian-vs-manual",
+  "createdAt": "2026-11-07T18:19:32+00:00",
+  "mode": "run",
+  "set": "all",
+  "labelerA": "manual",
+  "perCriterion": {
+    "opening": {
+      "n": 59,
+      "exact": 59,
+      "exactRate": 1,
+      "kappa": 1,
+      "confusion": {
+        "yes": {
+          "yes": 55
+        },
+        "no": {
+          "no": 4
+        }
+      }
+    },
+    "understanding": {
+      "n": 56,
+      "exact": 47,
+      "exactRate": 0.8392857142857143,
+      "kappa": 0.6648936170212766,
+      "naAgreement": 0.8571428571428571,
+      "confusion": {
+        "na": {
+          "na": 34,
+          "yes": 4,
+          "no": 2
+        },
+        "yes": {
+          "yes": 10,
+          "no": 1,
+          "na": 1
+        },
+        "no": {
+          "no": 3,
+          "na": 1
+        }
+      }
+    },
+    "verification": {
+      "n": 53,
+      "exact": 47,
+      "exactRate": 0.8867924528301887,
+      "kappa": 0.6528384279475983,
+      "naAgreement": 0.8867924528301887,
+      "confusion": {
+        "na": {
+          "na": 40,
+          "no": 1
+        },
+        "no": {
+          "no": 3,
+          "na": 5
+        },
+        "yes": {
+          "yes": 4
+        }
+      }
+    },
+    "guidance": {
+      "n": 57,
+      "exact": 49,
+      "exactRate": 0.8596491228070176,
+      "kappa": 0.6392405063291139,
+      "qwk": 0.8923076923076922,
+      "naAgreement": 1,
+      "confusion": {
+        "0": {
+          "0": 2,
+          "5": 1,
+          "10": 1
+        },
+        "10": {
+          "10": 5
+        },
+        "15": {
+          "20": 2
+        },
+        "20": {
+          "10": 1,
+          "15": 3,
+          "20": 41
+        },
+        "na": {
+          "na": 1
+        }
+      }
+    },
+    "empathy": {
+      "n": 59,
+      "exact": 55,
+      "exactRate": 0.9322033898305084,
+      "kappa": 0.6767123287671231,
+      "confusion": {
+        "yes": {
+          "yes": 50,
+          "no": 1
+        },
+        "no": {
+          "yes": 3,
+          "no": 5
+        }
+      }
+    },
+    "management": {
+      "n": 56,
+      "exact": 46,
+      "exactRate": 0.8214285714285714,
+      "kappa": 0.6075683251576733,
+      "qwk": 0.604602510460251,
+      "confusion": {
+        "0": {
+          "7": 2,
+          "10": 1
+        },
+        "4": {
+          "4": 4,
+          "7": 2
+        },
+        "7": {
+          "7": 5,
+          "10": 3
+        },
+        "10": {
+          "4": 1,
+          "7": 1,
+          "10": 37
+        }
+      }
+    },
+    "closing": {
+      "n": 55,
+      "exact": 48,
+      "exactRate": 0.8727272727272727,
+      "kappa": 0.7236180904522612,
+      "naAgreement": 0.9818181818181818,
+      "confusion": {
+        "no": {
+          "no": 35,
+          "yes": 4
+        },
+        "yes": {
+          "yes": 8,
+          "no": 2
+        },
+        "na": {
+          "na": 5,
+          "no": 1
+        }
+      }
+    },
+    "violations": {
+      "n": 59,
+      "exact": 58,
+      "exactRate": 0.9830508474576272,
+      "kappa": 0.9136163982430456,
+      "confusion": {
+        "no": {
+          "no": 52,
+          "yes": 1
+        },
+        "yes": {
+          "yes": 6
+        }
+      }
+    }
+  },
+  "pooled": {
+    "n": 454,
+    "exact": 409,
+    "exactRate": 0.9008810572687225,
+    "ci": [0.8630434782608696, 0.933920704845815]
+  },
+  "totals": {
+    "n": 44,
+    "mae": 8.940454545454545,
+    "maxError": 48.74,
+    "ci": [5.322045454545454, 12.990454545454547],
+    "skipped": 15
+  },
+  "violations": {
+    "tp": 6,
+    "fp": 1,
+    "fn": 0,
+    "precision": 0.8571428571428571,
+    "recall": 1
+  },
+  "breakdown": {
+    "language": {
+      "RU": {
+        "n": 254,
+        "exactRate": 0.889763779527559
+      },
+      "KZ": {
+        "n": 100,
+        "exactRate": 0.95
+      },
+      "EN": {
+        "n": 100,
+        "exactRate": 0.88
+      }
+    },
+    "channel": {
+      "agent chat": {
+        "n": 425,
+        "exactRate": 0.908235294117647
+      },
+      "voice call": {
+        "n": 29,
+        "exactRate": 0.7931034482758621
+      }
+    }
+  },
+  "runHealth": {
+    "dialogs": 59,
+    "failedSamples": 0,
+    "meanLatencyMs": 4762.186440677966,
+    "costUsd": 0.69233397,
+    "responsesWithoutUsage": 0,
+    "missingFromRun": ["p1-en-001", "p1-en-004", "p1-kz-012", "p1-kz-013", "p1-ru-012", "p4-ru-002"]
+  },
+  "mismatches": [
+    {
+      "conversationId": "p1-en-007",
+      "criterionId": "empathy",
+      "a": "no",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-en-007",
+      "criterionId": "closing",
+      "a": "no",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-en-008",
+      "criterionId": "guidance",
+      "a": 15,
+      "b": 20
+    },
+    {
+      "conversationId": "p1-en-008",
+      "criterionId": "management",
+      "a": 7,
+      "b": 10
+    },
+    {
+      "conversationId": "p1-en-011",
+      "criterionId": "closing",
+      "a": "yes",
+      "b": "no"
+    },
+    {
+      "conversationId": "p1-en-014",
+      "criterionId": "understanding",
+      "a": "na",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-en-014",
+      "criterionId": "guidance",
+      "a": 0,
+      "b": 10
+    },
+    {
+      "conversationId": "p1-en-014",
+      "criterionId": "empathy",
+      "a": "no",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-en-014",
+      "criterionId": "management",
+      "a": 0,
+      "b": 7
+    },
+    {
+      "conversationId": "p1-en-015",
+      "criterionId": "understanding",
+      "a": "na",
+      "b": "no"
+    },
+    {
+      "conversationId": "p1-en-015",
+      "criterionId": "guidance",
+      "a": 20,
+      "b": 15
+    },
+    {
+      "conversationId": "p1-en-015",
+      "criterionId": "empathy",
+      "a": "yes",
+      "b": "no"
+    },
+    {
+      "conversationId": "p1-kz-005",
+      "criterionId": "management",
+      "a": 10,
+      "b": 7
+    },
+    {
+      "conversationId": "p1-kz-015",
+      "criterionId": "understanding",
+      "a": "na",
+      "b": "no"
+    },
+    {
+      "conversationId": "p1-kz-015",
+      "criterionId": "empathy",
+      "a": "no",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-kz-015",
+      "criterionId": "closing",
+      "a": "no",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-kz-015",
+      "criterionId": "violations",
+      "a": "no",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-ru-002",
+      "criterionId": "guidance",
+      "a": 20,
+      "b": 10
+    },
+    {
+      "conversationId": "p1-ru-003",
+      "criterionId": "understanding",
+      "a": "na",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-ru-003",
+      "criterionId": "management",
+      "a": 4,
+      "b": 7
+    },
+    {
+      "conversationId": "p1-ru-004",
+      "criterionId": "understanding",
+      "a": "na",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-ru-005",
+      "criterionId": "understanding",
+      "a": "yes",
+      "b": "no"
+    },
+    {
+      "conversationId": "p1-ru-005",
+      "criterionId": "guidance",
+      "a": 20,
+      "b": 15
+    },
+    {
+      "conversationId": "p1-ru-007",
+      "criterionId": "management",
+      "a": 7,
+      "b": 10
+    },
+    {
+      "conversationId": "p1-ru-007",
+      "criterionId": "closing",
+      "a": "no",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-ru-009",
+      "criterionId": "closing",
+      "a": "no",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-ru-014",
+      "criterionId": "understanding",
+      "a": "yes",
+      "b": "na"
+    },
+    {
+      "conversationId": "p1-ru-017",
+      "criterionId": "verification",
+      "a": "no",
+      "b": "na"
+    },
+    {
+      "conversationId": "p1-ru-018",
+      "criterionId": "verification",
+      "a": "no",
+      "b": "na"
+    },
+    {
+      "conversationId": "p1-ru-021",
+      "criterionId": "closing",
+      "a": "yes",
+      "b": "no"
+    },
+    {
+      "conversationId": "p1-ru-022",
+      "criterionId": "verification",
+      "a": "no",
+      "b": "na"
+    },
+    {
+      "conversationId": "p1-ru-022",
+      "criterionId": "management",
+      "a": 0,
+      "b": 7
+    },
+    {
+      "conversationId": "p1-ru-023",
+      "criterionId": "verification",
+      "a": "no",
+      "b": "na"
+    },
+    {
+      "conversationId": "p1-ru-023",
+      "criterionId": "management",
+      "a": 0,
+      "b": 10
+    },
+    {
+      "conversationId": "p1-ru-025",
+      "criterionId": "understanding",
+      "a": "na",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-ru-026",
+      "criterionId": "understanding",
+      "a": "no",
+      "b": "na"
+    },
+    {
+      "conversationId": "p1-ru-026",
+      "criterionId": "verification",
+      "a": "no",
+      "b": "na"
+    },
+    {
+      "conversationId": "p1-ru-026",
+      "criterionId": "guidance",
+      "a": 0,
+      "b": 5
+    },
+    {
+      "conversationId": "p1-ru-026",
+      "criterionId": "management",
+      "a": 4,
+      "b": 7
+    },
+    {
+      "conversationId": "p4-ru-001",
+      "criterionId": "guidance",
+      "a": 15,
+      "b": 20
+    },
+    {
+      "conversationId": "p4-ru-001",
+      "criterionId": "management",
+      "a": 7,
+      "b": 10
+    },
+    {
+      "conversationId": "p4-ru-004",
+      "criterionId": "guidance",
+      "a": 20,
+      "b": 15
+    },
+    {
+      "conversationId": "p4-ru-005",
+      "criterionId": "verification",
+      "a": "na",
+      "b": "no"
+    },
+    {
+      "conversationId": "p4-ru-005",
+      "criterionId": "management",
+      "a": 10,
+      "b": 4
+    },
+    {
+      "conversationId": "p4-ru-005",
+      "criterionId": "closing",
+      "a": "na",
+      "b": "no"
+    }
+  ],
+  "run": {
+    "promptVersion": "p-f76b3f98",
+    "provider": "hf-router",
+    "model": "Qwen/Qwen3.8-27B:cerebras"
+  }
+}

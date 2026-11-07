@@ -37,7 +37,8 @@ export const systemPrompt = [
   "Voice call transcripts come from speech recognition and some words are misrecognized: read for the intended meaning and never count recognition errors against the operator (a garbled name in the greeting still counts as an introduction).",
   "Do not infer tone, diction, or audio quality.",
   "",
-  'Respond with JSON only: {"ratings":{"<criterionId>":{"answer":"yes","explanation":"Краткое пояснение.","evidence":[1,2]}}}. Write all answers as strings. Do not calculate points or a total.',
+  "For each criterion, before its answer, write checks: the conditions in that criterion's guidance that decide the answer, including its N/A condition when it has one. Give each check as a short condition, whether the transcript meets it, and the turns that show it. Then give the answer that follows from the checks.",
+  'Respond with JSON only: {"ratings":{"<criterionId>":{"checks":[{"condition":"...","met":true,"turns":[2]}],"answer":"yes","explanation":"Краткое пояснение.","evidence":[1,2]}}}. Write all answers as strings. Do not calculate points or a total.',
 ].join("\n");
 
 export function buildPrompt(conversation: ConversationInput, checklist: Checklist): ChatMessage[] {

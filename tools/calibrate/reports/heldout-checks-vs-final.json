@@ -1,0 +1,175 @@
+{
+  "name": "heldout-checks-vs-final",
+  "createdAt": "2026-11-07T18:14:38+00:00",
+  "mode": "run",
+  "set": "heldout",
+  "labelerA": "final",
+  "perCriterion": {
+    "opening": {
+      "n": 5,
+      "exact": 5,
+      "exactRate": 1,
+      "kappa": null,
+      "confusion": {
+        "yes": {
+          "yes": 5
+        }
+      }
+    },
+    "understanding": {
+      "n": 5,
+      "exact": 5,
+      "exactRate": 1,
+      "kappa": 1,
+      "naAgreement": 1,
+      "confusion": {
+        "na": {
+          "na": 4
+        },
+        "yes": {
+          "yes": 1
+        }
+      }
+    },
+    "verification": {
+      "n": 5,
+      "exact": 5,
+      "exactRate": 1,
+      "kappa": null,
+      "naAgreement": 1,
+      "confusion": {
+        "na": {
+          "na": 5
+        }
+      }
+    },
+    "guidance": {
+      "n": 5,
+      "exact": 5,
+      "exactRate": 1,
+      "kappa": null,
+      "qwk": null,
+      "naAgreement": 1,
+      "confusion": {
+        "20": {
+          "20": 5
+        }
+      }
+    },
+    "empathy": {
+      "n": 5,
+      "exact": 5,
+      "exactRate": 1,
+      "kappa": null,
+      "confusion": {
+        "yes": {
+          "yes": 5
+        }
+      }
+    },
+    "management": {
+      "n": 5,
+      "exact": 5,
+      "exactRate": 1,
+      "kappa": null,
+      "qwk": null,
+      "confusion": {
+        "10": {
+          "10": 5
+        }
+      }
+    },
+    "closing": {
+      "n": 5,
+      "exact": 5,
+      "exactRate": 1,
+      "kappa": 1,
+      "naAgreement": 1,
+      "confusion": {
+        "no": {
+          "no": 3
+        },
+        "yes": {
+          "yes": 1
+        },
+        "na": {
+          "na": 1
+        }
+      }
+    },
+    "violations": {
+      "n": 5,
+      "exact": 5,
+      "exactRate": 1,
+      "kappa": 1,
+      "confusion": {
+        "no": {
+          "no": 4
+        },
+        "yes": {
+          "yes": 1
+        }
+      }
+    }
+  },
+  "pooled": {
+    "n": 40,
+    "exact": 40,
+    "exactRate": 1,
+    "ci": [1, 1]
+  },
+  "totals": {
+    "n": 5,
+    "mae": 0,
+    "maxError": 0,
+    "ci": [0, 0],
+    "skipped": 0
+  },
+  "violations": {
+    "tp": 1,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1
+  },
+  "breakdown": {
+    "language": {
+      "RU": {
+        "n": 8,
+        "exactRate": 1
+      },
+      "KZ": {
+        "n": 16,
+        "exactRate": 1
+      },
+      "EN": {
+        "n": 16,
+        "exactRate": 1
+      }
+    },
+    "channel": {
+      "agent chat": {
+        "n": 40,
+        "exactRate": 1
+      },
+      "voice call": {
+        "n": 0,
+        "exactRate": null
+      }
+    }
+  },
+  "runHealth": {
+    "dialogs": 6,
+    "failedSamples": 0,
+    "meanLatencyMs": 5223.666666666667,
+    "costUsd": 0.06840343,
+    "responsesWithoutUsage": 0,
+    "missingFromRun": []
+  },
+  "mismatches": [],
+  "run": {
+    "promptVersion": "p-5bd7ddaa",
+    "provider": "hf-router",
+    "model": "Qwen/Qwen3.8-27B:cerebras"
+  }
+}

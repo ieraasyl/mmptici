@@ -162,7 +162,8 @@ export async function main(argv: string[], deps: RunDeps = {}) {
   else {
     const apiKey = readVar("HF_TOKEN");
     if (!apiKey) throw new Error("HF_TOKEN not found in the environment or apps/api/.dev.vars");
-    llm = createHfClient({ apiKey, model, temperature });
+    // The runner retries with its own backoff and counts every request, so the client does not.
+    llm = createHfClient({ apiKey, model, temperature, retryDelaysMs: [] });
   }
   let commit = "unknown";
   try {

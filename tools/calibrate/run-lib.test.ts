@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vite-plus/test";
 import { defaultChecklist } from "../../apps/api/src/checklist.ts";
-import type { LlmClient } from "../../apps/api/src/inference/index.ts";
+import {
+  EmptyReplyError,
+  evaluateConversation,
+  type LlmClient,
+} from "../../apps/api/src/inference/index.ts";
 import { fakeLlm, invalid, valid } from "./fake-llm.ts";
 import {
   aggregate,
@@ -173,6 +177,39 @@ describe("usage accounting", () => {
       parsedResponses: 1,
       usage: { promptTokens: 200, completionTokens: 100 },
       failedSamples: 0,
+    });
+  });
+
+  test("the wrapper passes the token budget through and counts cut-off replies", async () => {
+    const budgets: (number | undefined)[] = [];
+    let call = 0;
+    const llm: LlmClient = {
+      model: "fake",
+      maxTokens: 8000,
+      async complete(_messages, options) {
+        budgets.push(options?.maxTokens);
+        if (call++ === 0) {
+          throw new EmptyReplyError("length", options?.maxTokens, {
+            promptTokens: 100,
+            completionTokens: 8000,
+          });
+        }
+        return {
+          content: valid,
+          model: "fake",
+          usage: { promptTokens: 100, completionTokens: 50 },
+        };
+      },
+    };
+    const { client, accounting } = meteredClient(llm);
+    expect(client.maxTokens).toBe(8000);
+    const run = await evaluateConversation(client, record, defaultChecklist);
+    expect(run.ratings.length).toBeGreaterThan(0);
+    expect(budgets).toEqual([8000, 12000]);
+    expect(accounting).toMatchObject({
+      requests: 2,
+      responses: 2,
+      usage: { promptTokens: 200, completionTokens: 8050 },
     });
   });
 
