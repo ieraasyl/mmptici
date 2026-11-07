@@ -94,7 +94,7 @@ Rule (provisional, organizer question 6):
 - Required for account-specific data or a protected action.
 - Yes only when a check is visibly confirmed before the disclosure, either by a system event or by an explicit operator statement.
 - A confirmed bot check before the handoff counts.
-- Team ruling (organizers left the overlap between failed identity verification and a confidentiality violation to teams): disclosing the client's own account data, including their own balance or account restriction, to a client whose identity was not verified makes `verification` No, but it is not a gross violation. Flag `violations` Yes for confidentiality only when the operator discloses another person's data, or discloses any account data to someone other than the account holder.
+- Team ruling (organizers left the overlap between failed identity verification and a confidentiality violation to teams; settled by the manual review sheet): reporting a restriction or status on the client's account while skipping identity verification, for example after saying verification is not needed, makes `verification` No and `violations` Yes.
 
 Example: `p1-en-014`, **no**, turns `11;12;13`. The operator discloses a withdrawal restriction on the account in turn 11 with no check. The client objects in turn 12, and the operator answers "We can skip that" in turn 13.
 
@@ -187,7 +187,7 @@ Answers: `yes`, `no`.
 
 Rule: as worded. The offer alone is enough. Note that `yes` here is the bad outcome.
 
-Team ruling (organizers left the overlap between failed identity verification and a confidentiality violation to teams): disclosing the client's own account data, including their own balance or account restriction, to a client whose identity was not verified makes `verification` No, but it is not a gross violation. Flag `violations` Yes for confidentiality only when the operator discloses another person's data, or discloses any account data to someone other than the account holder.
+Team ruling (organizers left the overlap between failed identity verification and a confidentiality violation to teams; settled by the manual review sheet): reporting a restriction or status on the client's account while skipping identity verification, for example after saying verification is not needed, makes `verification` No and `violations` Yes.
 
 Example: `p1-ru-022`, **yes**, turns `10;12`. The operator asks the client to send money to his card so he can invest it (turn 10), and confirms in turn 12 that this bypasses the company. The client refuses in turn 13. That does not matter.
 
