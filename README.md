@@ -2,6 +2,8 @@
 
 A starter with React, Hono, Better Auth, and Cloudflare D1. Includes typed API calls, routing, data fetching, and Workers AI. The UI and API deploy together as one Cloudflare Worker.
 
+This starter is the foundation for the Freedom Broker Conversation Quality Analytics (CQA) hackathon prototype. The planned workflows cover configurable checklists, transcript evaluation with evidence, and appeals. See the [hackathon brief](CQA_HACKATHON.md) for requirements.
+
 [Live app](https://mmptici.ieraasyl.workers.dev)
 
 ## Project layout
@@ -18,7 +20,7 @@ See [AGENTS.md](AGENTS.md) for implementation conventions.
 
 ## Local setup
 
-Use Node.js 26 and Vite+ (`vp`).
+Use the Node.js 26 version pinned in [`.node-version`](.node-version) and Vite+ (`vp`).
 
 ```sh
 vp install
