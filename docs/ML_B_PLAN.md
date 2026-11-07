@@ -217,7 +217,7 @@ Run the tuning set on the self-hosted Qwen with the accepted prompt. The report 
 ## Phase 4, T+12 to T+17
 
 1. **Calibration page data.** Give Fullstack a stable `reports/latest.json` with the same fields as the report: per-criterion agreement, human ceiling, total MAE, cloud versus local, and prompt version.
-2. **Unlabeled sanity run on all 65 DEV dialogs.** Check the failure rate, the answer distribution per criterion, and that `violations` flags all six known cases: p1-ru-022, p1-ru-023, p1-ru-029, p1-kz-013, p1-en-013, and nothing else. A distribution far from what the labels show points to a prompt problem the 14 did not reveal.
+2. **Unlabeled sanity run on all 65 DEV dialogs.** Check the failure rate, the answer distribution per criterion, and that `violations` flags all five known cases (p1-ru-022, p1-ru-023, p1-ru-029, p1-kz-013, p1-en-013) and nothing else. A distribution far from what the labels show points to a prompt problem the 14 did not reveal.
 3. **Demo prep for local mode.** Find out how to keep the Modal endpoint warm before the demo, and time one evaluation in local mode.
 4. **Organizer answers.** When answers arrive, update the guide, relabel the affected criteria, and rerun. Closing and understanding are the most likely to change.
 

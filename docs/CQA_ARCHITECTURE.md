@@ -187,7 +187,7 @@ Hours count from now (T). Each task has one owner and a check that proves it is 
 | ID | Owner | Task | Done when |
 | --- | --- | --- | --- |
 | A5 | ML A | 3-sample voting with confidence. | The report shows the voted result against the single sample on the 14 dialogs. |
-| A6 | ML A | gpt-oss-120b tie-break and the separate gross-violation call. | c08 catches all 4 known DEV cases: p1-ru-022, p1-ru-023, p1-kz-013, p1-en-013. |
+| A6 | ML A | gpt-oss-120b tie-break and the separate gross-violation call. | c08 catches all 5 known DEV cases: p1-ru-022, p1-ru-023, p1-ru-029, p1-kz-013, p1-en-013. |
 | A7 + B4 | ML A, ML B | Prompt iterations driven only by the mismatch report. Add 3 hand-picked short examples kept outside the 20 labeled dialogs. | Held-out 6 do not get worse while the tuning 14 improve. |
 | B5 | ML B | Check KZ separately. If KZ agreement is clearly lower, run the tie-break on every KZ criterion. | KZ row in the report. |
 | C3 | ML C | Kazakh routing with whisper-tulpar, then role labeling with rules plus one LLM call. Output in DEV format. | The 5 DEV calls convert to valid transcripts that import into the app. |
