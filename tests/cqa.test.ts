@@ -80,6 +80,25 @@ test("imports conversations once and isolates browser workspaces", async () => {
   ).toBe(403);
 });
 
+test("loads the bundled DEV dataset once per workspace", async () => {
+  const load = cqa.conversations["import-dev"].$post;
+  expect((await load()).status).toBe(401);
+  const headers = await openWorkspace();
+  const other = await openWorkspace();
+
+  const imported = await load({}, { headers });
+  expect(imported.status).toBe(201);
+  expect(await imported.json()).toEqual({ imported: 65, skipped: 0 });
+  expect(await (await load({}, { headers })).json()).toEqual({ imported: 0, skipped: 65 });
+
+  const { conversations } = await (await cqa.conversations.$get({}, { headers })).json();
+  expect(conversations).toHaveLength(65);
+  expect(conversations.every(({ group }) => group === "DEV")).toBe(true);
+  expect(await (await cqa.conversations.$get({}, { headers: other })).json()).toEqual({
+    conversations: [],
+  });
+});
+
 test("returns JSON errors for malformed and invalid imports", async () => {
   const headers = await openWorkspace();
   const malformed = await fetch(`${origin}/api/cqa/conversations`, {

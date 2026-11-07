@@ -37,7 +37,8 @@ import { request } from "@/lib/request";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { EmptyState, ErrorMessage, Loading, PageHeading, StatusMessage } from "./ui";
+import { toast } from "@/lib/toast";
+import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
 
 const PAGE_SIZE = 12;
 
@@ -53,19 +54,20 @@ export function ConversationList() {
   const [page, setPage] = useState(0);
 
   const importDataset = useMutation({
+    onMutate: () => {
+      toast.add({
+        id: "conversation-import",
+        title: "Importing conversations…",
+        description: undefined,
+        type: "loading",
+        timeout: 0,
+      });
+    },
     mutationFn: async (file: File | "dev") => {
-      let text: string;
-      if (file === "dev") {
-        const response = await fetch("/__cqa_dev_dataset");
-        if (!response.ok)
-          throw new Error(
-            "The local DEV dataset is unavailable. Import the organizer’s JSON file.",
-          );
-        text = await response.text();
-      } else {
-        if (file.size > 5 * 1024 * 1024) throw new Error("Import a JSON file under 5 MB.");
-        text = await file.text();
-      }
+      if (file === "dev")
+        return request((init) => cqa.conversations["import-dev"].$post({}, { init }));
+      if (file.size > 5 * 1024 * 1024) throw new Error("Import a JSON file under 5 MB.");
+      const text = await file.text();
       let value: unknown;
       try {
         value = JSON.parse(text);
@@ -82,13 +84,29 @@ export function ConversationList() {
       }
       return request((init) => cqa.conversations.$post({ json: parsed.data }, { init }));
     },
-    onSuccess: () => {
+    onSuccess: ({ imported, skipped }) => {
+      toast.add({
+        id: "conversation-import",
+        title: `Imported ${imported} conversations.`,
+        description: skipped > 0 ? `Skipped ${skipped} already in this dataset.` : undefined,
+        type: "success",
+        timeout: 5_000,
+      });
       setSearch("");
       setLanguage("");
       setChannel("");
       setGroup("");
       setPage(0);
       void queryClient.invalidateQueries(conversationsQuery);
+    },
+    onError: (error) => {
+      toast.add({
+        id: "conversation-import",
+        title: "Import failed",
+        description: error.message,
+        type: "error",
+        timeout: 8_000,
+      });
     },
   });
 
@@ -125,17 +143,15 @@ export function ConversationList() {
         title="Conversations"
         actions={
           <>
-            {import.meta.env.DEV && (
-              <Button
-                variant="outline"
-                size="lg"
-                disabled={importDataset.isPending}
-                onClick={() => importDataset.mutate("dev")}
-              >
-                <HugeiconsIcon icon={Database01Icon} data-icon="inline-start" aria-hidden="true" />{" "}
-                Load DEV dataset
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="lg"
+              disabled={importDataset.isPending}
+              onClick={() => importDataset.mutate("dev")}
+            >
+              <HugeiconsIcon icon={Database01Icon} data-icon="inline-start" aria-hidden="true" />{" "}
+              Load DEV dataset
+            </Button>
             <Button
               size="lg"
               disabled={importDataset.isPending}
@@ -175,15 +191,6 @@ export function ConversationList() {
         ))}
       </div>
 
-      {importDataset.isPending && <Loading>Importing conversations…</Loading>}
-      {importDataset.error && <ErrorMessage error={importDataset.error} />}
-      {importDataset.data && (
-        <StatusMessage>
-          Imported {importDataset.data.imported} conversations.
-          {importDataset.data.skipped > 0 &&
-            ` Skipped ${importDataset.data.skipped} already in this dataset.`}
-        </StatusMessage>
-      )}
       {list.error && (
         <ErrorMessage
           error={list.error}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/toast";
 import { api } from "@/lib/api";
 import { request } from "@/lib/request";
 import { createAppRouter } from "@/router";
@@ -44,7 +45,9 @@ export default function App() {
 
   return (
     <QueryClientProvider client={client}>
-      <Workspace router={router} />
+      <Toaster>
+        <Workspace router={router} />
+      </Toaster>
     </QueryClientProvider>
   );
 }

@@ -8,13 +8,16 @@ import {
   answerOptions,
   checklistSchema,
   createAppealSchema,
+  datasetFileSchema,
   datasetSchema,
   decideAppealSchema,
   runEvaluationSchema,
   saveChecklistSchema,
+  type Dataset,
 } from "@app/contracts";
 import { and, asc, createDb, desc, eq, exists, isNull } from "@app/db";
 import { cqaAppeals, cqaChecklists, cqaConversations, cqaEvaluations } from "@app/db/schema";
+import devDataset from "../../../../data/invoke.json";
 import { defaultChecklist } from "../checklist.ts";
 import type { Bindings } from "../env.ts";
 import { validationError } from "../errors.ts";
@@ -48,6 +51,29 @@ function findConversation(db: Db, workspaceId: string, id: string) {
     .from(cqaConversations)
     .where(and(eq(cqaConversations.workspaceId, workspaceId), eq(cqaConversations.id, id)))
     .get();
+}
+
+async function importConversations(db: Db, workspaceId: string, { group, records }: Dataset) {
+  const inserts = records.map((record) =>
+    db
+      .insert(cqaConversations)
+      .values({
+        id: crypto.randomUUID(),
+        workspaceId,
+        group,
+        sourceId: record.conversation_id,
+        channel: record.channel,
+        language: record.language,
+        transcript: record.transcript,
+        audioUrl: record.audio_url,
+      })
+      .onConflictDoNothing()
+      .returning({ id: cqaConversations.id }),
+  );
+  const [first, ...rest] = inserts;
+  const results = await db.batch([first, ...rest]);
+  const imported = results.reduce((count, rows) => count + rows.length, 0);
+  return { imported, skipped: records.length - imported };
 }
 
 function findChecklist(db: Db, workspaceId: string, id: string) {
@@ -147,31 +173,19 @@ export const cqaRoutes = new Hono<CqaEnv>()
     }),
     zValidator("json", datasetSchema, validationError),
     async (c) => {
-      const db = c.get("db");
-      const { group, records } = c.req.valid("json");
-      const workspaceId = c.get("workspace");
-      const inserts = records.map((record) =>
-        db
-          .insert(cqaConversations)
-          .values({
-            id: crypto.randomUUID(),
-            workspaceId,
-            group,
-            sourceId: record.conversation_id,
-            channel: record.channel,
-            language: record.language,
-            transcript: record.transcript,
-            audioUrl: record.audio_url,
-          })
-          .onConflictDoNothing()
-          .returning({ id: cqaConversations.id }),
+      const result = await importConversations(
+        c.get("db"),
+        c.get("workspace"),
+        c.req.valid("json"),
       );
-      const [first, ...rest] = inserts;
-      const results = await db.batch([first, ...rest]);
-      const imported = results.reduce((count, rows) => count + rows.length, 0);
-      return c.json({ imported, skipped: records.length - imported }, 201);
+      return c.json(result, 201);
     },
   )
+  .post("/conversations/import-dev", async (c) => {
+    const dataset = datasetFileSchema.parse(devDataset);
+    const result = await importConversations(c.get("db"), c.get("workspace"), dataset);
+    return c.json(result, 201);
+  })
   .get("/conversations/:id", async (c) => {
     const db = c.get("db");
     const conversation = await findConversation(db, c.get("workspace"), c.req.param("id"));
