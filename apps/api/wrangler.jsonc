@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mmptici",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-16",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api", "/api/*"],
+  },
+  "observability": {
+    "enabled": true,
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mmptici-db",
+      "database_id": "a5aa5b44-c39b-41af-bcb0-f4bbd5b451e5",
+      "migrations_dir": "../../packages/db/migrations",
+    },
+  ],
+  "vars": {
+    "BETTER_AUTH_URL": "https://mmptici.ieraasyl.workers.dev",
+  },
+  "ai": {
+    "binding": "AI",
+    "remote": true,
+  },
+  "workers_dev": true,
+  "preview_urls": false,
+}
