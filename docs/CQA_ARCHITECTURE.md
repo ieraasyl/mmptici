@@ -153,7 +153,7 @@ The 5 DEV calls have real recordings: the player page links to a signed MP3 we v
 | ML B, calibration and local mode | dauka | Labeling guide, labels, `tools/calibrate`, error analysis, wiring local mode to the existing Qwen endpoints |
 | ML C, STT | ML teammate 2 | `services/stt`: pipeline, WER on DEV calls, `/transcribe` endpoint on Modal |
 
-All four label dialogs in phase 2. ML B leads the labeling. Self-hosted Qwen already runs on Modal and on a local GPU, so local mode is wiring, not serving.
+All four label dialogs in phase 2. ML B leads the labeling. ML B's detailed plan: [ML_B_PLAN.md](ML_B_PLAN.md). Self-hosted Qwen already runs on Modal and on a local GPU, so local mode is wiring, not serving.
 
 ## Plan
 
