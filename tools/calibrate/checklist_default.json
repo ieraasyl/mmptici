@@ -40,13 +40,7 @@
       "guidance": "20: addressed every material question or gave the correct next step. 15: resolved the main issue and missed a minor detail. 10: addressed part of the request and left a material question unanswered. 5: gave general guidance without a usable next step. 0: no substantive answer or an incorrect key recommendation. Use N/A if the conversation ended before the customer stated the request.",
       "weight": 20,
       "kind": "numeric",
-      "scale": [
-        0,
-        5,
-        10,
-        15,
-        20
-      ],
+      "scale": [0, 5, 10, 15, 20],
       "allowNA": true
     },
     {
@@ -66,12 +60,7 @@
       "guidance": "10: clear, coherent replies and the customer was told about any obvious wait. 7: one noticeable lapse but the customer could still understand and continue. 4: the customer had to ask again because of wording or the order of replies. 0: disjointed or contradictory replies made the flow unclear. Judge communication separately from whether the request was resolved. Do not apply a three-minute first-response threshold.",
       "weight": 15,
       "kind": "numeric",
-      "scale": [
-        0,
-        4,
-        7,
-        10
-      ],
+      "scale": [0, 4, 7, 10],
       "allowNA": false
     },
     {

@@ -10,112 +10,64 @@
           "criterionId": "opening",
           "answer": "yes",
           "confidence": 0.8,
-          "votes": [
-            "yes",
-            "yes"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["yes", "yes"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "understanding",
           "answer": "yes",
           "confidence": 0.8,
-          "votes": [
-            "yes",
-            "yes"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["yes", "yes"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "verification",
           "answer": "yes",
           "confidence": 0.8,
-          "votes": [
-            "yes",
-            "yes"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["yes", "yes"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "guidance",
           "answer": "10",
           "confidence": 0.8,
-          "votes": [
-            "10",
-            "10"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["10", "10"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "empathy",
           "answer": "yes",
           "confidence": 0.8,
-          "votes": [
-            "yes",
-            "yes"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["yes", "yes"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "management",
           "answer": "7",
           "confidence": 0.8,
-          "votes": [
-            "7",
-            "7"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["7", "7"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "closing",
           "answer": "yes",
           "confidence": 0.8,
-          "votes": [
-            "yes",
-            "yes"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["yes", "yes"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "violations",
           "answer": "no",
           "confidence": 0.8,
-          "votes": [
-            "no",
-            "no"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["no", "no"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         }
       ],
@@ -148,10 +100,7 @@
               "model": "m2"
             }
           ],
-          "evidence": [
-            1,
-            2
-          ],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
@@ -168,10 +117,7 @@
               "model": "m2"
             }
           ],
-          "evidence": [
-            1,
-            2
-          ],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
@@ -188,10 +134,7 @@
               "model": "m2"
             }
           ],
-          "evidence": [
-            1,
-            2
-          ],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
@@ -208,10 +151,7 @@
               "model": "m2"
             }
           ],
-          "evidence": [
-            1,
-            2
-          ],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
@@ -228,10 +168,7 @@
               "model": "m2"
             }
           ],
-          "evidence": [
-            1,
-            2
-          ],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
@@ -248,10 +185,7 @@
               "model": "m2"
             }
           ],
-          "evidence": [
-            1,
-            2
-          ],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
@@ -268,10 +202,7 @@
               "model": "m2"
             }
           ],
-          "evidence": [
-            1,
-            2
-          ],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
@@ -288,10 +219,7 @@
               "model": "m2"
             }
           ],
-          "evidence": [
-            1,
-            2
-          ],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         }
       ],
@@ -314,112 +242,64 @@
           "criterionId": "opening",
           "answer": "no",
           "confidence": 0.8,
-          "votes": [
-            "no",
-            "no"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["no", "no"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "understanding",
           "answer": "yes",
           "confidence": 0.8,
-          "votes": [
-            "yes",
-            "yes"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["yes", "yes"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "verification",
           "answer": "no",
           "confidence": 0.8,
-          "votes": [
-            "no",
-            "no"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["no", "no"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "guidance",
           "answer": 5,
           "confidence": 0.8,
-          "votes": [
-            "5",
-            "5"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["5", "5"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "empathy",
           "answer": "yes",
           "confidence": 0.8,
-          "votes": [
-            "yes",
-            "yes"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["yes", "yes"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "management",
           "answer": 7,
           "confidence": 0.8,
-          "votes": [
-            "7",
-            "7"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["7", "7"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "closing",
           "answer": "yes",
           "confidence": 0.8,
-          "votes": [
-            "yes",
-            "yes"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["yes", "yes"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         },
         {
           "criterionId": "violations",
           "answer": "no",
           "confidence": 0.8,
-          "votes": [
-            "no",
-            "no"
-          ],
-          "evidence": [
-            1,
-            2
-          ],
+          "votes": ["no", "no"],
+          "evidence": [1, 2],
           "explanation": "fake explanation"
         }
       ],
