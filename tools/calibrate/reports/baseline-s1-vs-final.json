@@ -1,0 +1,288 @@
+{
+  "name": "baseline-s1-vs-final",
+  "createdAt": "2026-11-07T14:51:00+00:00",
+  "mode": "run",
+  "set": "p1-ru-003,p1-ru-007,p1-ru-022,p1-ru-025,p1-ru-028,p1-ru-029,p1-kz-003,p1-kz-008,p1-kz-011,p1-en-008,p1-en-009,p1-en-014",
+  "labelerA": "final",
+  "perCriterion": {
+    "opening": {
+      "n": 12,
+      "exact": 12,
+      "exactRate": 1,
+      "kappa": 1,
+      "confusion": {
+        "yes": {
+          "yes": 11
+        },
+        "no": {
+          "no": 1
+        }
+      }
+    },
+    "understanding": {
+      "n": 12,
+      "exact": 10,
+      "exactRate": 0.8333333333333334,
+      "kappa": 0.7073170731707318,
+      "naAgreement": 0.8333333333333334,
+      "confusion": {
+        "na": {
+          "na": 6,
+          "yes": 1,
+          "no": 1
+        },
+        "yes": {
+          "yes": 3
+        },
+        "no": {
+          "no": 1
+        }
+      }
+    },
+    "verification": {
+      "n": 12,
+      "exact": 12,
+      "exactRate": 1,
+      "kappa": 1,
+      "naAgreement": 1,
+      "confusion": {
+        "na": {
+          "na": 10
+        },
+        "no": {
+          "no": 1
+        },
+        "yes": {
+          "yes": 1
+        }
+      }
+    },
+    "guidance": {
+      "n": 12,
+      "exact": 9,
+      "exactRate": 0.75,
+      "kappa": 0.6288659793814433,
+      "qwk": 0.9230769230769231,
+      "naAgreement": 1,
+      "confusion": {
+        "0": {
+          "0": 1
+        },
+        "5": {
+          "10": 1
+        },
+        "10": {
+          "10": 1
+        },
+        "15": {
+          "10": 1,
+          "20": 1
+        },
+        "20": {
+          "20": 6
+        },
+        "na": {
+          "na": 1
+        }
+      }
+    },
+    "empathy": {
+      "n": 12,
+      "exact": 12,
+      "exactRate": 1,
+      "kappa": 1,
+      "confusion": {
+        "yes": {
+          "yes": 9
+        },
+        "no": {
+          "no": 3
+        }
+      }
+    },
+    "management": {
+      "n": 12,
+      "exact": 9,
+      "exactRate": 0.75,
+      "kappa": 0.6086956521739131,
+      "qwk": 0.6504854368932038,
+      "confusion": {
+        "0": {
+          "4": 1
+        },
+        "4": {
+          "7": 1,
+          "10": 1
+        },
+        "7": {
+          "7": 4
+        },
+        "10": {
+          "10": 5
+        }
+      }
+    },
+    "closing": {
+      "n": 12,
+      "exact": 10,
+      "exactRate": 0.8333333333333334,
+      "kappa": 0.7073170731707318,
+      "naAgreement": 0.9166666666666666,
+      "confusion": {
+        "no": {
+          "no": 6,
+          "na": 1,
+          "yes": 1
+        },
+        "na": {
+          "na": 3
+        },
+        "yes": {
+          "yes": 1
+        }
+      }
+    },
+    "violations": {
+      "n": 12,
+      "exact": 11,
+      "exactRate": 0.9166666666666666,
+      "kappa": 0.7499999999999999,
+      "confusion": {
+        "no": {
+          "no": 9,
+          "yes": 1
+        },
+        "yes": {
+          "yes": 2
+        }
+      }
+    }
+  },
+  "pooled": {
+    "n": 96,
+    "exact": 85,
+    "exactRate": 0.8854166666666666,
+    "ci": [0.8020833333333334, 0.9583333333333334]
+  },
+  "totals": {
+    "n": 12,
+    "mae": 4.558333333333334,
+    "maxError": 29.240000000000002,
+    "ci": [0.9566666666666664, 9.659166666666668],
+    "skipped": 0
+  },
+  "violations": {
+    "tp": 2,
+    "fp": 1,
+    "fn": 0,
+    "precision": 0.6666666666666666,
+    "recall": 1
+  },
+  "breakdown": {
+    "language": {
+      "RU": {
+        "n": 48,
+        "exactRate": 0.875
+      },
+      "KZ": {
+        "n": 24,
+        "exactRate": 0.9583333333333334
+      },
+      "EN": {
+        "n": 24,
+        "exactRate": 0.8333333333333334
+      }
+    },
+    "channel": {
+      "agent chat": {
+        "n": 96,
+        "exactRate": 0.8854166666666666
+      },
+      "voice call": {
+        "n": 0,
+        "exactRate": null
+      }
+    }
+  },
+  "runHealth": {
+    "dialogs": 59,
+    "failedSamples": 0,
+    "meanLatencyMs": 4146.745762711865,
+    "costUsd": 0.37156414,
+    "responsesWithoutUsage": 0,
+    "missingFromRun": []
+  },
+  "mismatches": [
+    {
+      "conversationId": "p1-en-008",
+      "criterionId": "guidance",
+      "a": 15,
+      "b": 20
+    },
+    {
+      "conversationId": "p1-en-014",
+      "criterionId": "understanding",
+      "a": "na",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-en-014",
+      "criterionId": "guidance",
+      "a": 15,
+      "b": 10
+    },
+    {
+      "conversationId": "p1-en-014",
+      "criterionId": "violations",
+      "a": "no",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-kz-008",
+      "criterionId": "closing",
+      "a": "no",
+      "b": "na"
+    },
+    {
+      "conversationId": "p1-ru-007",
+      "criterionId": "guidance",
+      "a": 5,
+      "b": 10
+    },
+    {
+      "conversationId": "p1-ru-007",
+      "criterionId": "management",
+      "a": 4,
+      "b": 10
+    },
+    {
+      "conversationId": "p1-ru-007",
+      "criterionId": "closing",
+      "a": "no",
+      "b": "yes"
+    },
+    {
+      "conversationId": "p1-ru-022",
+      "criterionId": "understanding",
+      "a": "na",
+      "b": "no"
+    },
+    {
+      "conversationId": "p1-ru-022",
+      "criterionId": "management",
+      "a": 4,
+      "b": 7
+    },
+    {
+      "conversationId": "p1-ru-029",
+      "criterionId": "management",
+      "a": 0,
+      "b": 4
+    }
+  ],
+  "run": {
+    "promptVersion": "p-ec2a86d6",
+    "provider": "hf-router",
+    "model": "Qwen/Qwen3.8-27B:cerebras"
+  }
+}

@@ -1,0 +1,239 @@
+{
+  "name": "ai-labeler-agreement",
+  "createdAt": "2026-11-07T14:51:11+00:00",
+  "mode": "pairs",
+  "set": "p1-ru-003,p1-ru-007,p1-ru-022,p1-ru-025,p1-ru-028,p1-ru-029,p1-kz-003,p1-kz-008,p1-kz-011,p1-en-008,p1-en-009,p1-en-014,p1-ru-012,p1-kz-012,p1-kz-013,p1-en-001,p1-en-004",
+  "labelerA": "ai-fable",
+  "perCriterion": {
+    "opening": {
+      "n": 17,
+      "exact": 17,
+      "exactRate": 1,
+      "kappa": 1,
+      "confusion": {
+        "yes": {
+          "yes": 16
+        },
+        "no": {
+          "no": 1
+        }
+      }
+    },
+    "understanding": {
+      "n": 17,
+      "exact": 16,
+      "exactRate": 0.9411764705882353,
+      "kappa": 0.8776978417266187,
+      "naAgreement": 0.9411764705882353,
+      "confusion": {
+        "na": {
+          "na": 11
+        },
+        "yes": {
+          "yes": 4
+        },
+        "no": {
+          "no": 1,
+          "na": 1
+        }
+      }
+    },
+    "verification": {
+      "n": 17,
+      "exact": 17,
+      "exactRate": 1,
+      "kappa": 1,
+      "naAgreement": 1,
+      "confusion": {
+        "na": {
+          "na": 15
+        },
+        "no": {
+          "no": 1
+        },
+        "yes": {
+          "yes": 1
+        }
+      }
+    },
+    "guidance": {
+      "n": 17,
+      "exact": 16,
+      "exactRate": 0.9411764705882353,
+      "kappa": 0.8982035928143712,
+      "qwk": 0.9745222929936306,
+      "naAgreement": 1,
+      "confusion": {
+        "0": {
+          "0": 1
+        },
+        "10": {
+          "10": 2
+        },
+        "15": {
+          "15": 2,
+          "20": 1
+        },
+        "20": {
+          "20": 10
+        },
+        "na": {
+          "na": 1
+        }
+      }
+    },
+    "empathy": {
+      "n": 17,
+      "exact": 17,
+      "exactRate": 1,
+      "kappa": 1,
+      "confusion": {
+        "yes": {
+          "yes": 14
+        },
+        "no": {
+          "no": 3
+        }
+      }
+    },
+    "management": {
+      "n": 17,
+      "exact": 13,
+      "exactRate": 0.7647058823529411,
+      "kappa": 0.5776397515527949,
+      "qwk": 0.6685236768802227,
+      "confusion": {
+        "4": {
+          "4": 2
+        },
+        "7": {
+          "4": 1,
+          "7": 2
+        },
+        "10": {
+          "4": 1,
+          "7": 2,
+          "10": 9
+        }
+      }
+    },
+    "closing": {
+      "n": 17,
+      "exact": 17,
+      "exactRate": 1,
+      "kappa": 1,
+      "naAgreement": 1,
+      "confusion": {
+        "no": {
+          "no": 11
+        },
+        "na": {
+          "na": 4
+        },
+        "yes": {
+          "yes": 2
+        }
+      }
+    },
+    "violations": {
+      "n": 17,
+      "exact": 17,
+      "exactRate": 1,
+      "kappa": 1,
+      "confusion": {
+        "no": {
+          "no": 14
+        },
+        "yes": {
+          "yes": 3
+        }
+      }
+    }
+  },
+  "pooled": {
+    "n": 136,
+    "exact": 130,
+    "exactRate": 0.9558823529411765,
+    "ci": [0.9191176470588235, 0.9852941176470589]
+  },
+  "totals": {
+    "n": 17,
+    "mae": 1.869411764705882,
+    "maxError": 13.840000000000003,
+    "ci": [0.4076470588235298, 3.9952941176470596],
+    "skipped": 0
+  },
+  "violations": {
+    "tp": 3,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1
+  },
+  "breakdown": {
+    "language": {
+      "RU": {
+        "n": 56,
+        "exactRate": 0.9464285714285714
+      },
+      "KZ": {
+        "n": 40,
+        "exactRate": 0.95
+      },
+      "EN": {
+        "n": 40,
+        "exactRate": 0.975
+      }
+    },
+    "channel": {
+      "agent chat": {
+        "n": 136,
+        "exactRate": 0.9558823529411765
+      },
+      "voice call": {
+        "n": 0,
+        "exactRate": null
+      }
+    }
+  },
+  "runHealth": null,
+  "mismatches": [
+    {
+      "conversationId": "p1-en-008",
+      "criterionId": "management",
+      "a": 10,
+      "b": 7
+    },
+    {
+      "conversationId": "p1-kz-013",
+      "criterionId": "guidance",
+      "a": 15,
+      "b": 20
+    },
+    {
+      "conversationId": "p1-kz-013",
+      "criterionId": "management",
+      "a": 10,
+      "b": 7
+    },
+    {
+      "conversationId": "p1-ru-003",
+      "criterionId": "management",
+      "a": 7,
+      "b": 4
+    },
+    {
+      "conversationId": "p1-ru-007",
+      "criterionId": "management",
+      "a": 10,
+      "b": 4
+    },
+    {
+      "conversationId": "p1-ru-022",
+      "criterionId": "understanding",
+      "a": "no",
+      "b": "na"
+    }
+  ],
+  "labelerB": "ai-opus"
+}
