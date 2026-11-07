@@ -26,7 +26,14 @@ import {
 import { ApiRequestError, request } from "@/lib/request";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
 
@@ -178,7 +185,10 @@ function DecisionForm({ appeal, onDecided }: { appeal: Appeal; onDecided?: () =>
   const client = useQueryClient();
   const [answer, setAnswer] = useState<Answer>(appeal.original.answer);
   const [reason, setReason] = useState("");
-  const options = answerOptions(appeal.criterion);
+  const options = answerOptions(appeal.criterion).map((value) => ({
+    value,
+    label: `${answerLabel(value)}${value === appeal.original.answer ? " (confirm original)" : ""}`,
+  }));
   const save = useMutation({
     mutationFn: async () => {
       try {
@@ -228,22 +238,27 @@ function DecisionForm({ appeal, onDecided }: { appeal: Appeal; onDecided?: () =>
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor={`answer-${appeal.id}`}>Final rating</FieldLabel>
-          <NativeSelect
-            id={`answer-${appeal.id}`}
+          <Select<Answer>
+            items={options}
             disabled={save.isPending}
-            value={String(answer)}
-            onChange={(event) => {
-              const selected = options.find((option) => String(option) === event.target.value);
-              if (selected !== undefined) setAnswer(selected);
+            value={answer}
+            onValueChange={(value) => {
+              if (value !== null) setAnswer(value);
             }}
           >
-            {options.map((option) => (
-              <NativeSelectOption key={option} value={String(option)}>
-                {answerLabel(option)}
-                {option === appeal.original.answer ? " (confirm original)" : ""}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
+            <SelectTrigger id={`answer-${appeal.id}`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {options.map(({ value, label }) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </Field>
         <Field>
           <FieldLabel htmlFor={`reason-${appeal.id}`}>Reason for decision</FieldLabel>

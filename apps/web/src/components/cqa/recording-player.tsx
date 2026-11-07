@@ -4,7 +4,7 @@ import { PauseIcon, PlayIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Spinner } from "@/components/ui/spinner";
-import { toast } from "@/lib/toast";
+import { toast } from "@/components/ui/toast";
 
 function timeLabel(seconds: number) {
   const whole = Math.max(0, Math.floor(seconds));

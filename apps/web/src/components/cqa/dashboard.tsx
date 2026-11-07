@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { Bar, BarChart, Pie, PieChart, Rectangle, XAxis, YAxis } from "recharts";
+import { cn } from "cn";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   AlertCircleIcon,
@@ -9,6 +11,7 @@ import {
   JusticeScale01Icon,
   RefreshIcon,
   Task01Icon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import {
   channelName,
@@ -28,8 +31,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ChartContainer, type ChartConfig } from "@/components/ui/chart";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -38,14 +49,51 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Toggle } from "@/components/ui/toggle";
 import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
+
+const scoreRanges = [
+  { label: "Below 25", min: 0, max: 25 },
+  { label: "25 to <50", min: 25, max: 50 },
+  { label: "50 to <75", min: 50, max: 75 },
+  { label: "75 to 100", min: 75, max: 101 },
+];
+
+const scoreChartConfig = {
+  count: { label: "Conversations", color: "var(--primary)" },
+} satisfies ChartConfig;
+
+const coverageChartConfig = {
+  evaluated: { label: "Evaluated", color: "var(--primary)" },
+  awaiting: { label: "Awaiting evaluation", color: "var(--muted)" },
+} satisfies ChartConfig;
 
 export function Dashboard() {
   const query = useQuery(dashboardQuery);
+  const refreshInProgress = useRef(false);
+  const [showRefreshing, setShowRefreshing] = useState(false);
+  const [refreshConfirmedAt, setRefreshConfirmedAt] = useState<number | null>(null);
   const [group, setGroup] = useState("");
   const [language, setLanguage] = useState("");
   const [reviewOnly, setReviewOnly] = useState(false);
+
+  useEffect(() => {
+    if (refreshConfirmedAt === null) return;
+    const timer = setTimeout(() => setRefreshConfirmedAt(null), 1_200);
+    return () => clearTimeout(timer);
+  }, [refreshConfirmedAt]);
+
   const all = query.data?.conversations ?? [];
+  const datasets = [
+    { value: "", label: "All datasets" },
+    ...[...new Set(all.map((item) => item.group))]
+      .sort()
+      .map((name) => ({ value: name, label: name })),
+  ];
+  const languages = [
+    { value: "", label: "All languages" },
+    ...Object.entries(languageName).map(([value, label]) => ({ value, label })),
+  ];
   const conversations = all.filter(
     (item) => (!group || item.group === group) && (!language || item.language === language),
   );
@@ -61,6 +109,14 @@ export function Dashboard() {
   const coverage = conversations.length
     ? Math.round((evaluated.length / conversations.length) * 100)
     : 0;
+  const scoreDistribution = scoreRanges.map(({ label, min, max }) => ({
+    label,
+    count: scores.filter((score) => score >= min && score < max).length,
+  }));
+  const coverageSegments = [
+    { value: evaluated.length, fill: "var(--color-evaluated)" },
+    { value: Math.max(conversations.length, 1) - evaluated.length, fill: "var(--color-awaiting)" },
+  ];
   const ordered = evaluated.toSorted(
     (a, b) =>
       (b.evaluation?.createdAt ?? "").localeCompare(a.evaluation?.createdAt ?? "") ||
@@ -97,6 +153,23 @@ export function Dashboard() {
     },
   ];
 
+  async function refresh() {
+    if (refreshInProgress.current) return;
+    refreshInProgress.current = true;
+    setRefreshConfirmedAt(null);
+    const timer = setTimeout(() => setShowRefreshing(true), 250);
+    try {
+      const result = await query.refetch({ cancelRefetch: false });
+      if (result.isSuccess && result.dataUpdatedAt !== query.dataUpdatedAt) {
+        setRefreshConfirmedAt(result.dataUpdatedAt);
+      }
+    } finally {
+      clearTimeout(timer);
+      refreshInProgress.current = false;
+      setShowRefreshing(false);
+    }
+  }
+
   return (
     <>
       <PageHeading
@@ -105,12 +178,34 @@ export function Dashboard() {
           <>
             <Button
               variant="outline"
-              disabled={query.isFetching}
-              onClick={() => void query.refetch()}
+              disabled={query.isPending || showRefreshing}
+              aria-busy={query.isFetching}
+              onClick={() => void refresh()}
             >
-              <HugeiconsIcon icon={RefreshIcon} data-icon="inline-start" aria-hidden="true" />
-              {query.isFetching ? "Refreshing…" : "Refresh"}
+              <span className="relative shrink-0" aria-hidden="true">
+                <HugeiconsIcon
+                  icon={RefreshIcon}
+                  data-icon="inline-start"
+                  className={cn(
+                    "block transition-opacity duration-150 motion-reduce:transition-none",
+                    refreshConfirmedAt !== null && "opacity-0",
+                    showRefreshing && "motion-safe:animate-spin",
+                  )}
+                />
+                <HugeiconsIcon
+                  icon={Tick02Icon}
+                  data-icon="inline-start"
+                  className={cn(
+                    "absolute inset-0 transition-opacity duration-150 motion-reduce:transition-none",
+                    refreshConfirmedAt === null && "opacity-0",
+                  )}
+                />
+              </span>
+              Refresh
             </Button>
+            <span className="sr-only" role="status">
+              {refreshConfirmedAt !== null && "Dashboard refreshed"}
+            </span>
             <Button nativeButton={false} render={<Link to="/" />}>
               View conversations
               <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" aria-hidden="true" />
@@ -121,7 +216,7 @@ export function Dashboard() {
         Latest evaluation per conversation. Scores include reviewer decisions.
       </PageHeading>
 
-      {query.error && <ErrorMessage error={query.error} retry={() => void query.refetch()} />}
+      {query.error && <ErrorMessage error={query.error} retry={() => void refresh()} />}
       {query.isPending && <Loading>Loading dashboard…</Loading>}
       {query.data && all.length === 0 && (
         <Card>
@@ -140,35 +235,45 @@ export function Dashboard() {
           <div className="flex flex-wrap items-end gap-3">
             <Field className="w-full sm:w-56">
               <FieldLabel htmlFor="dashboard-group">Dataset</FieldLabel>
-              <NativeSelect
-                id="dashboard-group"
-                className="w-full"
+              <Select
+                items={datasets}
                 value={group}
-                onChange={(event) => setGroup(event.target.value)}
+                onValueChange={(value) => setGroup(value ?? "")}
               >
-                <NativeSelectOption value="">All datasets</NativeSelectOption>
-                {[...new Set(all.map((item) => item.group))].sort().map((name) => (
-                  <NativeSelectOption key={name} value={name}>
-                    {name}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+                <SelectTrigger id="dashboard-group" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {datasets.map(({ value, label }) => (
+                      <SelectItem key={value} value={value}>
+                        <span className="wrap-anywhere whitespace-normal">{label}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </Field>
             <Field className="w-full sm:w-48">
               <FieldLabel htmlFor="dashboard-language">Language</FieldLabel>
-              <NativeSelect
-                id="dashboard-language"
-                className="w-full"
+              <Select
+                items={languages}
                 value={language}
-                onChange={(event) => setLanguage(event.target.value)}
+                onValueChange={(value) => setLanguage(value ?? "")}
               >
-                <NativeSelectOption value="">All languages</NativeSelectOption>
-                {Object.entries(languageName).map(([code, name]) => (
-                  <NativeSelectOption key={code} value={code}>
-                    {name}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+                <SelectTrigger id="dashboard-language" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {languages.map(({ value, label }) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </Field>
             {(group || language) && (
               <Button
@@ -219,38 +324,59 @@ export function Dashboard() {
                       : "Run an evaluation to see the score distribution."}
                   </p>
                 ) : (
-                  <div className="space-y-5">
-                    {[
-                      { label: "Below 25", min: 0, max: 25 },
-                      { label: "25 to <50", min: 25, max: 50 },
-                      { label: "50 to <75", min: 50, max: 75 },
-                      { label: "75 to 100", min: 75, max: 101 },
-                    ].map(({ label, min, max }) => {
-                      const count = scores.filter((score) => score >= min && score < max).length;
-                      return (
-                        <div key={label} className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>{label}</span>
-                            <span className="font-medium tabular-nums">{count}</span>
-                          </div>
-                          <svg
-                            viewBox="0 0 100 2"
-                            className="h-2 w-full"
-                            preserveAspectRatio="none"
-                            aria-hidden="true"
-                          >
-                            <rect width="100" height="2" rx="1" className="fill-muted" />
-                            <rect
-                              width={(count / scores.length) * 100}
-                              height="2"
-                              rx="1"
-                              className="fill-primary"
-                            />
-                          </svg>
+                  <>
+                    <dl className="sr-only">
+                      {scoreDistribution.map(({ label, count }) => (
+                        <div key={label}>
+                          <dt>{label}</dt>
+                          <dd>{count}</dd>
                         </div>
-                      );
-                    })}
-                  </div>
+                      ))}
+                    </dl>
+                    <ChartContainer
+                      config={scoreChartConfig}
+                      className="h-44 w-full aspect-auto"
+                      aria-hidden="true"
+                    >
+                      <BarChart
+                        accessibilityLayer={false}
+                        data={scoreDistribution}
+                        layout="vertical"
+                        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                      >
+                        <XAxis type="number" domain={[0, scores.length]} hide />
+                        <YAxis
+                          type="category"
+                          dataKey="label"
+                          width={76}
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                        />
+                        <YAxis
+                          yAxisId="counts"
+                          orientation="right"
+                          type="category"
+                          dataKey="count"
+                          width={38}
+                          interval={0}
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tick={{ className: "font-medium tabular-nums" }}
+                        />
+                        {/* Keep the track visible for empty score ranges. */}
+                        <Bar
+                          dataKey="count"
+                          barSize={8}
+                          shape={<Rectangle radius={4} />}
+                          background={{ fill: "var(--muted)", radius: 4 }}
+                          fill="var(--color-count)"
+                          isAnimationActive={false}
+                        />
+                      </BarChart>
+                    </ChartContainer>
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -264,27 +390,25 @@ export function Dashboard() {
               <CardContent>
                 <div className="flex flex-wrap items-center gap-6">
                   <div className="relative shrink-0">
-                    <svg viewBox="0 0 120 120" className="size-36" aria-hidden="true">
-                      <circle
-                        cx="60"
-                        cy="60"
-                        r="50"
-                        fill="none"
-                        strokeWidth="9"
-                        className="stroke-muted"
-                      />
-                      <circle
-                        cx="60"
-                        cy="60"
-                        r="50"
-                        fill="none"
-                        strokeWidth="9"
-                        pathLength="100"
-                        strokeDasharray={`${coverage} 100`}
-                        transform="rotate(-90 60 60)"
-                        className="stroke-primary"
-                      />
-                    </svg>
+                    <ChartContainer
+                      config={coverageChartConfig}
+                      className="size-36 aspect-square"
+                      initialDimension={{ width: 144, height: 144 }}
+                      aria-hidden="true"
+                    >
+                      <PieChart accessibilityLayer={false}>
+                        <Pie
+                          data={coverageSegments}
+                          dataKey="value"
+                          innerRadius={55}
+                          outerRadius={65}
+                          startAngle={90}
+                          endAngle={-270}
+                          stroke="none"
+                          isAnimationActive={false}
+                        />
+                      </PieChart>
+                    </ChartContainer>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <span className="text-2xl font-semibold tabular-nums">{coverage}%</span>
                       <span className="text-xs text-muted-foreground">evaluated</span>
@@ -324,14 +448,14 @@ export function Dashboard() {
                   : "Up to eight conversations, ordered by their latest evaluation"}
               </CardDescription>
               <CardAction>
-                <Button
+                <Toggle
                   size="sm"
-                  variant={reviewOnly ? "secondary" : "outline"}
-                  aria-pressed={reviewOnly}
-                  onClick={() => setReviewOnly((value) => !value)}
+                  variant="outline"
+                  pressed={reviewOnly}
+                  onPressedChange={setReviewOnly}
                 >
                   Needs review ({attention.length})
-                </Button>
+                </Toggle>
               </CardAction>
             </CardHeader>
             <CardContent>

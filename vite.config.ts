@@ -77,6 +77,31 @@ export default defineConfig({
           "shadcn/require-static-classes": "off",
         },
       },
+      {
+        files: ["apps/web/src/components/ui/toast.tsx"],
+        plugins: ["react"],
+        rules: {
+          // The shadcn registry exports the toast manager and its helpers with the components.
+          "react/only-export-components": [
+            "warn",
+            { allowExportNames: ["createToastManager", "toast", "useToastManager"] },
+          ],
+        },
+      },
+      {
+        files: ["apps/web/src/components/ui/toggle.tsx"],
+        plugins: ["react"],
+        rules: {
+          "react/only-export-components": ["warn", { allowExportNames: ["toggleVariants"] }],
+        },
+      },
+      {
+        files: ["apps/web/src/components/ui/chart.tsx"],
+        rules: {
+          // The registry chart emits theme variables and swatch colors from its configuration.
+          "shadcn/no-inline-styles": "off",
+        },
+      },
     ],
   },
 });

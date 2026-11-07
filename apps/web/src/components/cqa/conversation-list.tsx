@@ -16,13 +16,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  ArrowLeft01Icon,
-  ArrowRight01Icon,
   ArrowUpRight01Icon,
   Chat01Icon,
   Database01Icon,
@@ -43,8 +41,24 @@ import {
 import { request } from "@/lib/request";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { toast } from "@/lib/toast";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "@/components/ui/toast";
 import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
 
 const PAGE_SIZE = 12;
@@ -58,7 +72,7 @@ export function ConversationList() {
   const [language, setLanguage] = useState("");
   const [channel, setChannel] = useState("");
   const [group, setGroup] = useState("");
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
 
   const importDataset = useMutation({
     onMutate: () => {
@@ -92,18 +106,24 @@ export function ConversationList() {
       return request((init) => cqa.conversations.$post({ json: parsed.data }, { init }));
     },
     onSuccess: ({ imported, skipped }) => {
+      const count = imported || skipped;
+      const conversations = count === 1 ? "conversation" : "conversations";
       toast.add({
         id: "conversation-import",
-        title: `Imported ${imported} conversations.`,
-        description: skipped > 0 ? `Skipped ${skipped} already in this dataset.` : undefined,
-        type: "success",
+        title:
+          imported > 0
+            ? `Imported ${count} ${conversations}.`
+            : `${count} ${conversations} already imported.`,
+        description:
+          imported > 0 && skipped > 0 ? `Skipped ${skipped} already in this dataset.` : undefined,
+        type: imported > 0 ? "success" : "info",
         timeout: 5_000,
       });
       setSearch("");
       setLanguage("");
       setChannel("");
       setGroup("");
-      setPage(0);
+      setPage(1);
       void queryClient.invalidateQueries(conversationsQuery);
       void queryClient.invalidateQueries(dashboardQuery);
     },
@@ -120,6 +140,29 @@ export function ConversationList() {
 
   const conversations = list.data?.conversations ?? [];
   const groups = [...new Set(conversations.map((item) => item.group))];
+  const filters = [
+    {
+      label: "Language",
+      all: "All languages",
+      value: language,
+      onChange: setLanguage,
+      options: Object.entries(languageName),
+    },
+    {
+      label: "Channel",
+      all: "All channels",
+      value: channel,
+      onChange: setChannel,
+      options: Object.entries(channelName),
+    },
+    {
+      label: "Dataset",
+      all: "All datasets",
+      value: group,
+      onChange: setGroup,
+      options: groups.map((name) => [name, name] as const),
+    },
+  ];
   const term = search.trim().toLowerCase();
   const filtered = conversations.filter(
     (item) =>
@@ -129,8 +172,14 @@ export function ConversationList() {
       (!group || item.group === group),
   );
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pageCount - 1);
-  const visible = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+  const currentPage = Math.min(page, pageCount);
+  const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const pageNumbers =
+    pageCount <= 7
+      ? Array.from({ length: pageCount }, (_, index) => index + 1)
+      : [...new Set([1, currentPage - 1, currentPage, currentPage + 1, pageCount])].filter(
+          (number) => number >= 1 && number <= pageCount,
+        );
   const stats = [
     { label: "Conversations", value: list.data && conversations.length, icon: Chat01Icon },
     {
@@ -237,55 +286,42 @@ export function ConversationList() {
                   value={search}
                   onChange={(event) => {
                     setSearch(event.target.value);
-                    setPage(0);
+                    setPage(1);
                   }}
                 />
               </div>
-              <NativeSelect
-                aria-label="Language"
-                value={language}
-                onChange={(event) => {
-                  setLanguage(event.target.value);
-                  setPage(0);
-                }}
-              >
-                <NativeSelectOption value="">All languages</NativeSelectOption>
-                {Object.entries(languageName).map(([key, label]) => (
-                  <NativeSelectOption key={key} value={key}>
-                    {label}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-              <NativeSelect
-                aria-label="Channel"
-                value={channel}
-                onChange={(event) => {
-                  setChannel(event.target.value);
-                  setPage(0);
-                }}
-              >
-                <NativeSelectOption value="">All channels</NativeSelectOption>
-                {Object.entries(channelName).map(([key, label]) => (
-                  <NativeSelectOption key={key} value={key}>
-                    {label}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-              {groups.length > 1 && (
-                <NativeSelect
-                  aria-label="Dataset"
-                  value={group}
-                  onChange={(event) => {
-                    setGroup(event.target.value);
-                    setPage(0);
-                  }}
-                >
-                  <NativeSelectOption value="">All datasets</NativeSelectOption>
-                  {groups.map((item) => (
-                    <NativeSelectOption key={item}>{item}</NativeSelectOption>
-                  ))}
-                </NativeSelect>
-              )}
+              {filters
+                .filter(({ options }) => options.length > 1)
+                .map((filter) => {
+                  const items = [
+                    { value: "", label: filter.all },
+                    ...filter.options.map(([value, label]) => ({ value, label })),
+                  ];
+                  return (
+                    <Select
+                      key={filter.label}
+                      items={items}
+                      value={filter.value}
+                      onValueChange={(value) => {
+                        filter.onChange(value ?? "");
+                        setPage(1);
+                      }}
+                    >
+                      <SelectTrigger aria-label={filter.label} className="w-36 max-w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {items.map(({ value, label }) => (
+                            <SelectItem key={value} value={value}>
+                              <span className="wrap-anywhere whitespace-normal">{label}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  );
+                })}
             </div>
           </CardContent>
         )}
@@ -362,31 +398,48 @@ export function ConversationList() {
             </CardContent>
             {pageCount > 1 && (
               <CardFooter>
-                <div className="flex w-full items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">
-                    Page {currentPage + 1} of {pageCount}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={currentPage === 0}
-                      aria-label="Previous page"
-                      onClick={() => setPage(currentPage - 1)}
-                    >
-                      <HugeiconsIcon icon={ArrowLeft01Icon} aria-hidden="true" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={currentPage + 1 >= pageCount}
-                      aria-label="Next page"
-                      onClick={() => setPage(currentPage + 1)}
-                    >
-                      <HugeiconsIcon icon={ArrowRight01Icon} aria-hidden="true" />
-                    </Button>
-                  </div>
-                </div>
+                <p className="sr-only" role="status">
+                  Page {currentPage} of {pageCount}
+                </p>
+                <Pagination aria-label="Conversation pages">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        nativeButton
+                        disabled={currentPage === 1}
+                        onClick={() => setPage(currentPage - 1)}
+                      />
+                    </PaginationItem>
+                    {pageNumbers.map((number, index) => (
+                      <Fragment key={number}>
+                        {number - (pageNumbers[index - 1] ?? number) > 1 && (
+                          <PaginationItem className="hidden sm:list-item">
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        )}
+                        <PaginationItem
+                          className={number === currentPage ? undefined : "hidden sm:list-item"}
+                        >
+                          <PaginationLink
+                            nativeButton
+                            isActive={number === currentPage}
+                            aria-label={`Page ${number}`}
+                            onClick={() => setPage(number)}
+                          >
+                            {number}
+                          </PaginationLink>
+                        </PaginationItem>
+                      </Fragment>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        nativeButton
+                        disabled={currentPage === pageCount}
+                        onClick={() => setPage(currentPage + 1)}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </CardFooter>
             )}
           </>

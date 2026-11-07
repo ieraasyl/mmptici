@@ -37,7 +37,14 @@ import {
 import { ApiRequestError, request } from "@/lib/request";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
 import { EvaluationResult } from "./evaluation-result";
 import { RecordingPlayer } from "./recording-player";
@@ -98,8 +105,22 @@ function Detail({
   const pendingRun = useRef<{ id: string; checklistId: string } | null>(null);
   const queryClient = useQueryClient();
   const checklists = useQuery(checklistsQuery);
-  const checklistId = selectedChecklist || checklists.data?.defaultId || "";
+  const checklistItems =
+    checklists.data?.checklists.map(({ id, name, revision }) => ({
+      value: id,
+      label: `${name} · v${revision}`,
+    })) ?? [];
+  const checklistId = checklistItems.some(({ value }) => value === selectedChecklist)
+    ? selectedChecklist
+    : (checklists.data?.defaultId ?? "");
   const evaluationId = selectedEvaluation || history[0]?.id || "";
+  const historyItems = history.map(({ id, checklistName, revision, createdAt }) => ({
+    value: id,
+    label: `${checklistName} · v${revision} · ${dateLabel(createdAt)}`,
+  }));
+  if (evaluationId && !historyItems.some(({ value }) => value === evaluationId)) {
+    historyItems.unshift({ value: evaluationId, label: "Selected evaluation" });
+  }
   const result = useQuery({ ...evaluationQuery(evaluationId), enabled: !!evaluationId });
   const evaluate = useMutation({
     mutationFn: async (input: { id: string; checklistId: string }) => {
@@ -177,24 +198,29 @@ function Detail({
             <div className="flex flex-wrap items-end justify-between gap-4">
               <Field className="w-full sm:w-72">
                 <FieldLabel htmlFor="run-checklist">Checklist for this evaluation</FieldLabel>
-                <NativeSelect
-                  className="w-full"
-                  id="run-checklist"
-                  value={checklistId}
+                <Select
+                  items={checklistItems}
+                  value={checklistId || null}
                   disabled={!checklists.data || evaluate.isPending}
-                  onChange={(event) => setSelectedChecklist(event.target.value)}
+                  onValueChange={(value) => setSelectedChecklist(value ?? "")}
                 >
-                  {!checklists.data && (
-                    <NativeSelectOption value="">
-                      {checklists.isPending ? "Loading checklists…" : "No checklist loaded"}
-                    </NativeSelectOption>
-                  )}
-                  {checklists.data?.checklists.map((item) => (
-                    <NativeSelectOption key={item.id} value={item.id}>
-                      {item.name} · v{item.revision}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                  <SelectTrigger id="run-checklist" className="w-full">
+                    <SelectValue
+                      placeholder={
+                        checklists.isPending ? "Loading checklists…" : "No checklist loaded"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {checklistItems.map(({ value, label }) => (
+                        <SelectItem key={value} value={value}>
+                          <span className="wrap-anywhere whitespace-normal">{label}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </Field>
               <Button size="lg" disabled={!checklistId || evaluate.isPending} onClick={run}>
                 <HugeiconsIcon icon={SparklesIcon} data-icon="inline-start" aria-hidden="true" />
@@ -239,21 +265,26 @@ function Detail({
           {history.length > 0 && (
             <Field>
               <FieldLabel htmlFor="evaluation-history">Evaluation history</FieldLabel>
-              <NativeSelect
-                className="w-full"
-                id="evaluation-history"
+              <Select
+                items={historyItems}
                 value={evaluationId}
-                onChange={(event) => onSelectEvaluation(event.target.value)}
+                onValueChange={(value) => {
+                  if (value !== null) onSelectEvaluation(value);
+                }}
               >
-                {!history.some(({ id }) => id === evaluationId) && (
-                  <NativeSelectOption value={evaluationId}>Selected evaluation</NativeSelectOption>
-                )}
-                {history.map((item) => (
-                  <NativeSelectOption key={item.id} value={item.id}>
-                    {item.checklistName} · v{item.revision} · {dateLabel(item.createdAt)}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+                <SelectTrigger id="evaluation-history" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {historyItems.map(({ value, label }) => (
+                      <SelectItem key={value} value={value}>
+                        <span className="wrap-anywhere whitespace-normal">{label}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </Field>
           )}
           {!evaluationId && (

@@ -23,6 +23,8 @@
     "hono": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-is": "catalog:",
+    "recharts": "catalog:",
     "shadcn": "catalog:",
     "tw-animate-css": "catalog:"
   },

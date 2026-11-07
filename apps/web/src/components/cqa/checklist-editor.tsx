@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/accordion";
 import {
   AlertDialog,
+  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -45,11 +46,24 @@ import { ApiRequestError, request } from "@/lib/request";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ErrorMessage, Loading, PageHeading, StatusMessage } from "./ui";
 
 type CriterionFields = Omit<Criterion, "scale" | "weight"> & { scale: string; weight: string };
+
+const criterionKinds = [
+  { value: "binary", label: "Yes / No" },
+  { value: "numeric", label: "Numeric scale" },
+  { value: "flag", label: "Serious violation flag" },
+];
 
 function blankCriterion(): CriterionFields {
   return {
@@ -409,14 +423,14 @@ function ChecklistForm({
                     <AlertDialogCancel type="button" disabled={remove.isPending}>
                       Cancel
                     </AlertDialogCancel>
-                    <Button
+                    <AlertDialogAction
                       type="button"
                       variant="destructive"
                       disabled={remove.isPending}
                       onClick={() => remove.mutate(checklist)}
                     >
                       {remove.isPending ? "Deleting…" : "Delete checklist"}
-                    </Button>
+                    </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -490,15 +504,27 @@ function CriterionEditor({
             </Field>
             <Field>
               <FieldLabel htmlFor={`kind-${id}`}>Answer type</FieldLabel>
-              <NativeSelect
-                id={`kind-${id}`}
+              <Select<Criterion["kind"]>
+                items={criterionKinds}
+                disabled={disabled}
                 value={item.kind}
-                onChange={(event) => onChange({ kind: event.target.value as Criterion["kind"] })}
+                onValueChange={(kind) => {
+                  if (kind !== null) onChange({ kind });
+                }}
               >
-                <NativeSelectOption value="binary">Yes / No</NativeSelectOption>
-                <NativeSelectOption value="numeric">Numeric scale</NativeSelectOption>
-                <NativeSelectOption value="flag">Serious violation flag</NativeSelectOption>
-              </NativeSelect>
+                <SelectTrigger id={`kind-${id}`}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {criterionKinds.map(({ value, label }) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </Field>
             {item.kind !== "flag" && (
               <Field>
