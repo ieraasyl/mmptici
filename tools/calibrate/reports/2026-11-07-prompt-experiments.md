@@ -38,6 +38,17 @@ Round 2 leaves the criterion guidance alone and changes what the model writes be
 
 **`analysis` is rejected.** It lost 7 cells, mostly in guidance and management.
 
+## Round 3: a Russian system prompt
+
+Research brief recommendation 9 suggests Russian instructions. This variant translates the system prompt of the `checks` version into Russian. It keeps the JSON keys, the answer values, and the criterion guidance unchanged. The report is `prompt-russian-vs-manual.md`.
+
+| Version |       All cells | Decided cells |
+| ------- | --------------: | ------------: |
+| checks  | 420/454 (92.5%) |         39/62 |
+| russian | 409/454 (90.1%) |         29/62 |
+
+**`russian` is rejected.** Against `checks` it fixes 7 cells and breaks 18. It is worse in every language: Russian chats 203 against 206 of 225, Kazakh 95 against 96 of 100, English 88 against 94 of 100, and calls 23 against 24 of 29. It also flags `p1-kz-015` as a violation, a case the sheet marks No. The frozen `checks` prompt stays in English.
+
 ## Recommendations
 
 - Use the `checks` prompt from round 2 for the control run.
