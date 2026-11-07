@@ -39,3 +39,6 @@ dist-ssr
 !.vscode/settings.json
 !.vscode/extensions.json
 .vitest/
+
+# Hackathon data and evaluation runs
+data/
