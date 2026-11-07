@@ -18,7 +18,8 @@ import { cqaAppeals, cqaChecklists, cqaConversations, cqaEvaluations } from "@ap
 import { defaultChecklist } from "../checklist.ts";
 import type { Bindings } from "../env.ts";
 import { validationError } from "../errors.ts";
-import { evaluateConversation, evaluationModel, scoreEvaluation } from "../evaluation.ts";
+import { scoreEvaluation } from "../evaluation.ts";
+import { createHfClient, evaluateConversation, EvaluationError } from "../inference/index.ts";
 
 type Db = ReturnType<typeof createDb>;
 type CqaEnv = { Bindings: Bindings; Variables: { workspace: string; db: Db } };
@@ -269,34 +270,43 @@ export const cqaRoutes = new Hono<CqaEnv>()
         }
         return c.json({ id }, 200);
       }
-      if (!c.env.AI)
+      const llm =
+        c.env.LLM ??
+        (c.env.HF_TOKEN
+          ? createHfClient({ apiKey: c.env.HF_TOKEN, model: c.env.CQA_MODEL })
+          : undefined);
+      if (!llm)
         return c.json(
           {
             error: {
               code: "AI_UNAVAILABLE",
-              message:
-                "Workers AI is unavailable. Connect a Cloudflare account to run an evaluation.",
+              message: "The evaluation model is not configured. Set HF_TOKEN to run an evaluation.",
             },
           },
           503,
         );
 
-      let ratings;
+      let run;
       try {
-        ratings = await evaluateConversation(c.env.AI, conversation, checklist);
+        run = await evaluateConversation(llm, conversation, checklist);
       } catch (cause) {
-        console.warn("CQA evaluation failed", cause instanceof Error ? cause.name : "UnknownError");
+        if (cause instanceof EvaluationError) {
+          console.warn("CQA evaluation rejected", cause.attempts.at(-1)?.errors);
+        } else {
+          console.warn("CQA evaluation failed", cause instanceof Error ? cause.message : cause);
+        }
         return c.json(
           {
             error: {
               code: "EVALUATION_FAILED",
               message:
-                "Workers AI could not return a complete evaluation. Try again and check the Workers AI connection if the problem persists.",
+                "The model could not return a complete evaluation. Try again, and check HF_TOKEN if the problem persists.",
             },
           },
           502,
         );
       }
+      const { ratings } = run;
       const saved = await db
         .insert(cqaEvaluations)
         .values({
@@ -304,7 +314,7 @@ export const cqaRoutes = new Hono<CqaEnv>()
           conversationId: conversation.id,
           checklist,
           ratings,
-          model: evaluationModel,
+          model: run.model,
           createdAt: new Date(),
         })
         .onConflictDoNothing()

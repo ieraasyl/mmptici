@@ -190,17 +190,11 @@ function Detail({
                 <AccordionTrigger>Model and estimated cost</AccordionTrigger>
                 <AccordionContent>
                   <p>
-                    Cloudflare Workers AI · Google Gemma 4 26B A4B IT. A run makes one model call
-                    and costs about $0.0009 at 5,000 input and 1,200 output tokens before the free
-                    allowance. Actual cost varies with transcript length.{" "}
-                    <a
-                      className="text-primary underline"
-                      href="https://developers.cloudflare.com/workers-ai/platform/pricing/"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Cloudflare pricing
-                    </a>
+                    Qwen3.8 27B on Cerebras through the Hugging Face router. A run makes one model
+                    call, plus one retry if the answer fails validation. At $0.99 per million input
+                    and $1.49 per million output tokens, a typical chat costs about $0.007 (about
+                    1,700 input and 3,800 output tokens, most of them reasoning). Actual cost varies
+                    with transcript length.
                   </p>
                 </AccordionContent>
               </AccordionItem>

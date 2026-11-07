@@ -1,0 +1,4 @@
+# Hugging Face access token with the "Inference Providers" permission (https://huggingface.co/settings/tokens)
+HF_TOKEN=hf_replace-me
+# Optional: override the evaluation model, e.g. openai/gpt-oss-120b:cerebras
+# CQA_MODEL=Qwen/Qwen3.8-27B:cerebras

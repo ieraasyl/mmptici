@@ -8,10 +8,12 @@ export default {
       return app.fetch(request, env);
     }
 
-    const AI = {
-      async run(_model: string, input: { messages: { content: string }[] }) {
-        const { criteria } = JSON.parse(input.messages[1].content) as {
-          criteria: { criterionId: string; title: string; allowedAnswers: (string | number)[] }[];
+    // Stands in for the Hugging Face model: answers from the criteria in the prompt.
+    const LLM: NonNullable<Bindings["LLM"]> = {
+      model: "test-model",
+      async complete(messages) {
+        const { criteria } = JSON.parse(messages[1].content) as {
+          criteria: { criterionId: string; title: string; allowedAnswers: string[] }[];
         };
         const ratings = Object.fromEntries(
           criteria.map(({ criterionId, title, allowedAnswers }) => [
@@ -30,10 +32,10 @@ export default {
             },
           ]),
         );
-        return { choices: [{ message: { content: JSON.stringify({ ratings }) } }] };
+        return { content: JSON.stringify({ ratings }), model: "test-model" };
       },
-    } as NonNullable<Bindings["AI"]>;
+    };
 
-    return app.fetch(request, { ...env, AI });
+    return app.fetch(request, { ...env, LLM });
   },
 };
