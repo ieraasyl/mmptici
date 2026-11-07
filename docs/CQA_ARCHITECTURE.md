@@ -8,18 +8,16 @@ Accuracy against Ground Truth on 10 unseen transcripts is the main criterion. Ev
 
 ## Division of labor
 
-| Area | Owner | Lives in |
-| --- | --- | --- |
-| Scoring engine (pure functions, tested) | AI core | `packages/scoring` |
-| LLM evaluator: prompt, output schema, voting, verifier | AI core | `packages/evaluator` |
-| Calibration CLI: run DEV, compare with hand labels, report per-criterion agreement | AI core | `tools/calibrate` |
-| Shared Zod contracts for checklist, evaluation, appeal | AI core defines, both use | `packages/contracts` |
-| D1 schema and migrations | App | `packages/db` |
-| Hono routes, dataset import, audio resolver | App | `apps/api` |
-| React UI: list, card, checklist editor, appeal, review | App | `apps/web` |
-| Deploy, secrets, README run steps | App | root |
+Four members: one fullstack, three ML. Roles below use those labels.
 
-The boundary is the two JSON contracts below. The evaluator is a function `evaluate(conversation, checklist, options) -> EvaluationResult` with no database or framework imports, so it runs inside the Worker and inside the calibration CLI unchanged.
+| Role | Owns | Lives in |
+| --- | --- | --- |
+| Fullstack | D1 schema, Hono routes, dataset import, React UI, deploy, secrets, README run steps | `apps/api`, `apps/web`, `packages/db`, root |
+| ML 1, scoring and contracts | Zod contracts, default checklist JSON, scoring engine with tests, `applyDecisions` | `packages/contracts`, `packages/scoring` |
+| ML 2, evaluator | Prompt, LLM client, output parsing and retry, voting, verifier | `packages/evaluator` |
+| ML 3, calibration | Calibration CLI, labeling sheet and guide, agreement reports, error analysis that feeds ML 2 | `tools/calibrate`, `data/labels.csv` |
+
+All three ML members label DEV dialogs in step 8. The boundary between ML and Fullstack is the two JSON contracts below. The evaluator is a function `evaluate(conversation, checklist, options) -> EvaluationResult` with no database or framework imports, so it runs inside the Worker and inside the calibration CLI unchanged.
 
 ## Model
 
@@ -188,11 +186,11 @@ Test cases to encode: the example from the brief, all N/A on one section, a dial
 
 - `run --group DEV` evaluates every conversation and writes `data/eval/<run-id>.json`.
 - `compare --labels data/labels.csv` prints per-criterion agreement, mean absolute error on total, and the list of mismatches with the model's explanation next to the human answer.
-- `data/labels.csv` has one row per conversation and criterion. The three ML members label about 20 DEV dialogs mixed across RU, KZ, EN, and two calls. Start after the baseline exists.
+- `data/labels.csv` has one row per conversation and criterion. The three ML members label about 20 DEV dialogs mixed across RU, KZ, EN, and two calls, about 7 each, after the baseline exists.
 
 Prompt changes are judged only by this report. The DEV JSON lives in `data/raw/dev.json` locally, ignored by git.
 
-## App side, for the teammate
+## App side, for Fullstack
 
 **Tables.** `conversations` (id, group_id, channel, language, transcript JSON, audio_url, imported_at), `checklists` (id, name, version, config JSON, created_at, is_active), `evaluations` (id, conversation_id, checklist_id, checklist_version, result JSON, status, created_at), `appeals` (id, evaluation_id, criterion_id, comment, status, created_at), `decisions` (id, appeal_id, new_answer, new_scale_value, reason, reviewer, created_at). Final results are computed on read with `applyDecisions`, not stored twice.
 
@@ -204,19 +202,28 @@ Batch "evaluate all" is driven from the browser, one request per conversation wi
 
 ## Plan
 
-| Step | What | Owner | Done when |
-| --- | --- | --- | --- |
-| 1 | Contracts and default checklist JSON | AI core | Zod schemas compile, default config validates |
-| 2 | Scoring engine with tests | AI core | Tests pass on the cases above |
-| 3 | Evaluator baseline and calibration CLI, run on all 65 | AI core | 65 result files, eyeballed |
-| 4 | Drop login, tables, import route, list and card screens | App | Any DEV dialog opens with transcript |
-| 5 | Evaluate route and scorecard with evidence jump | App | Demo part 2 works |
-| 6 | Appeals and decisions with recompute | App | Demo part 3 works |
-| 7 | Checklist editor with versioning | App | Demo part 4 works |
-| 8 | Hand labels, agreement report, prompt iteration | AI core plus labelers | Per-criterion agreement stable |
-| 9 | Voting and confidence, verifier | AI core | Confidence visible on the card |
-| 10 | README, cost statement, demo dry run | Both | Five-minute run-through under time |
-| 11 | Bonus features | Both | Whatever is left |
+Four tracks run in parallel from the start. Steps in a row depend on the steps above them in the same column only.
+
+| Order | Fullstack | ML 1, scoring | ML 2, evaluator | ML 3, calibration |
+| --- | --- | --- | --- | --- |
+| 1 | Drop login, add tables, import route | Contracts and default checklist JSON | Prompt draft and LLM client against the contracts | Labeling sheet, labeling guide, pick 20 DEV dialogs |
+| 2 | List and card screens on a stubbed EvaluationResult | Scoring engine with tests | Baseline single pass, parsing and retry | Calibration CLI: run DEV, write results |
+| 3 | Evaluate route calling `evaluate()`, scorecard with evidence jump | `applyDecisions` with tests, then help Fullstack wire scoring into the API | First full run on 65 dialogs, fix failures | Compare command: agreement per criterion, mismatch list |
+| 4 | Appeals and reviewer decisions with recompute | Label | Label | Label |
+| 5 | Checklist editor with versioning | Prompt iteration on the mismatch list with ML 2 | Prompt iteration | Re-run and report after every prompt change |
+| 6 | Polish, README, cost shown on the card | Bonus feature | Voting with confidence, then verifier | Control-set rehearsal: replace a criterion through the UI and re-run |
+| 7 | Demo dry run | Demo dry run | Demo dry run | Demo dry run |
+
+Done when, per milestone:
+
+| Milestone | Proof |
+| --- | --- |
+| Scoring correct | Unit tests pass on the cases listed in the scoring section |
+| Evaluator baseline | All 65 DEV dialogs produce a valid EvaluationResult |
+| Demo parts 1 and 2 | A dialog opens, evaluates, and evidence links scroll to the right turn |
+| Demo part 3 | An appeal changes a criterion and the total recomputes |
+| Demo part 4 | A replaced criterion is saved in the UI and applied to all dialogs |
+| Accuracy | Per-criterion agreement on the 20 labeled dialogs stops improving between prompt versions |
 
 Bonus candidates, ranked by judge value: second-opinion model toggle, operator and language analytics page, per-criterion confidence and needs-review queue, export of evaluations, prompt and response viewer on the card for the process-validity check.
 
