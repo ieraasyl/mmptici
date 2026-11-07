@@ -308,7 +308,7 @@ describe("review finalize", () => {
     expect(rows.understanding).toMatchObject({ evidence_turns: "2", note: "human: rev: " });
   });
 
-  test("an override that matches the labelers keeps their evidence", () => {
+  test("a decision equal to the agreed answer is confirmed, not overridden", () => {
     const s = setup();
     const r = s.finalize({
       // Added by hand to a sheet made without --include.
@@ -318,10 +318,12 @@ describe("review finalize", () => {
       [`d1:${CRITS[3]}`]: { decision: "na" },
     });
     expect(r.code).toBe(0);
+    expect(r.text()).toContain("decided: 3, pending: 0, confirmed: 1");
+    expect(r.text()).not.toContain("overridden");
     expect(r.final().opening).toMatchObject({
       answer: "yes",
       evidence_turns: "1;2",
-      note: "human override: rev: checked",
+      note: "human confirmed: rev: checked",
     });
   });
 

@@ -300,6 +300,7 @@ export function finalize(
   let agreed = 0;
   let decided = 0;
   let overridden = 0;
+  let kept = 0;
   for (const e of classify(rows, aName, bName, convs, o.checklist)) {
     const d = decisions.get(key(e.conv, e.cid));
     if (e.agreed && !d?.decision) {
@@ -317,8 +318,10 @@ export function finalize(
       continue;
     }
     const support = [e.a, e.b].filter((r) => r && r.answer === answer);
-    const label = e.agreed ? "human override" : "human";
-    if (e.agreed) overridden++;
+    const confirmed = e.agreed && answer === e.a!.answer;
+    const label = confirmed ? "human confirmed" : e.agreed ? "human override" : "human";
+    if (confirmed) kept++;
+    else if (e.agreed) overridden++;
     else decided++;
     out.push([
       e.conv,
@@ -340,6 +343,7 @@ export function finalize(
   io.out(o.out);
   io.out(
     `agreed: ${agreed}, decided: ${decided}, pending: ${pending.length}` +
+      (kept ? `, confirmed: ${kept}` : "") +
       (overridden ? `, overridden: ${overridden}` : ""),
   );
   return 0;
