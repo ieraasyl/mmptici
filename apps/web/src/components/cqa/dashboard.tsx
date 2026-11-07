@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 import { cn } from "cn";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { RefreshIcon, Tick02Icon } from "@hugeicons/core-free-icons";
@@ -15,7 +14,6 @@ import {
 } from "@/lib/dashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, type ChartConfig } from "@/components/ui/chart";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Select,
@@ -29,16 +27,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState, ErrorMessage, PageHeading } from "./ui";
 import { DashboardCriteria } from "./dashboard-criteria";
 import { DashboardResultsTable } from "./dashboard-results-table";
+import { ScoreDistribution } from "./score-distribution";
 
-const scoreRanges = [
-  { label: "Below 25%", min: 0, max: 25 },
-  { label: "25 to <50%", min: 25, max: 50 },
-  { label: "50 to <75%", min: 50, max: 75 },
-  { label: "75 to 100%", min: 75, max: 101 },
-];
-const scoreChartConfig = {
-  count: { label: "Conversations", color: "var(--primary)" },
-} satisfies ChartConfig;
 type Option = { value: string; label: string };
 const reviewOptions: Option[] = [
   { value: "", label: "All evaluated conversations" },
@@ -97,10 +87,6 @@ export function Dashboard() {
   const checkedForViolations = evaluated.filter((item) =>
     item.evaluation?.criteria.some(({ kind, answer }) => kind === "flag" && answer !== "na"),
   ).length;
-  const scoreDistribution = scoreRanges.map(({ label, min, max }) => ({
-    label,
-    count: scores.filter((score) => score >= min && score < max).length,
-  }));
   const ordered = sortDashboardConversations(evaluated, "review");
   const { breakdown, results } = dashboardView(ordered, {
     criterion,
@@ -183,15 +169,15 @@ export function Dashboard() {
       {query.error && <ErrorMessage error={query.error} retry={() => void refresh()} />}
       {query.isPending && (
         <div className="space-y-6" role="status" aria-label="Loading dashboard">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Skeleton className="h-8" />
             <Skeleton className="h-8" />
-            <Skeleton className="h-8" />
+            <Skeleton className="h-8 max-sm:col-span-2" />
           </div>
-          <div className="grid gap-6 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6">
             <Skeleton className="h-20" />
             <Skeleton className="h-20" />
-            <Skeleton className="h-20" />
+            <Skeleton className="h-20 max-sm:col-span-2" />
           </div>
           <Skeleton className="h-80" />
         </div>
@@ -239,20 +225,24 @@ export function Dashboard() {
                 clearResultFilters();
               }}
             />
-            <FilterSelect
-              id="dashboard-checklist"
-              label="Checklist"
-              className="col-span-2 sm:w-80"
-              items={checklists}
-              value={checklist}
-              onChange={(value) => {
-                setChecklist(value);
-                clearResultFilters();
-              }}
-            />
+            <div className="col-span-2 flex min-w-0 items-end gap-3 sm:contents">
+              <FilterSelect
+                id="dashboard-checklist"
+                label="Checklist"
+                className="max-sm:flex-1 sm:w-80"
+                items={checklists}
+                value={checklist}
+                onChange={(value) => {
+                  setChecklist(value);
+                  clearResultFilters();
+                }}
+              />
+              <div className="sm:ml-auto">{refreshButton}</div>
+            </div>
             {filtered && (
               <Button
                 variant="ghost"
+                className="max-sm:col-span-2 max-sm:justify-self-start"
                 onClick={() => {
                   setGroup("");
                   setLanguage("");
@@ -263,20 +253,19 @@ export function Dashboard() {
                 Clear filters
               </Button>
             )}
-            <div className="col-start-2 justify-self-end sm:ml-auto">{refreshButton}</div>
           </div>
 
-          <section aria-label="Quality overview" className="border-y py-5">
-            <dl className="grid gap-5 sm:grid-cols-3">
+          <section aria-label="Quality overview" className="border-y py-4 sm:py-5">
+            <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5">
               <div className="min-w-0 space-y-1">
                 <dt className="text-sm text-muted-foreground">Average score</dt>
-                <dd className="text-3xl font-semibold tracking-tight tabular-nums">
+                <dd className="text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">
                   {scoreLabel(average)}
                 </dd>
               </div>
               <div className="min-w-0 space-y-1">
                 <dt className="text-sm text-muted-foreground">Serious violations</dt>
-                <dd className="text-3xl font-semibold tracking-tight tabular-nums">
+                <dd className="text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">
                   {checkedForViolations ? (
                     <>
                       {violations}{" "}
@@ -289,9 +278,9 @@ export function Dashboard() {
                   )}
                 </dd>
               </div>
-              <div className="min-w-0 space-y-1">
+              <div className="min-w-0 space-y-1 max-sm:col-span-2 max-sm:border-t max-sm:pt-3">
                 <dt className="text-sm text-muted-foreground">Most common checklist issue</dt>
-                <dd className="text-3xl font-semibold tracking-tight wrap-anywhere">
+                <dd className="text-lg font-semibold tracking-tight wrap-anywhere sm:text-3xl">
                   {mostCommonIssue?.title ??
                     (breakdown.some((row) => row.applied > 0) ? "No points lost" : "N/A")}
                 </dd>
@@ -321,78 +310,9 @@ export function Dashboard() {
             </Card>
           ) : (
             <>
-              <div className="grid items-start gap-6 xl:grid-cols-12">
+              <div className="grid gap-6 xl:grid-cols-8">
                 <DashboardCriteria rows={breakdown} mixedChecklists={mixedChecklists} />
-                <section
-                  className="min-w-0 space-y-3 xl:col-span-4"
-                  aria-labelledby="distribution-heading"
-                >
-                  <div className="space-y-1">
-                    <h2 id="distribution-heading" className="text-base font-medium">
-                      Score distribution
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                      {scores.length} scored conversations
-                    </p>
-                  </div>
-                  {scores.length ? (
-                    <>
-                      <dl className="sr-only">
-                        {scoreDistribution.map(({ label, count }) => (
-                          <div key={label}>
-                            <dt>{label}</dt>
-                            <dd>{count}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                      <ChartContainer
-                        config={scoreChartConfig}
-                        className="h-44 w-full aspect-auto"
-                        aria-hidden="true"
-                      >
-                        <BarChart
-                          accessibilityLayer={false}
-                          data={scoreDistribution}
-                          margin={{ top: 20, right: 4, bottom: 0, left: 0 }}
-                        >
-                          <CartesianGrid vertical={false} />
-                          <XAxis
-                            dataKey="label"
-                            interval={0}
-                            tickLine={false}
-                            axisLine={{ stroke: "var(--border)" }}
-                            tickMargin={8}
-                          />
-                          <YAxis
-                            allowDecimals={false}
-                            tickCount={4}
-                            width={32}
-                            tickLine={false}
-                            axisLine={false}
-                          />
-                          <Bar
-                            dataKey="count"
-                            maxBarSize={44}
-                            radius={[4, 4, 0, 0]}
-                            fill="var(--color-count)"
-                            isAnimationActive={false}
-                          >
-                            <LabelList
-                              dataKey="count"
-                              position="top"
-                              offset={5}
-                              className="fill-foreground font-medium tabular-nums"
-                            />
-                          </Bar>
-                        </BarChart>
-                      </ChartContainer>
-                    </>
-                  ) : (
-                    <p className="py-8 text-sm text-muted-foreground">
-                      No numeric scores. N/A totals are excluded.
-                    </p>
-                  )}
-                </section>
+                <ScoreDistribution scores={scores} />
               </div>
 
               <Card id="dashboard-results" className="scroll-m-5">

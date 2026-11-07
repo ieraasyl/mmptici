@@ -45,9 +45,7 @@ export function AppealQueue() {
 
   return (
     <>
-      <PageHeading title="Appeals" hideTitle>
-        Review disputed ratings against the cited transcript turns.
-      </PageHeading>
+      <PageHeading title="Appeals" hideTitle />
       {query.error && (
         <ErrorMessage
           error={query.error}

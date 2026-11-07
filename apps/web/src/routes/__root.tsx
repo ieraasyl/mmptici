@@ -38,7 +38,7 @@ function WorkspaceLayout() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto w-full max-w-7xl min-w-0 space-y-6 p-4 sm:p-6 lg:p-8"
+        className="mx-auto w-full max-w-7xl min-w-0 space-y-6 p-4 max-sm:pb-(--workspace-nav-clearance) sm:p-6 lg:p-8"
       >
         <Outlet />
       </main>
@@ -60,9 +60,9 @@ function WorkspaceHeader() {
   });
 
   return (
-    <header className="flex justify-center px-2 pt-4 sm:pt-6">
-      <NavigationMenu aria-label="Workspace">
-        <NavigationMenuList className="flex-wrap justify-center">
+    <header className="flex justify-center px-2 max-sm:pointer-events-none max-sm:fixed max-sm:inset-x-0 max-sm:bottom-(--workspace-nav-bottom) max-sm:z-20 sm:pt-6">
+      <NavigationMenu aria-label="Workspace" className="pointer-events-auto">
+        <NavigationMenuList className="justify-center sm:flex-wrap">
           {workspaceDestinations.map(({ to, label, icon }, index) => {
             const showPending = to === "/appeals" && pendingAppealCount > 0;
             return (
@@ -75,12 +75,12 @@ function WorkspaceHeader() {
                 >
                   <HugeiconsIcon
                     icon={icon}
-                    className="hidden size-4 md:block"
+                    className="size-5 sm:size-4 sm:max-md:hidden"
                     aria-hidden="true"
                   />
-                  {label}
+                  <span className="max-sm:sr-only">{label}</span>
                   {showPending && (
-                    <Badge variant="secondary" aria-hidden="true">
+                    <Badge variant="secondary" aria-hidden="true" className="hidden sm:inline-flex">
                       {pendingAppealCount}
                     </Badge>
                   )}

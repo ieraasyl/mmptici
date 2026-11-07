@@ -39,7 +39,7 @@ function NavigationMenuLink({
       active={active}
       data-slot="navigation-menu-link"
       className={cn(
-        "relative isolate flex h-9 items-center gap-2 rounded-full px-1 text-xs font-medium whitespace-nowrap text-muted-foreground transition-colors outline-none not-data-active:hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-1 focus-visible:outline-ring data-active:text-foreground sm:px-3 sm:text-sm",
+        "relative isolate flex size-12 items-center justify-center gap-2 rounded-full text-xs font-medium whitespace-nowrap text-muted-foreground transition-colors outline-none not-data-active:hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-1 focus-visible:outline-ring data-active:text-foreground sm:h-9 sm:w-auto sm:px-3 sm:text-sm",
         className,
       )}
       {...props}

@@ -86,7 +86,7 @@ export function DashboardCriteria({
   });
 
   return (
-    <section className="min-w-0 space-y-3 xl:col-span-8" aria-labelledby="criterion-heading">
+    <section className="min-w-0 space-y-3 xl:col-span-5" aria-labelledby="criterion-heading">
       <div className="space-y-1">
         <h2 id="criterion-heading" className="text-base font-medium">
           Checklist performance

@@ -237,7 +237,7 @@ export function ConversationList() {
               selectable
               unselectedStatus={`${evaluatedCount} of ${conversations.length} evaluated`}
               toolbarControls={
-                <>
+                <div className="grid w-full grid-cols-2 items-end gap-2 max-sm:*:odd:last:col-span-2 sm:contents">
                   {filters
                     .filter(({ options }) => options.length > 1)
                     .map((filter) => {
@@ -246,7 +246,7 @@ export function ConversationList() {
                         ...filter.options.map(([value, label]) => ({ value, label })),
                       ];
                       return (
-                        <Field key={filter.id} className="w-auto min-w-0 max-w-full">
+                        <Field key={filter.id} className="min-w-0 max-w-full sm:w-auto">
                           <FieldLabel htmlFor={filter.id}>{filter.label}</FieldLabel>
                           <Select
                             items={items}
@@ -276,18 +276,18 @@ export function ConversationList() {
                       );
                     })}
                   {checklist}
-                </>
+                </div>
               }
               toolbarActions={
-                <>
+                <div className="flex w-full flex-wrap items-center gap-2 max-sm:*:grow sm:contents">
                   {hasFilters && (
-                    <p className="py-1.5 text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground max-sm:basis-full sm:py-1.5">
                       {filtered.length} {filtered.length === 1 ? "match" : "matches"}
                     </p>
                   )}
                   {importMenu}
                   {actions}
-                </>
+                </div>
               }
             />
           )}

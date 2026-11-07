@@ -52,6 +52,8 @@
 }
 
 :root {
+  --workspace-nav-bottom: calc(--spacing(3) + env(safe-area-inset-bottom));
+  --workspace-nav-clearance: calc(var(--workspace-nav-bottom) + --spacing(18));
   --motion-fast: 150ms;
   --motion-panel: 220ms;
   --motion-ease: cubic-bezier(0.2, 0, 0, 1);
