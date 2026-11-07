@@ -2,10 +2,12 @@
 
 For the four labelers of the 20 DEV dialogs. Budget: about an hour each.
 
+The organizers' control set is 10 chats, and they compare answers per criterion. This round labels the 17 chats in `tools/calibrate/labels/sets.json` (`tuning` and `heldout`), not the 3 calls `p4-ru-001`, `p4-ru-002` and `p4-ru-003`. Section 5 on calls is kept for reference only.
+
 ## 1. Purpose and rules
 
 - Your labels measure the LLM evaluator. They stand in for the organizers' Ground Truth.
-- Label what the transcript shows. Do not guess what happened off screen.
+- Label what the transcript shows. Do not guess what happened off screen. When the transcript does not show something, do not assume it happened. Organizers expect logical, evidence-based ratings without invented details, and they accept that experts disagree (Q&A message 2981).
 - Judge only the operator. Bot and system turns are context: they tell you what the client already said and what was already checked, but they never earn or lose credit.
 - Six dialogs are held out: `p1-ru-012`, `p1-kz-012`, `p1-kz-013`, `p1-en-001`, `p1-en-004`, `p4-ru-002`. Never discuss them with ML A, who tunes the prompt.
 - The decision rules below are provisional. Each depends on an open organizer question. If an answer changes a rule, we relabel that criterion.
@@ -55,7 +57,10 @@ Turn numbers in the examples are 1-based, as printed. All examples come from the
 
 Answers: `yes`, `no`.
 
-Rule (provisional, organizer question 4): look only at the operator's first message. Yes needs a greeting in the client's language plus a name. "[Имя скрыто]" counts as a name. The bot's greeting never counts.
+Rule (provisional, organizer question 4): look only at the operator's first message. Yes needs a greeting in the client's language plus a name. The bot's greeting never counts.
+
+- Masked names: organizers gave no ruling, so "[Имя скрыто]" still counts as a name.
+- Voice calls: organizers allow N/A when the recording starts after the greeting (Q&A message 2978). The app's checklist does not yet allow this. Calls are not labeled in this round.
 
 Example: `p4-ru-003`, **yes**, turns `13`. The operator says «Здравствуйте, Фридом брокер меня зовут [Имя скрыто], чем могу помочь?»: a Russian greeting plus a masked name, which counts. The IVR greeting in turn 3 is irrelevant.
 
@@ -67,9 +72,9 @@ Contrast: `p1-kz-008` turn 10, «Сәлем. Қай сайтқа кірдіңі�
 
 Answers: `yes`, `no`, `na`.
 
-Rule (provisional, organizer question 5):
+Rule (confirmed by organizers, Q&A message 2814):
 
-- N/A when the client's messages before the operator's first reply, including those to the bot, already contain enough to answer.
+- N/A when the client's messages before the operator's first reply, including those to the bot, already contain enough to answer. Details given to the bot count.
 - Yes when the operator used the known details and asked only for what was missing.
 - No when the operator answered without a needed clarification, or asked again for something already stated.
 
@@ -89,6 +94,7 @@ Rule (provisional, organizer question 6):
 - Required for account-specific data or a protected action.
 - Yes only when a check is visibly confirmed before the disclosure, either by a system event or by an explicit operator statement.
 - A confirmed bot check before the handoff counts.
+- Team ruling: organizers left the overlap between failed identity verification and a confidentiality violation to teams. If the operator discloses the client's own account status or restriction to an unverified client, `verification` is No. That alone is not a gross violation, so see `violations` (4.8) for when it is also flagged.
 
 Example: `p1-en-014`, **no**, turns `11;12;13`. The operator discloses a withdrawal restriction on the account in turn 11 with no check. The client objects in turn 12, and the operator answers "We can skip that" in turn 13.
 
@@ -161,7 +167,7 @@ The tuning set has no clean chat example of a partial score (7 or 4). Use the sc
 
 Answers: `yes`, `no`, `na`.
 
-Rule (provisional, organizer question 10, the least certain rule in this guide):
+Rule (organizer question 10, the least certain rule in this guide; the organizers' answer points back to the checklist wording, so we keep the strict reading):
 
 - Yes needs a goodbye plus either a summary or an offer of further help.
 - A goodbye alone is No.
@@ -181,6 +187,8 @@ Answers: `yes`, `no`.
 
 Rule: as worded. The offer alone is enough. Note that `yes` here is the bad outcome.
 
+Team ruling on confidentiality (organizers left the overlap with failed verification to teams): disclosing the client's own account status or restriction to an unverified client makes `verification` No but is not by itself a gross violation. Flag `violations` Yes for confidentiality only when the operator discloses another person's data, or sensitive personal or financial details such as balances, document numbers or contact data, to someone whose identity was not verified.
+
 Example: `p1-ru-022`, **yes**, turns `10;12`. The operator asks the client to send money to his card so he can invest it (turn 10), and confirms in turn 12 that this bypasses the company. The client refuses in turn 13. That does not matter.
 
 Second example: `p1-ru-029`, **yes**, turns `10`. «Вы вообще читать умеете?» mocks the client, and we count that as an insult. Mild rudeness without a personal jab only costs `empathy`; if you are unsure which side a remark falls on, explain in `note`.
@@ -192,7 +200,12 @@ Second example: `p1-ru-029`, **yes**, turns `10`. «Вы вообще читат
 - For `p4` calls, judge the operator turns addressed to the client.
 - Masked data such as "[Персональные данные скрыты]" or "[Данные идентификации скрыты]" means the data was given. It does not mean it was missing.
 
-## 6. Disagreements
+## 6. AI labelers
+
+- An AI labeler must not read `tools/calibrate/runs/`, `tools/calibrate/reports/`, the other labeler's CSV, or any model output. It reads only this guide, `CQA_HACKATHON.md`, the checklist, and the dialogs.
+- Each AI labeler marks uncertain rows by starting the note with `UNSURE:`.
+
+## 7. Disagreements
 
 1. Each labeler sends their filled CSV to ML B. ML B runs the agreement report with all files: `python3 tools/calibrate/compare.py --pairs --name <name> --labels a.csv b.csv c.csv d.csv`. Rows with an empty answer are skipped with a warning, so finish every row before you send.
 2. Disagreements are settled in a short call with the labelers involved.
