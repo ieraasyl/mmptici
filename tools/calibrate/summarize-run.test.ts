@@ -81,6 +81,17 @@ describe("summarize-run", () => {
     expect(summarize(RUN).cost).not.toHaveProperty("responsesWithoutUsage");
   });
 
+  test("dialogs without latency or cost are skipped and counted", () => {
+    const run = structuredClone(RUN);
+    run.dialogs[0].run = { calls: 1 } as never;
+    const s = summarize(run);
+    expect(s.cost.totalUsd).toBeCloseTo(0.02);
+    expect(s.cost.meanLatencyS).toBeCloseTo(2.33);
+    expect(s.cost.dialogsWithoutCost).toBe(1);
+    expect(s.cost.dialogsWithoutLatency).toBe(1);
+    expect(JSON.stringify(s.cost)).not.toContain("null");
+  });
+
   test("reports hold no text fields", () => {
     const dir = tempDir();
     writeFileSync(`${dir}/run.json`, JSON.stringify(RUN));

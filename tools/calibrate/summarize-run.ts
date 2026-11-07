@@ -75,13 +75,14 @@ export function collect(run: RunFile) {
     .map((d) => d.total as number | null | undefined)
     .filter((t): t is number => t !== null && t !== undefined);
   const metas = dialogs.filter((d) => d.run).map((d) => d.run!);
-  const latencies = metas.map((m) => m.latencyMs as number);
+  const latencies = metas.map((m) => m.latencyMs).filter((x): x is number => typeof x === "number");
+  const costs = metas.map((m) => m.costUsd).filter((x): x is number => typeof x === "number");
   const withoutUsage = metas.reduce((s, m) => s + (m.responsesWithoutUsage ?? 0), 0);
   // Python printed int sums and means without ".0"; keep that in the Markdown.
   const allInts = (xs: number[]) => xs.every((x) => Number.isInteger(x));
   const format = {
     mean: allInts(totals) ? pyStr : pyFloat,
-    cost: allInts(metas.map((m) => m.costUsd)) ? pyStr : pyFloat,
+    cost: allInts(costs) ? pyStr : pyFloat,
   };
   return {
     format,
@@ -110,8 +111,12 @@ export function collect(run: RunFile) {
       max: totals.length ? Math.max(...totals) : null,
     },
     cost: {
-      totalUsd: round(pySum(metas.map((m) => m.costUsd)), 4),
+      totalUsd: round(pySum(costs), 4),
       meanLatencyS: latencies.length ? round(meanOf(latencies) / 1000, 2) : null,
+      ...(latencies.length < metas.length
+        ? { dialogsWithoutLatency: metas.length - latencies.length }
+        : {}),
+      ...(costs.length < metas.length ? { dialogsWithoutCost: metas.length - costs.length } : {}),
       calls: metas.reduce((s, m) => s + requests(m), 0),
       // Present only when some responses had no usage, which makes totalUsd a lower bound.
       ...(withoutUsage ? { responsesWithoutUsage: withoutUsage } : {}),
@@ -209,12 +214,17 @@ export function renderMd(name: string, s: Collected) {
   const lowerBound = c.responsesWithoutUsage
     ? ` (lower bound: ${c.responsesWithoutUsage} response(s) reported no token usage)`
     : "";
+  const missing = [
+    c.dialogsWithoutCost ? `${c.dialogsWithoutCost} dialog(s) had no cost` : "",
+    c.dialogsWithoutLatency ? `${c.dialogsWithoutLatency} dialog(s) had no latency` : "",
+  ].filter(Boolean);
+  const missingNote = missing.length ? ` (${missing.join(", ")}; skipped)` : "";
   lines.push(
     "",
     "## Totals and cost",
     "",
     `- Totals: n=${t.n}, mean ${s.format.mean(t.mean)}, min ${pyStr(t.min)}, max ${pyStr(t.max)}`,
-    `- Cost $${s.format.cost(c.totalUsd)}${lowerBound} over ${c.calls} model calls, mean ${pyFloat(c.meanLatencyS)} s per dialog`,
+    `- Cost $${s.format.cost(c.totalUsd)}${lowerBound} over ${c.calls} model calls, mean ${pyFloat(c.meanLatencyS)} s per dialog${missingNote}`,
     "",
   );
   return lines.join("\n");
