@@ -23,7 +23,8 @@
     "calibrate:compare": "node tools/calibrate/compare.ts",
     "calibrate:print": "node tools/calibrate/print-dialogs.ts",
     "calibrate:summarize": "node tools/calibrate/summarize-run.ts",
-    "calibrate:review": "node tools/calibrate/review.ts"
+    "calibrate:review": "node tools/calibrate/review.ts",
+    "calibrate:index": "node tools/calibrate/index.ts"
   },
   "devDependencies": {
     "@app/api": "workspace:*",

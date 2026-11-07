@@ -1,0 +1,124 @@
+{
+  "generatedAt": "2026-11-07T16:06:54.500Z",
+  "report": "prompt-before-vs-manual",
+  "promptVersion": "p-433387c8",
+  "provider": "hf-router",
+  "model": "Qwen/Qwen3.8-27B:cerebras",
+  "referenceLabeler": "manual",
+  "dialogs": 59,
+  "pooled": {
+    "exact": 416,
+    "n": 454,
+    "rate": 0.9162995594713657,
+    "ci": [0.8845315904139434, 0.9470198675496688]
+  },
+  "perCriterion": {
+    "opening": {
+      "n": 59,
+      "exactRate": 1,
+      "kappa": 1
+    },
+    "understanding": {
+      "n": 56,
+      "exactRate": 0.8571428571428571,
+      "kappa": 0.6906077348066297
+    },
+    "verification": {
+      "n": 53,
+      "exactRate": 0.9056603773584906,
+      "kappa": 0.7207586933614332
+    },
+    "guidance": {
+      "n": 57,
+      "exactRate": 0.8771929824561403,
+      "kappa": 0.7037861915367483
+    },
+    "empathy": {
+      "n": 59,
+      "exactRate": 0.9661016949152542,
+      "kappa": 0.8383561643835615
+    },
+    "management": {
+      "n": 56,
+      "exactRate": 0.8214285714285714,
+      "kappa": 0.6241610738255032
+    },
+    "closing": {
+      "n": 55,
+      "exactRate": 0.8909090909090909,
+      "kappa": 0.7679324894514767
+    },
+    "violations": {
+      "n": 59,
+      "exactRate": 1,
+      "kappa": 1
+    }
+  },
+  "totals": {
+    "mae": 6.227954545454546,
+    "maxError": 31.680000000000007,
+    "n": 44
+  },
+  "violations": {
+    "tp": 6,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1
+  },
+  "breakdown": {
+    "language": {
+      "RU": {
+        "n": 254,
+        "exactRate": 0.8858267716535433
+      },
+      "KZ": {
+        "n": 100,
+        "exactRate": 0.97
+      },
+      "EN": {
+        "n": 100,
+        "exactRate": 0.94
+      }
+    },
+    "channel": {
+      "agent chat": {
+        "n": 425,
+        "exactRate": 0.9223529411764706
+      },
+      "voice call": {
+        "n": 29,
+        "exactRate": 0.8275862068965517
+      }
+    }
+  },
+  "humanCeiling": {
+    "report": "ai-labeler-agreement",
+    "labelerA": "ai-fable",
+    "labelerB": "ai-opus",
+    "n": 136,
+    "set": "p1-ru-003,p1-ru-007,p1-ru-022,p1-ru-025,p1-ru-028,p1-ru-029,p1-kz-003,p1-kz-008,p1-kz-011,p1-en-008,p1-en-009,p1-en-014,p1-ru-012,p1-kz-012,p1-kz-013,p1-en-001,p1-en-004",
+    "pooledRate": 0.9558823529411765,
+    "perCriterion": {
+      "opening": 1,
+      "understanding": 0.9411764705882353,
+      "verification": 1,
+      "guidance": 0.9411764705882353,
+      "empathy": 1,
+      "management": 0.7647058823529411,
+      "closing": 1,
+      "violations": 1
+    }
+  },
+  "providers": [
+    {
+      "provider": "hf-router",
+      "model": "Qwen/Qwen3.8-27B:cerebras",
+      "promptVersion": "p-433387c8",
+      "report": "prompt-before-vs-manual",
+      "pooledRate": 0.9162995594713657,
+      "meanLatencyMs": 3110.2203389830506,
+      "costUsd": 0.39824771
+    }
+  ]
+}

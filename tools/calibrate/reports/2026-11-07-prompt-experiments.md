@@ -8,9 +8,11 @@ Every run used one sample at T=0 with Qwen3.8-27B on Cerebras. Run files are in 
 | ------- | --------------------------------------------------------------------------------------------------------------------------- | --------------: | ------------: |
 | before  | The prompt on main (PR #4)                                                                                                  | 416/454 (91.6%) |         37/62 |
 | after   | Rules for every criterion; the system prompt counts bot details as known and warns against middle-step defaults             | 411/454 (90.5%) |         35/62 |
-| v3      | `after`, plus verification required for any account-related request and confidentiality covering any account information    | 387/454 (85.2%) |         33/62 |
-| v4      | `after` verification wording, with confidentiality narrowed to a restriction or status reported while skipping verification | 409/454 (90.1%) |         38/62 |
+| v3      | `after`, plus verification required for any account-related request and confidentiality covering any account information    | 387/449 (86.2%) |         33/62 |
+| v4      | `after` verification wording, with confidentiality narrowed to a restriction or status reported while skipping verification | 409/449 (91.1%) |         38/62 |
 | v5      | The prompt on main, plus only the closing and empathy rules                                                                 | 407/454 (89.6%) |         31/62 |
+
+v3 and v4 are scored on 449 cells because `p4-ru-003` is missing from their runs (a failed sample), so their percentages are not directly comparable with the other rows.
 
 ## Findings
 
