@@ -1,8 +1,6 @@
 # mmptici
 
-A starter with React, Hono, Better Auth, and Cloudflare D1. Includes typed API calls, routing, data fetching, and Workers AI. The UI and API deploy together as one Cloudflare Worker.
-
-This starter is the foundation for the Freedom Broker Conversation Quality Analytics (CQA) hackathon prototype. The planned workflows cover configurable checklists, transcript evaluation with evidence, and appeals. See the [hackathon requirements summary](CQA_HACKATHON.md).
+Conversation Quality Analytics (CQA) prototype. The React UI and Hono API deploy together as one Cloudflare Worker.
 
 [Live app](https://mmptici.ieraasyl.workers.dev)
 
@@ -11,10 +9,11 @@ This starter is the foundation for the Freedom Broker Conversation Quality Analy
 | Directory            | Contents                            |
 | -------------------- | ----------------------------------- |
 | `apps/web`           | React UI, TanStack Router and Query |
-| `apps/api`           | Hono RPC, Better Auth, Workers AI   |
+| `apps/api`           | Hono RPC and Workers AI             |
 | `packages/contracts` | Shared Zod validation               |
 | `packages/db`        | Drizzle schemas and migrations      |
 | `tests`              | HTTP tests and server setup         |
+| `data`               | Hackathon DEV dataset               |
 
 See [AGENTS.md](AGENTS.md) for implementation conventions.
 
@@ -24,23 +23,15 @@ Use the Node.js 26 version pinned in [`.node-version`](.node-version) and Vite+ 
 
 ```sh
 vp install
-cp apps/api/.dev.vars.example apps/api/.dev.vars
-openssl rand -hex 32
-```
-
-Set `BETTER_AUTH_SECRET` in `apps/api/.dev.vars` to the generated value. Keep the local `BETTER_AUTH_URL` unchanged.
-
-```sh
-vp run cf:types
 vp run db:migrate:local
 vp run dev
 ```
 
-Open <http://127.0.0.1:5173>. Development uses local bindings by default through `CLOUDFLARE_VITE_FORCE_LOCAL=true` in `apps/web/.env.development.local`, so no Cloudflare login is needed. Local D1 data lives in `.wrangler/state`.
+Open <http://127.0.0.1:5173>. D1 runs locally and stores data in `.wrangler/state`. The default `CLOUDFLARE_VITE_FORCE_LOCAL=true` in `apps/web/.env.development.local` lets you start the app without a Cloudflare login.
 
-For real Workers AI, set `CLOUDFLARE_VITE_FORCE_LOCAL=false` in `apps/web/.env.development.local`, run `vp -C apps/api exec wrangler login`, and restart the dev server. AI calls use your account's allowance or billing.
+On the Conversations page, click **Load DEV dataset** to load [data/invoke.json](data/invoke.json) during local development. Use **Import JSON** to load an organizer dataset in any environment. See [Datasets and API](CQA_HACKATHON.md#datasets-and-api) for the file format.
 
-The DEV dataset is in [data/invoke.json](data/invoke.json). See [Datasets and API](CQA_HACKATHON.md#datasets-and-api) for the response format and API link.
+Running evaluations requires the remote Workers AI binding. Set `CLOUDFLARE_VITE_FORCE_LOCAL=false` in `apps/web/.env.development.local`, run `vp -C apps/api exec wrangler login`, and restart the dev server. AI calls use your Cloudflare account's allowance or billing.
 
 ## Checks and tools
 
@@ -53,13 +44,13 @@ The DEV dataset is in [data/invoke.json](data/invoke.json). See [Datasets and AP
 | `vp run db:studio:local`  | Inspect local D1                              |
 | `vp run db:studio:remote` | Inspect remote D1                             |
 
-Tests manage their own server and temporary database; no separate dev server or Cloudflare login is needed.
+Tests start their own server, migrate a temporary D1 database, and stub Workers AI.
 
 Studio opens at <https://local.drizzle.studio>. Remote Studio requires `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_DATABASE_ID`, and `CLOUDFLARE_D1_TOKEN` in `packages/db/.env`. The token needs D1 Edit permission.
 
 ## Schema changes
 
-When auth feature changes affect the database schema, run `vp run auth:generate` first. After changing table definitions, generate and apply migrations:
+After changing table definitions in `packages/db/src/schema.ts`, generate and apply the local migration.
 
 ```sh
 vp run db:generate
@@ -70,11 +61,9 @@ Commit generated SQL and metadata in `packages/db/migrations`. For Worker bindin
 
 ## Deployment
 
-Log in with `vp -C apps/api exec wrangler login`.
+Log in with `vp -C apps/api exec wrangler login`. For a different Cloudflare account or database, update the account ID and D1 database name and ID in `apps/api/wrangler.jsonc`.
 
-Set the production `BETTER_AUTH_URL` and D1 database ID in `apps/api/wrangler.jsonc`. Store a separate production secret with `vp -C apps/api exec wrangler secret put BETTER_AUTH_SECRET`.
-
-After checks and tests pass:
+After checks and tests pass, preview the deployment, apply the remote migrations, and deploy.
 
 ```sh
 vp run deploy:dry

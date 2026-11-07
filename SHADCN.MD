@@ -36,7 +36,7 @@ Primitive implementations in `apps/web/src/components/ui` are exempt from `no-re
 
 ## Registry components
 
-Read the linked Markdown for the component you plan to use. Pass its registry name to the `add` command above. **Installed** components can be imported from `@/components/ui/*`.
+Check [the local component directory](apps/web/src/components/ui) before adding a component. Read the linked Markdown for the component you plan to use and pass its registry name to the `add` command above.
 
 | Registry name                                                                        | Use it for                                                                        |
 | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
@@ -49,7 +49,7 @@ Read the linked Markdown for the component you plan to use. Pass its registry na
 | [`badge`](https://ui.shadcn.com/docs/components/base/badge.md)                       | Mark statuses and verdicts such as Pending review, Yes, No, or N/A.               |
 | [`breadcrumb`](https://ui.shadcn.com/docs/components/base/breadcrumb.md)             | Show the path from the conversation list to the current evaluation.               |
 | [`bubble`](https://ui.shadcn.com/docs/components/base/bubble.md)                     | Display the text of a chat turn inside a speech bubble.                           |
-| [`button`](https://ui.shadcn.com/docs/components/base/button.md) **Installed**       | Run an evaluation, save a checklist, or trigger another action.                   |
+| [`button`](https://ui.shadcn.com/docs/components/base/button.md)                     | Run an evaluation, save a checklist, or trigger another action.                   |
 | [`button-group`](https://ui.shadcn.com/docs/components/base/button-group.md)         | Keep related actions, such as Save and its options menu, together.                |
 | [`calendar`](https://ui.shadcn.com/docs/components/base/calendar.md)                 | Select a date or date range from a calendar grid.                                 |
 | [`card`](https://ui.shadcn.com/docs/components/base/card.md)                         | Group related content such as a score summary or conversation overview.           |
@@ -66,15 +66,15 @@ Read the linked Markdown for the component you plan to use. Pass its registry na
 | [`drawer`](https://ui.shadcn.com/docs/components/base/drawer.md)                     | Open a swipeable panel for filters or actions on a small screen.                  |
 | [`dropdown-menu`](https://ui.shadcn.com/docs/components/base/dropdown-menu.md)       | Put secondary actions behind a button, such as a row's overflow menu.             |
 | [`empty`](https://ui.shadcn.com/docs/components/base/empty.md)                       | Explain why a list is empty and show what to do next.                             |
-| [`field`](https://ui.shadcn.com/docs/components/base/field.md) **Installed**         | Group a form control with its label, help text, and validation error.             |
+| [`field`](https://ui.shadcn.com/docs/components/base/field.md)                       | Group a form control with its label, help text, and validation error.             |
 | [`form`](https://ui.shadcn.com/docs/forms/react-hook-form.md)                        | Legacy entry. Use `Field` with React Hook Form for new forms.                     |
 | [`hover-card`](https://ui.shadcn.com/docs/components/base/hover-card.md)             | Preview linked content without opening its page.                                  |
-| [`input`](https://ui.shadcn.com/docs/components/base/input.md) **Installed**         | Enter a single-line value such as a checklist name or criterion weight.           |
+| [`input`](https://ui.shadcn.com/docs/components/base/input.md)                       | Enter a single-line value such as a checklist name or criterion weight.           |
 | [`input-group`](https://ui.shadcn.com/docs/components/base/input-group.md)           | Put a search icon, unit, or clear button next to an input.                        |
 | [`input-otp`](https://ui.shadcn.com/docs/components/base/input-otp.md)               | Enter or paste a one-time verification code.                                      |
 | [`item`](https://ui.shadcn.com/docs/components/base/item.md)                         | Present a list entry with a title, description, icon, and actions.                |
 | [`kbd`](https://ui.shadcn.com/docs/components/base/kbd.md)                           | Display a keyboard shortcut or key sequence.                                      |
-| [`label`](https://ui.shadcn.com/docs/components/base/label.md) **Installed**         | Name a standalone form control. Use `FieldLabel` inside a `Field`.                |
+| [`label`](https://ui.shadcn.com/docs/components/base/label.md)                       | Name a standalone form control. Use `FieldLabel` inside a `Field`.                |
 | [`marker`](https://ui.shadcn.com/docs/components/base/marker.md)                     | Mark a transcript event such as a date change or an agent joining.                |
 | [`menubar`](https://ui.shadcn.com/docs/components/base/menubar.md)                   | Keep desktop-style command menus visible at the top of a workspace.               |
 | [`message`](https://ui.shadcn.com/docs/components/base/message.md)                   | Lay out a transcript turn with its speaker, timestamp, and content.               |
@@ -89,7 +89,7 @@ Read the linked Markdown for the component you plan to use. Pass its registry na
 | [`resizable`](https://ui.shadcn.com/docs/components/base/resizable.md)               | Let reviewers adjust the width of transcript and scorecard panes.                 |
 | [`scroll-area`](https://ui.shadcn.com/docs/components/base/scroll-area.md)           | Keep a long transcript or list scrollable inside a fixed panel.                   |
 | [`select`](https://ui.shadcn.com/docs/components/base/select.md)                     | Choose one option from a styled menu, such as a checklist or criterion type.      |
-| [`separator`](https://ui.shadcn.com/docs/components/base/separator.md) **Installed** | Divide sections within a form, panel, or toolbar.                                 |
+| [`separator`](https://ui.shadcn.com/docs/components/base/separator.md)               | Divide sections within a form, panel, or toolbar.                                 |
 | [`sheet`](https://ui.shadcn.com/docs/components/base/sheet.md)                       | Open transcript evidence in a panel from the edge of the screen.                  |
 | [`sidebar`](https://ui.shadcn.com/docs/components/base/sidebar.md)                   | Keep main workspace destinations in a persistent side panel.                      |
 | [`skeleton`](https://ui.shadcn.com/docs/components/base/skeleton.md)                 | Reserve space for a scorecard or table while its data loads.                      |
