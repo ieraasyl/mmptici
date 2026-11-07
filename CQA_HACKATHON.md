@@ -4,7 +4,7 @@ Teams have 24 hours to build a Conversation Quality Analytics prototype. It must
 
 ## Top-50 selection
 
-AI evaluation accuracy is the primary criterion. During the control stage, teams receive 10 previously unseen transcripts. Organizers compare each system's ratings with reference ratings prepared in advance (Ground Truth). Closer agreement is better. The brief does not specify the comparison metric.
+AI evaluation accuracy is the primary criterion. During the control stage, teams receive 10 previously unseen chat transcripts. Organizers compare answers per criterion with reference ratings prepared in advance (Ground Truth). Closer agreement is better. The exact comparison metric and the weights of the selection factors remain unpublished. [Q&A message 2978](https://t.me/c/4473389149/732/2978), [message 3004](https://t.me/c/4473389149/732/3004)
 
 Organizers also consider four factors when selecting the top 50.
 
@@ -23,7 +23,7 @@ The organizers use the accuracy comparison as their main guide and exercise judg
 2. **Evaluate a conversation.** Let users load a transcript, select a checklist, and start an evaluation. Support Russian, Kazakh, and English. Evaluate the operator's work and use bot messages and system events as context.
 3. **Show the result.** For each criterion, show the answer, points, weight, explanation, and supporting message or call segment. When an action is missing, point to the part of the conversation where it was expected. For `N/A`, explain why the criterion does not apply. Show the total, any section scores, and a separate flag for serious violations.
 
-In a separate check, organizers will ask the team to replace one criterion. Save the revised checklist through the interface and apply it to the supplied conversations using the frozen code version.
+In a separate check, organizers will ask the team to replace one criterion. Save the revised checklist through the interface and reevaluate the already processed control conversations using the frozen code version. Whether the replacement must retain the original criterion's weight remains unclear. [Q&A message 2978](https://t.me/c/4473389149/732/2978)
 
 ### Review results and resolve appeals
 
@@ -83,7 +83,7 @@ On success, `isSuccess` is `true`, and `data.records` contains the conversations
 
 Use the same checklist for chats in Russian, Kazakh, and English. The first seven criteria have a combined weight of 100. The eighth flags serious violations separately.
 
-The participant guide includes calls in the dataset and provides for recording playback or a link to a player. The supplied materials give no separate scoring rubric for calls.
+The participant guide includes calls in the DEV dataset and provides for recording playback or a link to a player. The Q&A adds a call-specific exception to the chat checklist below. If a recording starts after the operator's greeting, rate opening as `N/A`. [Q&A message 2978](https://t.me/c/4473389149/732/2978)
 
 | #   | Criterion                                                     | Allowed answers        |    Weight | How to evaluate                                                                                                                                                                |
 | --- | ------------------------------------------------------------- | ---------------------- | --------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -122,7 +122,7 @@ The PDF groups criteria 01 and 02 under opening and understanding the request, 0
 1. Determine applicability. Use `N/A` only when the criterion allows it and its condition is met. If a required action was missed or performed incorrectly, mark a binary criterion No.
 2. Convert ratings to points. For a weighted Yes/No criterion, Yes earns its full weight and No earns zero. For a numeric criterion, multiply its weight by the rating divided by the highest value on its scale.
 3. Exclude criteria marked `N/A` and redistribute their weight proportionally across applicable criteria. Divide the sum of earned points by the sum of applicable weights and multiply by 100.
-4. Round the total to two decimal places. Leave it uncalculated if no applicable criteria carry weight. Report serious violations separately.
+4. Round the total half up to two decimal places, for example `50.625` becomes `50.63`. Leave it uncalculated if no applicable criteria carry weight. Report serious violations separately. [Q&A message 2978](https://t.me/c/4473389149/732/2978)
 
 The three-minute first-response threshold, tags, and attachments are outside the scope of scoring.
 
@@ -134,6 +134,8 @@ The three-minute first-response threshold, tags, and attachments are outside the
 - **Evidence.** Cite a specific message or system event and say what it shows. For example, if an operator closes a chat without saying goodbye, cite the last operator reply and the chat-closure event to support a No for closing.
 
 ## Submission and demo
+
+The live product can run locally or be hosted. Judges must be able to interact with the UI in real time. Organizers said they would read the README. At later stages, they may ask to use the running application on a team's laptop. [Q&A message 2968](https://t.me/c/4473389149/732/2968), [message 2980](https://t.me/c/4473389149/732/2980), [message 2991](https://t.me/c/4473389149/732/2991)
 
 | When                     | What happens                                                                                                                                            |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -147,3 +149,19 @@ The demo has a five-minute limit. Organizers will announce the exact schedule an
 2. **2 minutes.** Show the evaluation and its evidence, follow a link to the transcript, and show an `N/A` example and the total score.
 3. **1 minute.** Appeal a rating, show the reviewer's decision, and show the recalculated total.
 4. **1 minute.** Change a criterion through the interface and apply the revised checklist.
+
+Judges may ask to see all conversations flagged for serious violations with their explanations, submit an appeal, add or edit a criterion or its weight, or inspect a specific conversation's ratings and justifications. Prepare these workflows for a live demonstration. [Q&A message 2991](https://t.me/c/4473389149/732/2991)
+
+## Organizer Q&A clarifications, 7 November 2026
+
+This section records replies from Максим and Nikolay Borovinskiy in the Freedom Broker Q&A topic. The corresponding clarifications are also incorporated into the sections above.
+
+- TypeScript and Tailwind CSS are allowed. Teams may choose their model and external AI service. [Message 2303](https://t.me/c/4473389149/732/2303), [message 2719](https://t.me/c/4473389149/732/2719)
+- The DEV API link may be published in the repository. The control dataset will be available through the same API. Expert reference labels have not been provided. [Message 2716](https://t.me/c/4473389149/732/2716), [message 2966](https://t.me/c/4473389149/732/2966)
+- If the customer supplied enough details from the start, including details given to the bot, understanding the customer's needs is `N/A`. The overlap between failed identity verification and a serious confidentiality violation was left to teams' judgment. [Message 2814](https://t.me/c/4473389149/732/2814)
+- Recordings supplement transcripts for reviewers. Speech recognition and analysis of intonation, volume, or speaking speed are optional extensions after the main workflow works. [Message 2826](https://t.me/c/4473389149/732/2826), [message 2838](https://t.me/c/4473389149/732/2838)
+- Organizers expect logical, evidence-based, reproducible evaluations. Handle insufficient information and disputed facts without inventing details. They acknowledge that human experts can disagree and will consider the overall reasonableness of the ratings. [Message 2981](https://t.me/c/4473389149/732/2981)
+
+### Points still unspecified
+
+The exact comparison metric and selection weights remain unpublished. The replies leave replacement-criterion weight handling unclear and give no explicit ruling on masked operator names. They leave the identity-verification method to teams and mention a broker knowledge base without supplying its location or contents. For the closing criterion, the answer directs teams back to the checklist. [Message 2814](https://t.me/c/4473389149/732/2814), [message 2978](https://t.me/c/4473389149/732/2978), [message 3004](https://t.me/c/4473389149/732/3004)
