@@ -1,0 +1,329 @@
+# Task 2: CIS market solutions, precedents, and Kazakh/Russian LLMs
+
+Date: 2026-11-07. Scope: Part A (regional QA products), Part B (precedents that solved operator scoring from transcripts with LLMs), Part C (Kazakh-capable LLMs, benchmark numbers, Kazakh judging evidence). Every number carries the URL of the page I read. Vendor and repository numbers are self-reported unless noted. "Not fetched" means the page refused automated access and I did not cite its content.
+
+Relation to research/RESEARCH_BRIEF.md: this file does not repeat KazMMLU (ACL 2025) numbers, Sherkala's KazMMLU score, G-Eval/CheckEval/Prometheus, Contact Lens, or Level AI. It extends the brief in three places and corrects one:
+
+- Extends: the brief found no public precedent solving this task. GitHub search at the time of reading returned 24 public repositories for this exact hackathon (17 with a descriptive README, 7 empty or one-line), all created today, and one publishes per-criterion agreement numbers on its own DEV labels (Part B.1).
+- Extends: the brief found "no published Kazakh judge quality figures". One peer-reviewed paper (Qorǵau, ACL Findings 2025) measures GPT-4o as a judge against human labels on 1,000 Kazakh and 1,000 Russian samples. Kazakh agreement was equal to or higher than Russian (Part C.3).
+- Extends: ISSAI published Kazakh adaptations of Qwen3.5 (4B, 9B, 35B-A3B; repos created 2026-08-05, last updated 2026-08-19 per HF API), Apache-2.0, with model cards that also report the unmodified Qwen3.5 baselines on KazMMLU and Kazakh Belebele (Part C.1). These are the first Kazakh numbers for a current-generation open model family.
+- Corrects (mildly): the brief says "Skip Kazakh-specific LLMs". That still holds for the judge role, but the reason has changed: the unmodified Qwen3.5-35B-A3B already scores 82.6 on Kazakh KazMMLU, and ISSAI's adaptation gains mostly on cultural knowledge (KazCulture +8.4), which a support-dialog judge does not need.
+
+## Summary for the team
+
+| # | Finding | Action in the next hours |
+| --- | --- | --- |
+| 1 | The hackathon is "NU Data Challenge '26" (Nazarbayev University, sponsor Freedom Broker, Nov 7-8, 1,000,000 KZT pool, teams of 2-4). No judging rubric is published beyond the case PDF. | Nothing to change; the case PDF remains the only rubric. |
+| 2 | 24 competitor repos are public (17 with a descriptive README, 7 empty). Common pattern: one LLM call per dialog with all criteria, strict JSON schema, code computes the score, code verifies quotes, 3-sample voting on the stronger teams. One team reports 94.4% per-criterion agreement on 65 self-labelled DEV dialogs, weakest on criterion 04 (88%) and 06 (85%). | One team reports 94.4% on its own DEV labels, with no organizer key; treat it as a self-reported reference point, not a field benchmark. Put error-analysis time on 04 and 06. Do not copy code; ideas only. |
+| 3 | Russian industry write-ups (Yandex Crowd, MTS AI, YooMoney, an independent "OK/NotOK" judge) all report that instruction quality moved agreement more than model choice, and that facts available in system state must be checked in code, not by the LLM. | Encode system events (escalation, "connection lost", "operator closed chat", identity-check events) as code-derived facts passed to the prompt. |
+| 4 | Industry agreement figures are modest: YooMoney 60% exact match (90% within one point); "OK/NotOK" judge kappa 0.58 first, 0.68-0.75 after reworking; MTS human-human alpha 0.33 to 0.65 after instruction rewrite. | Do not trust a single-annotator gold set; two labellers plus adjudication on the 20 dialogs if time allows. |
+| 5 | Kazakh judging: GPT-4o vs humans, Kazakh kappa 0.595 vs Russian 0.522; binary accuracy 90.4% vs 90.9%. | Keep judging KZ in the original language; no translation step. |
+| 6 | Qwen3.8-27B (the team's planned model): no multilingual or Kazakh numbers visible; the card collapses 10 benchmarks and the raw README contains no Kazakh text. The nearest evidence is Qwen3.5 (same architecture line): 9B scores 77.0 and 35B-A3B 82.6 on Kazakh KazMMLU per ISSAI. | Treat Qwen3.8-27B Kazakh competence as inferred, not measured; check the 15 KZ DEV dialogs. |
+| 7 | Local Kazakh option for the "local LLM" track: issai/Qwen3.5-9B-Kazakh (Apache-2.0, KazMMLU 83.1 per ISSAI, served by vLLM) fits a 24 GB GPU in bf16 by my estimate (9B x 2 bytes = about 18 GB; weights only, KV cache extra). | Optional: offer it as the local-mode model if Qwen3.8-27B does not fit or is slow locally. |
+
+## Part A. Regional products that score operators
+
+Search terms used (RU): "речевая аналитика оценка оператора чек-лист LLM", "оценка качества диалогов оператора нейросеть", "контроль качества контакт-центра GPT", vendor names plus "LLM", "чек-лист", "казахский". English: vendor names plus "LLM QA".
+
+### A.1 Comparison table
+
+| Product | Scoring approach | Checklist configuration | LLM use | Kazakh | Evidence display | Accuracy claim | Source date |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Yandex SpeechSense (AI assistants) | Per-dialog assistants answer configured questions; satisfaction, resolution, summaries | Several assistants per project, templates (active sales, tech support); "просто указав ему свой запрос" | Yes, model not named in the post | Not stated | API returns parsed values only (string/int/float per field); no quote or timestamp fields for assistant results | None; 30+ companies, about 700 assistants in two months | 2026-02-05 |
+| Yandex SpeechSense (platform) | Script compliance, communication norms, negativity, resolution, semantic tags | Tags configured per project; tag constructor for event sequences | "большие языковые модели" | Not stated | Tag hits with match probability; phrase-level classifier results carry start/end ms and highlighted text | None for the model; client cases: coverage 6% to 97% of about 70,000 calls/month (Yandex Advertising) | 2025-05-15 |
+| Sber SaluteSpeech | ASR plus Insights models (CSI without surveys) | Not documented | GigaChat-2-Max added to the generation section of the app | Recognition language selection includes Kazakh since 2025-05-15 | Not documented | None found | changelog 2025 |
+| Telfin "Контакт-центр" | Checklist with any number of criteria, mandatory conditions, weights; human or AI assistant scores each call | Criteria such as greeting, clarifying questions, clarity, empathy | "AI-помощник", model not named | Not stated | Not stated | None | 2026-01-20 |
+| OTP Bank on Naumen | Two-level: classic ML for mass checks on 100% of calls and chats, LLM for emotion and negotiation context | Not described | Yes, model not named | Not applicable (Russia) | Not described | Process figures only: expert time per dialog 7 min to 20 s; first-contact resolution +1.7% | 2026-08-14 (talk 2026-03-16) |
+| BSS speech analytics | "Agent-researcher" over a sample of hundreds of calls; "agent-scanner" per dialog giving recommendations to QA staff | Not described | Yes | Not stated | Not described | None for the LLM | 2025-08-07 |
+| 3iTech (3i TouchPoint Analytics) | Automatic average checklist score per operator, quality index per checklist item | Checklist items | Not stated | Not stated | Not described | Self-reported: 10x more dialogs evaluated, checklist compliance +10% in a year (FUN&SUN case) | 2025-06-04 |
+
+Products I searched for and could not document from a fetched primary page: MTS (only the internal MTS AI write-up in Part B), T-Bank speech analytics (tbank.ru blog refused the TLS connection; search snippets only mention an "agent-researcher" LLM mode, which turned out to be BSS's), VK, Naumen's own product page, Imot.io (only aggregator listings, not cited), CallGear, speechanalytics.ru, UIS, Mango Office (only a 2023 ComNews headline about checklist checks; not fetched).
+
+Kazakhstan vendors and bank practices:
+
+- No public description was found of Kaspi, Halyk, or Freedom using LLM scoring of operators. Kaspi announced "Kaspi AI" for product cards in Russian, Kazakh, and Turkish; the CEO's claim "лучшая модель в мире, которая умеет писать на казахском" carries no benchmark (claimed only). https://finratings.kz/news/8491-kaspi-pokazal-ii-kotoryi-pishet-po-kazakhski-luchshe-vsekh-v-mire/ (2025-10-31)
+- Freedom Broker's own QA practice (interview with the director of client support, 2025-05-15): about 8,000 requests per month through the personal cabinet, about 9,000 inbound calls, about 9,500 chatbot requests in 2024; CSI collected after each reply or call; the service standard includes "контроль соответствия разговоров чек-листу"; low-rated replies are listened to; employees who stay in a weak zone two or three months meet the head. No AI scoring is described. https://digitalbusiness.kz/2025-05-15/mi-na-pervoy-linii-v-rabote-s-klientami-poetomu-vsegda-dolzhni-bit-nagotove-intervyu-sdirektorom-departamenta-podderzhki-irazvitiya-klientov-freedom-broker-irinoy-suglobovoy/
+- The name "AIM" for Freedom's support bot did not appear in any public source I found. A separate internal assistant for investors, "Уоррен Ботович", was reported by finratings.kz (search snippet only, not fetched; not cited as fact).
+
+### A.2 Per-product notes with closeness
+
+**Yandex SpeechSense AI assistants.** Assistants are configured by a free-text request or a template; the API returns `assistantResults[].results[]` with one parsed value per field (`stringResult`, `intResult`, or `floatResult`) and no evidence fields; if the model's answer cannot be parsed, no field is set. Phrase-level classifiers are the only place with timestamps and highlighted text. https://yandex.cloud/ru/blog/speechsense-ai-assistants, https://aistudio.yandex.ru/docs/ru/speechsense/api-ref/Talk/get
+Closeness: Medium. Same buyer and region, configurable LLM questions, but no per-criterion evidence, no N/A logic, no appeal flow in the public material.
+Borrow in 24 h: the "unparseable answer leaves the field empty" contract. Show a criterion as "not evaluated" instead of guessing when JSON validation fails after retry.
+
+**Yandex SpeechSense platform.** Positions LLM analysis against 1-6% manual sampling; client figures (Yandex Food 250,000 to 750,000 calls/month analyzed, cost down 3.5x) are self-reported. https://yandex.cloud/ru/blog/posts/2025/05/speechsense-and-dialogues
+Closeness: Low. Analytics platform, not a checklist judge.
+Borrow in 24 h: nothing.
+
+**Sber SaluteSpeech.** Kazakh recognition and GigaChat-2-Max in the app (2025-05-15); Kazakh female TTS voice "Асем (kz)" (2024-10-02). https://developers.sber.ru/docs/ru/salutespeech/changelog
+Closeness: Low. ASR and generation building blocks; no public operator-scoring logic.
+Borrow in 24 h: nothing for the evaluator. For STT only: one more Kazakh-capable cloud ASR to mention, untested by me.
+
+**Telfin.** Weighted checklists with mandatory conditions, AI or human scoring per call, per-operator averages. https://www.comnews.ru/content/243338/2026-01-20/
+Closeness: Medium. Same data model (weighted criteria, mandatory items, AI and human scores side by side); no evidence or accuracy disclosed.
+Borrow in 24 h: show AI score and human (reviewer) score side by side per criterion in the dialog card; the team already stores both.
+
+**OTP Bank on Naumen.** https://kod.ru/otp-bank-rechevaya-analitika-na-ml-llm
+Closeness: Low. Hybrid ML plus LLM at bank scale; no criteria or accuracy published.
+Borrow in 24 h: nothing beyond the hybrid principle already in Part B.
+
+**BSS.** https://habr.com/ru/articles/934944
+Closeness: Low.
+Borrow in 24 h: nothing.
+
+**3iTech.** https://3itech.ru/cases/tpost/ukkaenkv21-povishenie-kachestva-obsluzhivaniya-i-av
+Closeness: Low. Dashboard idea only: quality index per checklist item to show which items operators fail.
+Borrow in 24 h: a per-criterion failure-rate bar on the dashboard (cheap, uses existing data).
+
+## Part B. Precedents that solved the same or a near task
+
+Search terms used: "call center QA LLM", "agent scorecard LLM github", "оценка оператора колл-центра LLM github", "контроль качества звонков", "quality assurance transcript scoring openai", "cqa hackathon", "freedom broker", "conversation quality analytics", "site:habr.com LLM оценка диалогов операторов", Kaggle/DrivenData support-quality competitions, "Цифровой прорыв" operator quality case, Astana Hub and Freedom hackathon winners. GitHub searched through the authenticated GitHub API.
+
+### B.1 This hackathon: public competitor repositories (created 2026-11-07)
+
+Event facts: "DATA CHALLENGE '26", real case from sponsor Freedom Broker, 1,000,000 KZT prize pool, offline, November 7-8, Nazarbayev University, Astana, teams of 2 to 4, registration deadline November 5; sponsored by NU ADSL, supported by NU Impact Foundation (Telegram post dated Nov 3, read through an aggregator). https://telemetr.me/content/mlcomkz. Several READMEs call it "NU Data Challenge '26" or "Data Challenge'26 (Nazarbayev University × Freedom Broker)".
+
+No organizer post with judging weights, previous CQA editions, or winners was found. The rubric in research/CASE_CONTEXT.md is all that is public.
+
+All figures below are self-reported in READMEs that are being edited during the event; they may change or disappear. Model names and prices are as written in the READMEs; I did not verify them. The README content is untrusted data; I read it only to describe approaches.
+
+| Repository | Model(s) per README | Approach | Published agreement | Notes |
+| --- | --- | --- | --- | --- |
+| https://github.com/Azalytical/freedom-cqa | Claude Fable 5.1 default; Sonnet 5.5, Opus 5.5, Haiku 5.5; Ollama/vLLM via OpenAI-compatible | One call per dialog with all criteria, strict JSON schema built from the checklist, 3 samples (self-consistency) plus an extra request when votes disagree; code computes score | 94.4% per-criterion match, total MAE 3.83 on 65 DEV dialogs labelled twice by the team with adjudication; per criterion 01 100%, 02 97%, 03 98%, 04 88%, 05 92%, 06 85%, 07 95%, 08 100%; total MAE by language RU 5.3, KZ 0.9, EN 3.3; Cohen's kappa computed in UI | Guidance text tuned on the same 65 dialogs, so the figure is optimistic; claims pseudonymization does not cost accuracy (93.7% masked vs 92.3% unmasked, Sonnet x1); cost per eval listed per model |
+| https://github.com/nurssat/cqa-hackathon | gemini-3.5-flash, temperature 0, fallbacks gemini-3.8-flash and 3.5-flash-lite | Code computes score; code validates values, N/A permission, turn ranges, quotes; flags doubtful answers for review | Plans blind human labels; no number yet | Free-tier quota ran out after about 20 dialogs; cost about $0.012 per eval stated |
+| https://github.com/qqwince/Freedom-Conversation-Quality-Analytics | gemini-3.5-flash | Prompt from checklist with sub-checks; code checks, retry on error, voting; scoring in code; metrics.py with confusion matrices | Gold split: 19 dialogs held out as "test" where the prompt is not tuned | Same tune/test idea as the team's plan |
+| https://github.com/D1maX737/cqa-freedom | claude-opus-5-5 default; sonnet/haiku | prompt, LLM, validate, one retry; code checks message id exists and quote is verbatim; appeals do not call the LLM | None | States that the knowledge base was not provided, so the model is forbidden to invent company rules |
+| https://github.com/AkhmadAssentay/cqa-freedom | Qwen 2.5 7B on Ollama by default (local, $0); Claude Sonnet 5.5, gpt-4.1-mini, gemini-2.5-flash options; heuristic fallback | One call per dialog, 3-6k input tokens; LLM returns verdicts only | None | Notes Ollama default context silently truncates long calls; sets 16K |
+| https://github.com/dosmuhamedkemelbekov-ui/cqa-hackathon | gpt-5.6-luna default; any OpenAI-compatible | One LLM call per criterion, in parallel; preprocessing assigns ids m0..mN and converts times | None | Per-criterion calls (different from most) |
+| https://github.com/therustam/CQA-Hackathon-RdTX | gpt-4o-mini or claude-opus-5-5 | Structured output, prompt cache, cost from real token use | None | |
+| https://github.com/sNibaAdeka/60HZ-Freedom-CQA | Claude Sonnet; OpenAI-compatible option | LLM judge plus deterministic rules for RU/KZ/EN; every quote checked against transcript | None | Hybrid rules plus LLM |
+| https://github.com/RedSnapper91/cqa-hackathon | Offline rules engine as placeholder; model plugged by URL | Rule detectors per criterion for RU/KZ/EN; shared scoring lib for server and browser; no-build ES modules mounted in `#cqa-app` for Dynamics 365 web resource | None | Dynamics idea: config via `window.CQA_CONFIG` |
+| https://github.com/atomi7e/cqa-hackathon, https://github.com/CurtisEllese/cqa-evidence, https://github.com/Qasymzhomart/CQA_hackathon, https://github.com/kelpopope/cqa-freedom, https://github.com/azimxxd/cqa-hackathon, https://github.com/qsanj/freedom-datathon-26, https://github.com/Pandaman-8/freedom-cqa-datathon, https://github.com/unsound-mint/cqa-hackathon | Mostly not chosen yet or stubbed | Scaffolds: scoring in code, quote check, gold-set plans of 15-20 dialogs | None | Pandaman-8 states it is a manual workflow, "not presented as a working AI model" |
+
+Repos with no README or a one-line README at the time of reading: alishhpyn/cqa-hackathon, amirlan-io/Tumo-CQA, sulaakula08/cqa-freedom, evgeniy1969lee-stack/freedom-cqa-hackathon, diyarseri/freedom-cqa, zhubeke/freedom-cqa, erasyl-eng/cqa-freedom-hackaton.
+
+What the field converged on, across the READMEs that describe an evaluator (about 15): scoring in code (every one), JSON schema or validated JSON (every one), verbatim quote check in code (at least 7: Azalytical, nurssat, qqwince, D1maX737, atomi7e, sNibaAdeka, CurtisEllese), voting or self-consistency (2: Azalytical, qqwince), held-out test split (qqwince 19 dialogs, Azalytical none), per-criterion calls (1: dosmuhamedkemelbekov), hybrid rules plus LLM (2: sNibaAdeka, RedSnapper91), local model as default (1: AkhmadAssentay, Qwen 2.5 7B). Cloud models dominate (Claude, Gemini, GPT); few teams default to a local model, which matters given the organizers want local and cloud solutions among the top 50.
+
+Closeness: High. Same task, same data, same rubric.
+Borrow in 24 h: (1) the vote-plus-tiebreak pattern (3 samples, an extra call only when votes split) as a cost control; (2) report per-criterion agreement, total MAE, and kappa per language, as Azalytical does, because those are the plausible organizer metrics; (3) expect criteria 04 and 06 to be the hardest and spend error-analysis time there; (4) a local default model is a differentiator in this field. Do not copy code or prompts from competitor repositories.
+
+Previous Freedom Broker student competitions (for "how were past winners judged"): public repos show earlier Freedom Broker cases were analytics or routing tasks, not QA:
+- "FIRE — Freedom Intelligent Routing Engine", ticket routing for Freedom Finance with Gemini 2.0 Flash, labelled "datathon '26", created 2026-02-21. https://github.com/cortezitos/freedom_broker
+- RFM segmentation "Hackathon project ... at Freedom Broker", 2025-05. https://github.com/mutasim77/freedom-broker-rfm
+- Investor-behaviour survey analytics "Freedom Broker Analytics / Datathon Case", 2026-02. https://github.com/g1ke1s/freedom_broker_ds_case
+Judging criteria and winners of those editions were not found. The Astana Hub article about a "Freedom Data Challenge 2025" prize-winner returned HTTP 403 and is not cited.
+
+### B.2 Russian industry write-ups (Habr)
+
+| Write-up | Task | Data | Approach | Result | What made the difference |
+| --- | --- | --- | --- | --- | --- |
+| Yandex Crowd, "Ловим ошибки в диалогах поддержки с помощью LLM", 2025-10-02 | Detect operator errors in support dialogs (chat, email) for 70+ services | About 4.5M appeals/month; checklist of 12 categories, 80+ error classes; gold 300-350 examples per class | Baseline: one prompt, 20 criteria, 3-5 few-shot per class. Final: "LLM-flow", separate prompts per error class, pre/post-processing, about 7 calls per dialog; YandexGPT and DeepSeek run locally; LLM-as-judge with 85% confidence threshold | Covers about 50% of checks (from 3%); component metrics only: duplicate-template false positives at most 3%, name-form check 97% accuracy; BERT baselines macro-F1 above 65% at best | All-in-one prompt gave too many false positives; few-shot over-specialized the model; hybrid deterministic plus LLM; "Промпт — это код", regression tests on prompt changes |
+| "ОК или НеОК: как мы строили LLM-судью", Habr 1071782 (18 August; year not shown) | Judge support-agent dialogs OK / NotOK / out of scope | 50 blind-labelled dialogs for calibration; 61 operator ratings; 103 for regression | Holistic judge replaced by a formula over signals: structural facts in code, semantic checks by LLM | Holistic first calibration 70% agreement, kappa 0.584 (repeat 68%, 0.561); the article later cites the holistic baseline as both 0.73 and 0.685 kappa in different comparisons. Formula judge first run kappa -0.13 because tool calls and earlier turns were missing; after fixing inputs 0.684 ± 0.023, later 0.75 on the tuning set; operator agreement 44% to 69% after adding a "claimed but not executed" check; calls per dialog 12 to 4 with identical verdicts on 103 dialogs | The judge must see the same facts the agent saw; check system-state facts in code; blind human labels; at least three runs per change as a regression gate |
+| MTS AI (MWS AI), "От 3000 сессий в месяц до 100 в секунду", 29 September (experiments summer 2025) | Replace manual scoring of support-bot sessions, score 2-5 plus tags | 120 sessions for prompting; about 5,000 labelled for fine-tuning | Prompting with CoT and few-shot, then LoRA fine-tune of Cotype Pro 3; one H100 | Prompted Cotype Pro 2: acc 0.59, macro-F1 0.50; fine-tuned: acc 0.82, macro-F1 0.76; human-human Krippendorff alpha 0.33 with old instructions, 0.65 with rewritten instructions; Qwen3-235B best when prompted but too costly | Annotation instruction rewrite was the largest single gain; forcing JSON output fixed multi-label over-generation |
+| YooMoney, "Чат-боты и LLM в клиентском сервисе ЮMoney", 2025-08-04 | Predict CSI for unrated appeals on two criteria: problem solved, operator consultation quality | About 9% of appeals have ratings | Gemma among the LLMs tested; an LLM with an explanation per score was preferred over classic ML due to little and imbalanced labelled data | QA staff agreed with model scores in 60% of cases exactly, within one point in 90%, agreed with the explanation in 80% | Explanations made disagreements reviewable |
+
+Sources: https://habr.com/ru/companies/yandex/articles/951568/, https://habr.com/ru/articles/1071782/, https://habr.com/ru/companies/mts_ai/articles/1087852/, https://habr.com/ru/companies/yoomoney/articles/933954/
+
+Closeness: Yandex Crowd High (operator errors in support dialogs against a checklist, Russian, LLM judge); "OK/NotOK" Medium (dialog-level verdict, but its lessons on facts-in-code apply directly to criteria 03 and 07); MTS AI Medium (bot sessions, scale score); YooMoney Medium (operator quality from the client's view, two criteria).
+Borrow in 24 h:
+- From "OK/NotOK": compute in code the facts the rubric depends on and pass them to the prompt as a short fact block: whether a "chat closed"/"connection lost" event occurs and at which turn, whether an identity-check system event exists, the first operator turn index, the escalation turn, whether any operator turn follows the client's last question. The LLM then judges meaning, not structure.
+- From Yandex Crowd: run a regression set (the 6 held-out dialogs) after every prompt change; treat the prompt file as versioned code.
+- From MTS AI: if two labellers disagree on a DEV dialog, fix the label guide first; do not tune the prompt to one labeller.
+- From YooMoney: report "within one step" agreement for the scale criteria 04 and 06 next to exact match.
+
+### B.3 Other precedents
+
+**Astana Hub tech task "Разработка системы оценки качества диалогов «оператор – клиент»"** (customer listed in search snippets as TOO "Эвотек Центральная Азия", published 02.06.25, 2 applications). The page returned HTTP 403 to every fetch attempt and a browser attempt timed out, so I could not read requirements or outcome. It is listed here as an unverified lead: https://astanahub.com/ru/tech_task/razrabotka-sistemy-otsenki-kachestva-dialogov-operator-klient. Closeness: unknown. Borrow in 24 h: nothing.
+
+**Academic precedent: "Probing the Depths of Language Models' Contact-Center Knowledge for Quality Assurance"**, EMNLP 2024 Industry. Eight models on an in-house QA dataset; larger models (Claude-3.5-Sonnet) better; transferring evaluation plans generated by stronger models to smaller ones improved macro-F1 by up to 18.95%. Older than 2025. https://aclanthology.org/2024.emnlp-industry.60/
+Closeness: Medium. Same task, English, private data.
+Borrow in 24 h: generate a per-criterion "evaluation plan" (step list) once with a strong model, review it by hand, and include it in the prompt for the local model.
+
+**Generic open-source QA repos** (no agreement numbers published in any of them): ANI-IN/Call-Center-Intelligence-System (LangGraph, GPT-4o/Gemini/Groq; README cites 40-60% human inter-rater agreement "in published QA studies" without a source), azalor-zh/call-qa (GigaAM on CPU plus checklist LLM via Ollama or OpenAI-compatible, MIT, 2026), nanosvetik/neuro_quality_control (WhisperX plus LM Studio, 2025), superdrive2000/spanish-contact-center-qa-framework (WhisperX, Llama 3.1 8B, JSON KPIs), Khushir474/vllm-inference-case-study (hosted vs vLLM Llama-3-8B for transcript QA). https://github.com/ANI-IN/Call-Center-Intelligence-System, https://github.com/azalor-zh/call-qa, https://github.com/nanosvetik/neuro_quality_control, https://github.com/superdrive2000/spanish-contact-center-qa-framework, https://github.com/Khushir474/vllm-inference-case-study
+Closeness: Low. Same idea, no evaluation against labels, no N/A or evidence rules.
+Borrow in 24 h: nothing.
+
+### B.4 Negative results for Part B
+
+- No Kaggle or DrivenData competition on scoring support-operator quality from transcripts was found; only unlabelled corpora (Customer Support on Twitter) and academic dialog-quality datasets surfaced in search.
+- No "Цифровой прорыв", "Лидеры цифровой трансформации", Sber, T-Bank, VK, Yandex, or MTS hackathon case on operator-quality scoring was found. The nearest award is FINAWARD 2025 (Gazprombank and BSS quality-control module), seen in search results only.
+- No Decentrathon, AI Sana, Kaspi, or Halyk hackathon case on this task was found.
+- No GitHub repository for operator QA in Kazakh other than this hackathon's repos was found.
+- No public judging rubric or winner list for previous Freedom Broker competitions was found.
+
+## Part C. Kazakh and Russian LLMs as of November 2026
+
+### C.1 Benchmark numbers
+
+Numbers are accuracy (%) unless marked. Different tables use different prompts, shots, and reasoning settings; compare only within one source.
+
+Source 1: ISSAI model cards, thinking mode on, temperature 1.0, Kazakh-language questions (cards show no release date; repos created 2026-08-05, last updated 2026-08-19 per HF API).
+https://huggingface.co/issai/Qwen3.5-35B-A3B-Kazakh, https://huggingface.co/issai/Qwen3.5-9B-Kazakh
+
+| Model | KazMMLU (kk) | KazCulture (kk) | Belebele (kk) | MMLU (kk) | MMLU-Pro (kk) | Belebele (en) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Qwen/Qwen3.5-35B-A3B (unmodified) | 82.6 | 60.3 | 89.4 | 87.2 | 79.3 | 97.4 |
+| issai/Qwen3.5-35B-A3B-Kazakh | 84.0 | 68.7 | 88.9 | 84.4 | 76.1 | 97.7 |
+| Qwen/Qwen3.5-9B (unmodified) | 77.0 | 49.5 | 87.3 | 82.6 | 74.8 | 97.8 |
+| issai/Qwen3.5-9B-Kazakh | 83.1 | 63.4 | 87.9 | 82.8 | 73.7 | 96.9 |
+
+Source 2: ISSAI Qolda family cards (Kazakh rows; Qolda paper in IEEE Access 2026 per the card citation).
+https://huggingface.co/issai/Qolda-AVL-34B, https://huggingface.co/issai/Qolda
+
+| Model | Base | KazMMLU | KazBench | Belebele (kk) | INCLUDE (kk) | INCLUDE (ru) |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Qolda (4B, no think) | InternVL3.5 + Qwen3-4B | 58.11 | 64.23 | 81.07 | 45.20 | 59.17 |
+| Qolda (4B, think) | same | 66.14 | 61.12 | 82.91 | 46.00 | 56.52 |
+| Qolda-AVL-9B | Qwen3-VL | 73.04 | 64.61 | 84.76 | 57.20 | 64.49 |
+| Qolda-AVL-34B | Qwen3-VL-32B-Thinking | 78.98 | 70.05 | 88.78 | 61.80 | 70.83 |
+
+Source 3: AlemLLM card, "Kazakh leaderboard" (fractions, self-reported, methodology not given, release date not given).
+https://huggingface.co/astanahub/alemllm
+
+| Model | Kazakh avg | Kazakh MMLU | Russian avg | English avg |
+| --- | ---: | ---: | ---: | ---: |
+| AlemLLM (247B MoE, 22B active) | 0.826 | 0.757 | 0.848 | 0.921 |
+| Yi-Lightning | 0.812 | 0.720 | 0.834 | 0.909 |
+| DeepSeek R1 | 0.798 | 0.753 | 0.845 | 0.908 |
+| GPT-4o | 0.776 | 0.730 | 0.808 | 0.862 |
+| KazLLM-1.0-70B | 0.766 | 0.660 | 0.748 | 0.855 |
+| DeepSeek V3 | 0.715 | 0.650 | 0.818 | 0.880 |
+| Llama-3.1-70B-instruct | 0.639 | 0.610 | 0.752 | 0.841 |
+| QwQ 32B | 0.628 | 0.591 | 0.840 | 0.914 |
+
+Source 4: Kaz LLM Leaderboard v2 (kz-transformers, Space created 2026-08-11). The live board is in private datasets; the repository seed file `seed_models.json` holds 29 rows over 10 Kazakh multiple-choice tasks. The average below is my unweighted mean of the 10 task scores; the second column is the file's `mmlu_translated_kk`. Model versions (for example which YandexGPT) are not stated in the file.
+https://huggingface.co/spaces/kz-transformers/kaz-llm-lb2
+
+| Model | Mean of 10 tasks | MMLU translated kk |
+| --- | ---: | ---: |
+| gpt-4o | 72.8 | 74.2 |
+| claude-3-5-sonnet | 71.8 | 73.4 |
+| gemini-1.5-pro | 68.4 | 73.8 |
+| gpt-4o-mini | 62.7 | 56.2 |
+| Llama-3.3-70B-Instruct | 60.9 | 61.1 |
+| google/gemma-3-27b-it | 58.1 | 60.7 |
+| issai/LLama-3.1-KazLLM-1.0-70B | 57.5 | 61.5 |
+| Llama-3.1-Sherkala-8B-Chat | 52.8 | 47.4 |
+| yandex-gpt (version not stated) | 52.5 | 39.8 |
+| issai/LLama-3.1-KazLLM-1.0-8B | 50.6 | 46.1 |
+| Qwen/Qwen2.5-7B-Instruct | 39.6 | 38.3 |
+| random baseline | 21.9 | 23.0 |
+
+Benchmarks checked for Kazakh coverage:
+- MMLU-ProX: 13 languages in v1, 29 in the EMNLP 2025 version; I did not find the full list, so Kazakh inclusion is unverified.
+- Global-MMLU and MMMLU: Kazakh inclusion not verified. Gemma 4 reports MMMLU 88.4% (31B) and 86.3% (26B-A4B) with no per-language breakdown. https://huggingface.co/google/gemma-4-31B-it
+- INCLUDE contains Kazakh (Qolda reports kk and ru INCLUDE rows above).
+- Belebele contains Kazakh (rows above).
+- New 2026 Kazakh benchmarks seen on arXiv: KZ-SafetyPrompts (safety, GPT-4o refusal 28.2% overall), KazakhOCR (OCR), "Left Behind" (2,000 responses across Kazakh and Mongolian, 13.8-16.7 point gap vs English for eight unnamed models; abstract only). https://arxiv.org/abs/2603.21036. KZ-SafetyPrompts and KazakhOCR were seen in search results only and are not cited as facts.
+
+### C.2 Model availability and licensing
+
+| Model | Kazakh evidence | OpenAI-compatible API | License | One 24 GB GPU (my estimate) |
+| --- | --- | --- | --- | --- |
+| Qwen/Qwen3.8-27B (team's plan) | No multilingual or Kazakh numbers visible; the card collapses 10 benchmarks (coding, agentic, GPQA, HLE and others) and the raw README contains no Kazakh text. Inferred from Qwen3.5 rows above. https://huggingface.co/Qwen/Qwen3.8-27B | HF router providers: novita, cerebras, nscale, featherless-ai, scaleway, ovhcloud, deepinfra (HF API, checked today) | Apache-2.0 | 27B in 4-bit about 14-16 GB (weights only, KV cache extra); fits with short context |
+| Qwen/Qwen3.5-35B-A3B | Measured: KazMMLU 82.6, Belebele kk 89.4 (ISSAI) | HF router: novita, deepinfra | Apache-2.0 | 35B total in 4-bit about 18-20 GB (weights only, KV cache extra); tight |
+| issai/Qwen3.5-9B-Kazakh | Measured: KazMMLU 83.1 (ISSAI, self-reported for own model) | None on HF router; vLLM serve command on card | Apache-2.0 | bf16 about 18 GB (weights only, KV cache extra); fits |
+| issai/Qwen3.5-35B-A3B-Kazakh | Measured: KazMMLU 84.0 (self-reported) | None on HF router | Apache-2.0 | tight, as above (weights only, KV cache extra) |
+| issai/Qolda-AVL-34B | KazMMLU 78.98 (self-reported) | None found | Apache-2.0 | 34B 4-bit about 18-20 GB (weights only, KV cache extra); tight |
+| google/gemma-4-31B-it, 26B-A4B-it | No Kazakh-specific number; "35+ languages" supported, "140+" in pretraining | gemma-4-31B-it on HF router: novita, featherless-ai, deepinfra; team already uses 26B-A4B on Workers AI | Apache-2.0 (per card front matter) | 26B-A4B 4-bit QAT GGUF: 14.44 GB text weights plus 1.19 GB vision projector per the HF file listing of google/gemma-4-26B-A4B-it-qat-q4_0-gguf (weights only, KV cache extra); fits |
+| openai/gpt-oss-120b | No Kazakh evaluation found | HF router: groq, novita, cerebras, together, fireworks-ai and others | Apache-2.0 | No |
+| astanahub/alemllm | Kazakh avg 0.826 (self-reported) | No hosted provider; vLLM/SGLang, 8 GPUs in examples | Apache-2.0 plus use clause; gated | No |
+| issai/LLama-3.1-KazLLM-1.0-8B/70B | 0.766 avg kk for 70B in AlemLLM table; 57.5 on kaz-llm-lb seed | None found | CC-BY-NC (non-commercial) https://issai.nu.edu.kz/kazllm/ | 8B yes |
+| Sherkala-8B-Chat | 52.8 on kaz-llm-lb seed | None found | cc-by-nc-sa-4.0, gated (per the audit README) https://github.com/almubdimutaikhan/kazakh-vocab-extension-audit | yes |
+| YandexGPT | 52.5 on kaz-llm-lb seed (version not stated); Kazakh safe-response rate 90.7 in Qorǵau (safety, not quality) | Yandex Cloud API (not checked for OpenAI compatibility today) | Proprietary | No |
+| GigaChat | No Kazakh LLM evaluation found | Not checked | Proprietary | No |
+| Kaspi AI | Claimed only | No | Not published | No |
+
+Note on ISSAI's adaptation: an independent audit of issai/Qwen3.5-4B-Base-Kazakh (2026-10-25) found Kazakh needs 48% fewer tokens and Kazakh accuracy rises 3.7-5.4 points, but Russian text needs 19% more tokens and English/Russian MMLU drops about 1.5 points. For a judge that reads Russian and Kazakh dialogs, that trade is roughly neutral. https://github.com/almubdimutaikhan/kazakh-vocab-extension-audit
+
+ISSAI also lists, as of today, foggen models (2026-11-03), a Persona-ASR model (2026-09-14) and KazGenericTTS (2026-10-04) on its Hugging Face account; I did not read those cards.
+
+### C.3 LLM judging or classification on Kazakh text
+
+| Study | Judge | Task | Sample | Kazakh | Russian | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| Qorǵau (MBZUAI et al., ACL Findings 2025) | GPT-4o | Binary safe/unsafe of model responses | 1,000 per language | accuracy 90.4%, Cohen's kappa 0.595 | accuracy 90.9%, kappa 0.522 | https://aclanthology.org/2025.findings-acl.507.pdf |
+| same | GPT-4o | Fine-grained response-pattern classification (6 safe patterns, 4 harm types) | 1,000 per language | 70.7% | 69.7% in section 4.3; 71% (710/1000) in section 5.2 | same |
+| Azalytical repo (this hackathon, self-reported) | Claude Fable 5.1 x3 | This checklist | 15 KZ DEV dialogs inside 65 | total MAE 0.9 | total MAE 5.3 (RU includes the 5 noisy calls) | https://github.com/Azalytical/freedom-cqa |
+
+Reading: the one peer-reviewed measurement shows a frontier model judging Kazakh responses with the same accuracy as Russian and slightly higher kappa. The task is safety classification, not service quality, and the judge is GPT-4o, not an open model. The hackathon repo's lower Kazakh error is consistent with the KZ chats being short template variants of RU scenarios, while the RU set also contains the noisy calls.
+
+No paper was found that evaluates an open model (Qwen, Gemma, gpt-oss) as a judge on Kazakh text. No paper evaluates LLM judging of Kazakh customer-service dialogs.
+
+### C.4 Negative results for Part C
+
+- No 2026 KazMMLU leaderboard covering Gemma 4, Qwen3.8, gpt-oss, DeepSeek V3.x, YandexGPT 5, or GigaChat was found.
+- No public Kazakh evaluation of YandexGPT 5 or GigaChat 2 was found; Yandex's help page (2023-2024 material) says YandexGPT answers are not available in Kazakh Alice.
+- No public Kazakh evaluation of gpt-oss was found.
+- The MDPI Qolda-AVL paper (search snippet: Qwen3-Omni-30B-A3B-Thinking 77.80 on KazMMLU) and the MDPI Kazakh sentiment-classification paper returned HTTP 403; not cited.
+- The June 2026 headline "ChatGPT станет качественнее думать на казахском" describes a meeting between Kazakhtelecom and OpenAI, not a released model change. https://digitalbusiness.kz/2026-06-09/chatgpt-stanet-kachestvennee-dumat-na-kazahskom-yazike-chto-izmenitsya/
+
+## Implications for the open questions in CASE_CONTEXT
+
+1. Metric. Every precedent that measured agreement reported per-item exact match plus Cohen's kappa (or Krippendorff alpha), and for scales also "within one point". The strongest competitor reports per-criterion match and total MAE. Reporting all four per language costs nothing.
+2. Approach. Precedents converge on: facts from system state computed in code, LLM for semantics, strict JSON, quote check in code, a small regression set gating every prompt change. Voting adds about 0.4 points in the one public comparison (Azalytical: 94.0% single vs 94.4% with 3 votes on Fable; Sonnet 3 votes 92.5%).
+3. Kazakh. Measured evidence now exists that general models handle Kazakh well (Qwen3.5 KazMMLU 77-83) and that a frontier judge agrees with humans on Kazakh as well as on Russian. Kazakh-specific models are not needed for the judge.
+4. Local option. issai/Qwen3.5-9B-Kazakh or Qwen3.5-9B are the only open models with measured Kazakh numbers that fit one 24 GB GPU in bf16 by my estimate (weights only, KV cache extra).
+
+## Sources
+
+- https://telemetr.me/content/mlcomkz
+- https://github.com/Azalytical/freedom-cqa
+- https://github.com/nurssat/cqa-hackathon
+- https://github.com/qqwince/Freedom-Conversation-Quality-Analytics
+- https://github.com/D1maX737/cqa-freedom
+- https://github.com/AkhmadAssentay/cqa-freedom
+- https://github.com/dosmuhamedkemelbekov-ui/cqa-hackathon
+- https://github.com/therustam/CQA-Hackathon-RdTX
+- https://github.com/sNibaAdeka/60HZ-Freedom-CQA
+- https://github.com/RedSnapper91/cqa-hackathon
+- https://github.com/atomi7e/cqa-hackathon
+- https://github.com/CurtisEllese/cqa-evidence
+- https://github.com/Qasymzhomart/CQA_hackathon
+- https://github.com/kelpopope/cqa-freedom
+- https://github.com/azimxxd/cqa-hackathon
+- https://github.com/qsanj/freedom-datathon-26
+- https://github.com/Pandaman-8/freedom-cqa-datathon
+- https://github.com/unsound-mint/cqa-hackathon
+- https://github.com/cortezitos/freedom_broker
+- https://github.com/mutasim77/freedom-broker-rfm
+- https://github.com/g1ke1s/freedom_broker_ds_case
+- https://github.com/ANI-IN/Call-Center-Intelligence-System
+- https://github.com/azalor-zh/call-qa
+- https://github.com/nanosvetik/neuro_quality_control
+- https://github.com/superdrive2000/spanish-contact-center-qa-framework
+- https://github.com/Khushir474/vllm-inference-case-study
+- https://github.com/almubdimutaikhan/kazakh-vocab-extension-audit
+- https://habr.com/ru/companies/yandex/articles/951568/
+- https://habr.com/ru/articles/1071782/
+- https://habr.com/ru/companies/mts_ai/articles/1087852/
+- https://habr.com/ru/companies/yoomoney/articles/933954/
+- https://habr.com/ru/articles/934944
+- https://aclanthology.org/2024.emnlp-industry.60/
+- https://aclanthology.org/2025.findings-acl.507.pdf
+- https://arxiv.org/abs/2603.21036
+- https://yandex.cloud/ru/blog/speechsense-ai-assistants
+- https://yandex.cloud/ru/blog/posts/2025/05/speechsense-and-dialogues
+- https://aistudio.yandex.ru/docs/ru/speechsense/api-ref/Talk/get
+- https://developers.sber.ru/docs/ru/salutespeech/changelog
+- https://www.comnews.ru/content/243338/2026-01-20/
+- https://kod.ru/otp-bank-rechevaya-analitika-na-ml-llm
+- https://3itech.ru/cases/tpost/ukkaenkv21-povishenie-kachestva-obsluzhivaniya-i-av
+- https://finratings.kz/news/8491-kaspi-pokazal-ii-kotoryi-pishet-po-kazakhski-luchshe-vsekh-v-mire/
+- https://digitalbusiness.kz/2025-05-15/mi-na-pervoy-linii-v-rabote-s-klientami-poetomu-vsegda-dolzhni-bit-nagotove-intervyu-sdirektorom-departamenta-podderzhki-irazvitiya-klientov-freedom-broker-irinoy-suglobovoy/
+- https://digitalbusiness.kz/2026-06-09/chatgpt-stanet-kachestvennee-dumat-na-kazahskom-yazike-chto-izmenitsya/
+- https://huggingface.co/issai/Qwen3.5-35B-A3B-Kazakh
+- https://huggingface.co/issai/Qwen3.5-9B-Kazakh
+- https://huggingface.co/issai/Qolda-AVL-34B
+- https://huggingface.co/issai/Qolda
+- https://huggingface.co/astanahub/alemllm
+- https://issai.nu.edu.kz/kazllm/
+- https://huggingface.co/spaces/kz-transformers/kaz-llm-lb2
+- https://huggingface.co/Qwen/Qwen3.8-27B
+- https://huggingface.co/google/gemma-4-31B-it
+- https://huggingface.co/google/gemma-4-26B-A4B-it-qat-q4_0-gguf
+- https://astanahub.com/ru/tech_task/razrabotka-sistemy-otsenki-kachestva-dialogov-operator-klient (not fetched, HTTP 403; listed as an unverified lead only)
+
+## Confidence
+
+Part B.1 (competitor repositories) is reliable as a snapshot of what the READMEs said at the time of reading, but the content is self-reported, changes hourly, and the one published accuracy figure was measured on the team's own labels with guidance tuned on the same dialogs, so it overstates expected control-set agreement. Part B.2 numbers come from fetched Habr articles; two articles do not show the year, which I inferred only where the article states when experiments ran. Part C numbers are accurate transcriptions of model cards and one paper, but ISSAI and Astana Hub numbers are self-reported by the model authors, the AlemLLM table has no stated methodology, and the kaz-llm-lb2 figures come from a seed file rather than the live board, with my own averaging. VRAM fits are my arithmetic estimates, not measurements. I could not read Astana Hub (403 to fetch and browser), MDPI (403), or the T-Bank business blog (TLS error), and found no primary source on Imot.io, CallGear, speechanalytics.ru, UIS, VK, or Mango Office's current LLM features. Nothing here measures Qwen3.8-27B on Kazakh; that remains an inference from Qwen3.5.

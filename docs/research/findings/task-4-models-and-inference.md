@@ -1,0 +1,360 @@
+# Task 4: Models, inference, and audio options (verified 2026-11-07)
+
+All prices, IDs and context lengths below were read today (2026-11-07) from provider pages or machine-readable catalogs. Where a fetched page did not show a value, the cell says "not stated". Two catalogs were pulled as JSON and parsed locally: the Hugging Face router model list (`GET https://router.huggingface.co/v1/models`, 127 models) and the OpenRouter model list (`GET https://openrouter.ai/api/v1/models`, 460 models), plus OpenRouter per-model endpoint lists. These are catalog reads, not LLM calls. Vendor benchmark numbers are marked "self-reported".
+
+Relation to the existing brief (research/RESEARCH_BRIEF.md): this file **confirms** the planned model ID and Cerebras price, **corrects** four assumptions (structured-output support on the `:cerebras` route, context length, recommended thinking temperature, Kazakh STT options), and **extends** with the Workers AI catalog, frontier prices, a cost table, local throughput numbers, and audio options.
+
+## 1. Headline findings
+
+| # | Finding | Effect on the plan | Evidence |
+| --- | --- | --- | --- |
+| 1 | `Qwen/Qwen3.8-27B` exists (Apache-2.0, dense 27B, created on the Hub 2026-08-05) and is live on the HF router with provider `cerebras` at $0.99 in / $1.49 out per M. | Planned model and price confirmed. | HF router `/v1/models`; https://huggingface.co/Qwen/Qwen3.8-27B; https://inference-docs.cerebras.ai/models/qwen-3.8-27b |
+| 2 | The HF router lists the `cerebras` provider for Qwen3.8-27B with `supports_structured_output: false` and `context_length: 65536`. OpenRouter's Cerebras endpoint for the same model also reports no `structured_outputs` and 65,536 context. Cerebras's own docs say strict `json_schema` is supported and paid-tier context is 131,072. | **Contradiction.** JSON schema through `router.huggingface.co` + `:cerebras` may be passed through or may be dropped. Send one probe request with a deliberately strict schema and check that a non-conforming answer is impossible; if not enforced, validate with Zod and retry. | HF router JSON (fetched today); https://openrouter.ai/api/v1/models/qwen/qwen3.8-27b/endpoints; https://inference-docs.cerebras.ai/capabilities/structured-outputs |
+| 3 | Cerebras strict schemas reject `minItems`/`maxItems`, `pattern`, `format`, `oneOf`/`allOf`, and require `additionalProperties: false` on every object; Qwen3.8 strict tool schemas also reject `minLength`/`maxLength`. | The Zod-to-JSON-schema output must be stripped of these keywords or the request fails validation. | https://inference-docs.cerebras.ai/capabilities/structured-outputs |
+| 4 | On Cerebras, Qwen3.8 reasoning is controlled by `reasoning_effort` = `none`/`low`/`medium`/`high` (default `high`); Cerebras says not to send `enable_thinking` or `thinking_budget`. Effort levels do not guarantee a token budget. | Use `reasoning_effort` only; cap cost with `max_completion_tokens` (reasoning counts against it). | https://inference-docs.cerebras.ai/capabilities/reasoning |
+| 5 | The model card recommends temperature 1.0, top_p 0.95, top_k 20 in thinking mode (0.7 / 0.8 / presence_penalty 1.5 without thinking). | The brief's "temperature 0.6, 3 samples" deviates from the vendor default; either is defensible for voting, but test 1.0 too. | https://huggingface.co/Qwen/Qwen3.8-27B |
+| 6 | Cerebras rate limits for `qwen-3.8-27b`: Free Trial 5 RPM, 30K uncached TPM, 1M tokens/day; Developer 300 RPM, 150K uncached TPM, 750K total TPM (temporarily raised from 450K). | A 10-dialog control run with 3 samples (30 calls) takes 6+ minutes at 5 RPM. Use a paid key or the HF-routed path (HF's own limits are not documented). | https://inference-docs.cerebras.ai/support/rate-limits |
+| 7 | Workers AI now serves `@cf/qwen/qwen3.8-27b` (262,144 context, $0.45 in / $3.20 out) next to the current `@cf/google/gemma-4-26b-a4b-it` ($0.10 / $0.30). | Same model family inside the Worker binding, no external key; 2.1x more expensive than Cerebras on output. | https://developers.cloudflare.com/workers-ai/platform/pricing/; https://developers.cloudflare.com/workers-ai/models/qwen3.8-27b/ |
+| 8 | Workers AI added Cloudflare's own decision models `@cf/cloudflare/clef` (27B), `clef-flash`, and `clef-omni` (30B-A3B, accepts audio): input is a state plus up to 64 typed questions (`noul`, `choice`, `score`), output is a probability per option, billed on input only ($0.24/M for clef, $0.15/M for clef-omni). | Not covered by the brief. Maps directly onto a checklist (Yes/No/N/A and 0-20 scales) and gives calibrated confidence; it gives no explanation or evidence, so it is a second opinion, not the main judge. | https://developers.cloudflare.com/workers-ai/models/clef/; https://developers.cloudflare.com/workers-ai/models/clef-omni/ |
+| 9 | A 24 GB RTX 4090 runs Qwen3.8-27B UD-Q4_K_XL GGUF (17.56 GB file) at 47 tok/s decode, 109 tok/s with MTP speculative decoding (llama.cpp b11200), and Ollama `qwen3.8:27b` at 95.5 tok/s with MTP. | Local demo can use the same model as the cloud judge. One evaluation with 3,000 reasoning tokens takes about 35 s locally versus about 4 s on Cerebras. | https://computingforgeeks.com/run-qwen3-8-27b-locally/ |
+| 10 | GigaAM-Multilingual (Sber, MIT, created 2026-07-14) reports Kazakh WER 4.4 (FLEURS) and 15.8 (internal in-the-wild) for the 600M model versus 32.4 and 65.2 for Whisper large-v3 (self-reported). | **Corrects the brief**, which says GigaAM is Russian-only and routes Kazakh to Whisper fine-tunes. One model now covers RU and KZ. | https://huggingface.co/ai-sage/GigaAM-Multilingual |
+
+## 2. Candidate judge models
+
+### 2.1 Open-weight models: what is actually served (HF router, OpenRouter, Workers AI, Cerebras)
+
+Prices are USD per M tokens (input / output). "SO" is the structured-output flag the catalog reports. Speed is the HF router's own measured throughput (tokens/s) and first-token latency for that provider at fetch time; Workers AI does not publish speed.
+
+| Model ID (Hub) | Route | Context | Price in / out | SO flag | Measured speed | Notes |
+| --- | --- | ---: | --- | --- | --- | --- |
+| Qwen/Qwen3.8-27B | HF router `:cerebras` | 65,536 | 0.99 / 1.49 | false | 944 tok/s, TTFT 143 ms | Cerebras models overview page: ~1,850 tok/s; 131K paid context |
+| Qwen/Qwen3.8-27B | HF router `:deepinfra` | 262,144 | 0.20 / 2.50 | true | 46.5 tok/s, 303 ms | 20x slower than Cerebras |
+| Qwen/Qwen3.8-27B | HF router `:nscale` | 1,048,576 | 0.20 / 2.50 | true | 128.8 tok/s, 498 ms | |
+| Qwen/Qwen3.8-27B | HF router `:ovhcloud` | 262,144 | 0.47 / 3.19 | true | 116.5 tok/s, 1,051 ms | EU host |
+| Qwen/Qwen3.8-27B | HF router `:novita` | 1,000,000 | 0.42 / 3.00 | false | 26.1 tok/s | |
+| qwen-3.8-27b | Cerebras direct | 65,536 free / 131,072 paid | 0.99 / 1.49 | strict json_schema documented | ~1,850 tok/s (models overview page, https://inference-docs.cerebras.ai/models/overview; the qwen-3.8-27b page gives no speed) | max output 32,768 free / 40,960 paid |
+| @cf/qwen/qwen3.8-27b | Workers AI | 262,144 | 0.45 / 3.20 (cached in 0.05) | `response_format` listed, json_schema not documented | not published | `reasoning_effort` low / medium / xhigh |
+| qwen/qwen3.8-27b | OpenRouter | 1,024,000 max across 24 endpoints | from 0.033 / 1.794 (PrimeIntellect fp8) | true on most | not reported in API | Cerebras endpoint listed at 0.99 / 1.49, fp16, SO false |
+| openai/gpt-oss-120b | HF router `:cerebras` | 131,072 | 0.35 / 0.75 | false | 1,105 tok/s, 288 ms | reasoning cannot be disabled (low/medium/high) |
+| openai/gpt-oss-120b | HF router `:groq` | 131,072 | 0.15 / 0.75 | false | 434 tok/s, 317 ms | |
+| openai/gpt-oss-120b | HF router `:deepinfra` | 131,072 | 0.037 / 0.17 | true | 45.9 tok/s | |
+| @cf/openai/gpt-oss-120b | Workers AI | not stated | 0.35 / 0.75 | not documented | not published | |
+| google/gemma-4-26B-A4B-it | HF router `:deepinfra` | 262,144 | 0.07 / 0.34 | true | 53.7 tok/s | MoE, 3.8B active |
+| @cf/google/gemma-4-26b-a4b-it | Workers AI | 256,000 | 0.10 / 0.30 | `response_format` listed | not published | current team evaluator |
+| google/gemma-4-31B-it | HF router `:deepinfra` | 262,144 | 0.20 / 0.40 | true | 26.0 tok/s | dense; MMMLU 88.4 (self-reported) |
+| zai-org/GLM-5.3-Flash | HF router `:deepinfra` | 1,048,576 | 0.15 / 0.50 | true | 84.3 tok/s | also `@cf/zai-org/glm-5.3-flash` at 0.15 / 0.50 (Workers Paid only) |
+| deepseek-ai/DeepSeek-V4.1-Flash | HF router `:deepinfra` | 1,048,576 | 0.20 / 0.60 | true | 103.4 tok/s | `@cf/deepseek-ai/deepseek-v4.1-flash-1017` at 0.30 / 1.20 |
+| deepseek-ai/DeepSeek-V4-Pro | HF router `:deepinfra` | 1,048,576 | 1.30 / 2.60 | true | 30.6 tok/s | |
+| moonshotai/Kimi-K3 | HF router `:baseten` | 1,048,576 | 3.00 / 15.00 | true | 85.4 tok/s | Cerebras lists `kimi-k3` reasoning `low/high/max`, cannot disable |
+| moonshotai/Kimi-K2.6 | Workers AI | not stated | 0.95 / 4.00 | not documented | not published | |
+| nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4 | HF router `:baseten` | 1,048,576 | 0.20 / 0.50 | true | 361 tok/s | |
+| nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16 | HF router `:deepinfra` | 262,144 | 1.00 / 5.00 | true | 47 tok/s | |
+| @cf/nvidia/nemotron-3-120b-a12b | Workers AI | not stated | 0.50 / 1.50 | not documented | not published | |
+| meta-llama/Llama-4-Scout-17B-16E-Instruct | HF router `:deepinfra` | 327,680 | 0.10 / 0.30 | true | 78 tok/s | no reasoning mode |
+| mistralai/mistral-large-4-0 | OpenRouter | 1,048,576 | 0.70 / 2.10 | true | not reported | not on HF router |
+| Qwen/Qwen3.8-2.4T-A95B | HF router `:deepinfra` | 262,144 | 2.00 / 6.00 | true | 70 tok/s | flagship open Qwen3.8 |
+
+Sources: HF router JSON and OpenRouter JSON fetched today; https://inference-docs.cerebras.ai/models/overview; https://developers.cloudflare.com/workers-ai/platform/pricing/; https://developers.cloudflare.com/workers-ai/models/ (catalog of 39 text-generation models, including `qwen3.8-27b`, `gemma-4-26b-a4b-it`, `gpt-oss-120b`, `glm-5.3-flash`, `deepseek-v4.1-flash-1017`, `kimi-k2.6`, `nemotron-3-120b-a12b`).
+
+Only two models are served by Cerebras on the shared tier: `gpt-oss-120b` and `qwen-3.8-27b` (https://inference-docs.cerebras.ai/models/overview). Cerebras's reasoning page also documents `kimi-k3`, `zai-glm-5.3-flash`, `kimi-k2.7-code`, and `gemma-4-31b`, but the overview places the extra families on Dedicated Inference only.
+
+Closeness: High for Qwen3.8-27B (planned model, verified on three routes); Medium for gpt-oss-120b (second family on the same router, cannot turn reasoning off); Medium for GLM-5.3-Flash and DeepSeek-V4.1-Flash (cheap third-family voters, no RU/KZ judge evidence). Borrow in 24 h: switch the tie-break voter to a provider whose catalog flag says SO true if the Cerebras probe fails.
+
+### 2.2 Qwen3.8-27B documented properties
+
+| Property | Value | Source |
+| --- | --- | --- |
+| Architecture | Dense 27B causal LM with vision encoder; 64 layers, hidden 5,120; Gated DeltaNet + Gated Attention; MTP head; `qwen3_5` model type | https://huggingface.co/Qwen/Qwen3.8-27B |
+| Context | 262,144 native; up to 1,000,000 with YaRN | same |
+| Thinking | On by default; disable with `chat_template_kwargs: {"enable_thinking": false}` (vLLM/SGLang) or `enable_thinking: false` (Qwen Cloud); `reasoning_effort` xhigh (default) / medium / low; `preserve_thinking` on by default | same |
+| Languages | Card does not list languages or any multilingual benchmark | same (negative result) |
+| Benchmarks on the card | Coding, agent, GPQA Diamond 89.2, IFBench 79.5, vision; no MMMLU, INCLUDE, or Russian/Kazakh results (self-reported) | same |
+| License, weights | Apache-2.0; BF16 55.6 GB; official FP8 30.9 GB (`Qwen/Qwen3.8-27B-FP8`) | HF API sizes read today |
+| vLLM recipe | `vllm serve Qwen/Qwen3.8-27B --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser qwen3`; MTP: `--speculative-config '{"method":"mtp","num_speculative_tokens":3}'`; vLLM 0.17.0+ | https://recipes.vllm.ai/Qwen/Qwen3.8-27B |
+
+The card names three sibling models in its comparison table: Qwen3.6-27B, Qwen3.7-Plus, and Muse Glimmer-30B (Meta), plus "Opus4.6 Max".
+
+### 2.3 Frontier APIs
+
+| Provider / model ID | Context | Price in / out per M | Structured output | Reasoning control | Source |
+| --- | ---: | --- | --- | --- | --- |
+| OpenAI `gpt-6-astra` | 1.05M | 10.00 / 50.00 | listed on OpenRouter | low..max; `none` returns 400 | https://developers.openai.com/api/docs/pricing; https://developers.openai.com/api/docs/guides/reasoning |
+| OpenAI `gpt-6.1-sol` | 1.05M | 2.00 / 10.00 | listed on OpenRouter | low..max | https://developers.openai.com/api/docs/models |
+| OpenAI `gpt-6.1-terra` | 1.05M | 1.00 / 5.00 | listed on OpenRouter | none, low..max | same |
+| OpenAI `gpt-6-luna` | 1.05M (922K input) | 0.10 / 0.50 (cached 0.01) | supported | none, low, medium (default), high, xhigh, max | https://developers.openai.com/api/docs/models/gpt-6-luna |
+| OpenAI `gpt-5.6-luna` | 1.05M | 0.20 / 1.20 | listed on OpenRouter | not checked | pricing page |
+| Anthropic `claude-fable-5-1` | 1M | 10 / 50 | GA (listed in structured-outputs supported models) | adaptive thinking, always on, default effort high | https://platform.claude.com/docs/en/about-claude/pricing; https://platform.claude.com/docs/en/about-claude/models/overview |
+| Anthropic `claude-opus-5` (legacy) | 1M | 5 / 25 | GA | adaptive | pricing page |
+| Anthropic `claude-opus-5-5` | 1M | 4 / 20 | GA, `output_config.format` | adaptive thinking, always on, default effort medium | https://platform.claude.com/docs/en/about-claude/pricing; https://platform.claude.com/docs/en/about-claude/models/overview |
+| Anthropic `claude-sonnet-5-5` | 1M | 2 / 10 | GA | adaptive; `thinking: disabled` not supported | same |
+| Anthropic `claude-haiku-5-5` | 1M | 0.10 / 0.50 up to 100K prompt; 0.50 / 2.50 above | GA | adaptive, default effort medium | same |
+| Google `gemini-4-argon` | 1M | 2.00 / 10.00 to 2026-11-30, then 4.00 / 20.00 | listed on OpenRouter | thinking_level low / medium / high | https://aistudio.google.com/docs/pricing; https://aistudio.google.com/docs/thinking |
+| Google `gemini-3.8-flash` | 1,048,576 (OpenRouter) | 0.75 / 3.75 to 2026-12-31, then 1.50 / 7.50 | listed on OpenRouter | low / medium (default) / high; no off switch documented | same |
+| Google `gemini-3.5-flash-lite` | 1,048,576 (OpenRouter) | 0.30 / 2.50 (audio same price) | listed on OpenRouter | minimal (default) .. high | same |
+| xAI `grok-4.3` | 1M | 1.25 / 2.50 (<200K) | not stated on xAI page; listed on OpenRouter | not stated | https://docs.x.ai/docs/models |
+| xAI `grok-4.7` | 500K | 2.00 / 6.00 (<200K) | not stated on xAI page | not stated | same |
+
+Notes:
+- Anthropic top tier: Claude Fable 5.1 ($10/$50) is Anthropic's flagship for demanding reasoning; Claude Mythos 5.1 has the same price but limited availability (verified organizations only), so it is not an option here. Both appear on the pricing page cited above.
+- Anthropic: Claude 4.7 and later use a tokenizer that produces about 30% more tokens for the same text (pricing page); multiply Claude input and output token counts by about 1.3 when comparing. Not applied in the cost table below.
+- Anthropic structured outputs: a schema property that asks for "the model's thinking or step-by-step reasoning" can trigger a `reasoning_extraction` refusal; ask for a short explanation field instead (https://platform.claude.com/docs/en/build-with-claude/structured-outputs). The team's `subChecks` and `operatorActions` fields are fine; a field named `reasoning` is not.
+- OpenAI Batch and Flex are half price (pricing page). Not useful for a live demo.
+- Published Russian or Kazakh judge results for any of these models: none found (see section 8).
+
+Closeness: Medium for `gpt-6-luna` and `claude-haiku-5-5` (cheap, schema-enforced, off-switch for reasoning on luna); Low for Opus/Argon/Astra (cost 10-60x Qwen on Cerebras for unproven gain on short chats). Borrow in 24 h: `gpt-6-luna` with `reasoning_effort: "none"` or `"low"` as an independent-family voter if a paid OpenAI key exists.
+
+### 2.4 Regional models
+
+| Model | Price | Structured output | Notes | Source |
+| --- | --- | --- | --- | --- |
+| Yandex `YandexGPT Pro 5.1` | sync $0.006557376 per 1K tokens in and out ($6.56/M); async $0.0033606552 per 1K | not checked | USD net of VAT; page date not visible | https://aistudio.yandex.ru/docs/en/ai-studio/pricing |
+| Yandex `Alice AI LLM` | sync $0.00409836 in / $0.009836064 out per 1K | not checked | same page also hosts gpt-oss-120b ($0.002459 per 1K) and Qwen3.6 35B | same |
+| Sber `GigaChat-2-Max` | 650 RUB/M sync, 325 RUB/M async (VAT included) | not checked | page updated 2026-10-07; GigaChat 3 Ultra/Lightning not on the paid tariff page; 600 RUB monthly minimum | https://developers.sber.ru/docs/ru/gigachat/tariffs/legal-tariffs |
+| Astana Hub `astanahub/alemllm` | open weights, Apache-2.0, gated (auto) | n/a | `MoYiForCausalLM` architecture; card self-reports 0.848 on a Kazakh leaderboard vs 0.840 for QwQ-32B; no KazMMLU result found | HF API; search result https://huggingface.co/astanahub/alemllm (card not fully read) |
+| ISSAI `issai/Qwen3.5-35B-A3B-Kazakh` (also 9B, 4B) | open weights, Apache-2.0, created 2026-08-05 | via vLLM | KazMMLU 82.6 base to 84.0 adapted; MMLU drops 87.2 to 84.4; reasons more briefly than the original (self-reported) | https://huggingface.co/issai/Qwen3.5-35B-A3B-Kazakh |
+
+No Russian or Kazakh regional model offers a measured advantage as a checklist judge. Yandex and Sber need Russian legal entities or Russian payment; the GigaChat price is in rubles and was not converted because no exchange rate was verified. Closeness: Low for YandexGPT and GigaChat (cost and onboarding, no judge evidence); Medium for ISSAI Qwen3.5-35B-A3B-Kazakh (the only 2026 Kazakh-adapted model with published KazMMLU, 3B active so it is fast locally). AlemLLM: Low (gated weights, MoYi architecture, no KazMMLU or judge evidence found). Borrow in 24 h: nothing for the main path; the ISSAI 9B model is a candidate KZ-only local voter if KZ agreement is poor.
+
+## 3. Cost per evaluation
+
+Assumptions (stated so the table can be recomputed):
+- Input = transcript + 2,000 tokens of fixed prompt (system rules, 8 criteria with scales, JSON schema). Chat: 1,500 + 2,000 = 3,500 input tokens. Call: 6,000 + 2,000 = 8,000 input tokens.
+- Visible output (8 criteria with evidence and short explanations): 800 tokens.
+- Reasoning: 3,000 tokens, billed as output on every provider listed (Cerebras: reasoning counts in completion tokens; Gemini: "response pricing is the sum of output tokens and thinking tokens").
+- Three sampled calls = 3 independent requests, no prompt caching.
+- Formula: cost = (input × price_in + output × price_out) / 1,000,000.
+
+Worked example, Qwen3.8-27B on Cerebras, chat, one call with reasoning: (3,500 × 0.99 + 3,800 × 1.49) / 1e6 = (3,465 + 5,662) / 1e6 = $0.00913. Three samples: 3 × 0.00913 = $0.0274. Call, three samples: 3 × (8,000 × 0.99 + 3,800 × 1.49) / 1e6 = 3 × (7,920 + 5,662) / 1e6 = $0.0407.
+
+| Model and route | $/M in / out | Chat, 1 call no reasoning | Chat, 1 call + reasoning | Chat, 3 calls + reasoning | Call, 1 call no reasoning | Call, 1 call + reasoning | Call, 3 calls + reasoning |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Qwen3.8-27B, Cerebras (HF `:cerebras` or direct) | 0.99 / 1.49 | 0.00466 | 0.00913 | 0.02738 | 0.00911 | 0.01358 | 0.04075 |
+| Qwen3.8-27B, Workers AI | 0.45 / 3.20 | 0.00413 | 0.01374 | 0.04121 | 0.00616 | 0.01576 | 0.04728 |
+| Qwen3.8-27B, DeepInfra via HF | 0.20 / 2.50 | 0.00270 | 0.01020 | 0.03060 | 0.00360 | 0.01110 | 0.03330 |
+| gpt-oss-120b, Cerebras | 0.35 / 0.75 | 0.00183* | 0.00407 | 0.01222 | 0.00340* | 0.00565 | 0.01695 |
+| gpt-oss-120b, Groq via HF | 0.15 / 0.75 | 0.00112* | 0.00337 | 0.01013 | 0.00180* | 0.00405 | 0.01215 |
+| gemma-4-26B-A4B, Workers AI | 0.10 / 0.30 | 0.00059 | 0.00149 | 0.00447 | 0.00104 | 0.00194 | 0.00582 |
+| GLM-5.3-Flash, Workers AI or HF DeepInfra | 0.15 / 0.50 | 0.00093 | 0.00243 | 0.00728 | 0.00160 | 0.00310 | 0.00930 |
+| DeepSeek-V4.1-Flash, HF DeepInfra | 0.20 / 0.60 | 0.00118 | 0.00298 | 0.00894 | 0.00208 | 0.00388 | 0.01164 |
+| gpt-6-luna | 0.10 / 0.50 | 0.00075 | 0.00225 | 0.00675 | 0.00120 | 0.00270 | 0.00810 |
+| gpt-6.1-terra | 1.00 / 5.00 | 0.00750 | 0.02250 | 0.06750 | 0.01200 | 0.02700 | 0.08100 |
+| claude-haiku-5-5 | 0.10 / 0.50 | 0.00075* | 0.00225 | 0.00675 | 0.00120* | 0.00270 | 0.00810 |
+| claude-sonnet-5-5 | 2.00 / 10.00 | 0.01500* | 0.04500 | 0.13500 | 0.02400* | 0.05400 | 0.16200 |
+| claude-fable-5-1 | 10.00 / 50.00 | 0.07500* | 0.22500 | 0.67500 | 0.12000* | 0.27000 | 0.81000 |
+| claude-opus-5 (legacy) | 5.00 / 25.00 | 0.03750* | 0.11250 | 0.33750 | 0.06000* | 0.13500 | 0.40500 |
+| claude-opus-5-5 | 4.00 / 20.00 | 0.03000* | 0.09000 | 0.27000 | 0.04800* | 0.10800 | 0.32400 |
+| gemini-3.5-flash-lite | 0.30 / 2.50 | 0.00305* | 0.01055 | 0.03165 | 0.00440* | 0.01190 | 0.03570 |
+| gemini-3.8-flash (price to 2026-12-31) | 0.75 / 3.75 | 0.00562* | 0.01688 | 0.05063 | 0.00900* | 0.02025 | 0.06075 |
+| gemini-4-argon (price to 2026-11-30) | 2.00 / 10.00 | 0.01500* | 0.04500 | 0.13500 | 0.02400* | 0.05400 | 0.16200 |
+| grok-4.3 | 1.25 / 2.50 | 0.00637 | 0.01388 | 0.04163 | 0.01200 | 0.01950 | 0.05850 |
+| YandexGPT Pro 5.1, sync | 6.557 / 6.557 | 0.02820 | 0.04787 | 0.14361 | 0.05770 | 0.07738 | 0.23213 |
+| Cloudflare clef (input-only billing) | 0.24 / 0 | 0.00084 | n/a | n/a | 0.00192 | n/a | n/a |
+
+\* The "no reasoning" column is a lower bound for models whose reasoning cannot be fully disabled: gpt-oss-120b (minimum `low`), Claude Fable 5.1, Opus 5.5 and Sonnet 5.5 (adaptive thinking, always on for Fable 5.1 and Opus 5.5; the models overview says Sonnet 5.5 rejects `thinking: disabled`; Haiku 5.5 not verified), Gemini 3.8 Flash and Argon (minimum `low`), Gemini 3.5 Flash-Lite (minimum `minimal`).
+
+Cost for the required "one evaluation across all calls" statement: the 10-dialog control set with the brief's design (3 Qwen samples with reasoning on Cerebras) costs 10 × $0.0274 = $0.27 if all are chats, and at most 10 × $0.0407 = $0.41 if all are calls. The full 65-dialog DEV set (60 chats, 5 calls) costs 60 × 0.02738 + 5 × 0.04075 = 1.643 + 0.204 = $1.85 per full 3-sample pass.
+
+### 3.1 Latency per evaluation (estimates from measured throughput)
+
+Time ≈ TTFT + output tokens / throughput (prefill ignored for cloud; it is small at 3.5K-8K input). Throughput is the HF router's measured value for that provider today; local values from the RTX 4090 benchmark in section 4.
+
+| Route | Throughput | 800 tokens (no reasoning) | 3,800 tokens (with reasoning) | 3 samples in parallel |
+| --- | ---: | ---: | ---: | ---: |
+| Qwen3.8-27B, Cerebras via HF | 944 tok/s, TTFT 0.14 s | 1.0 s | 4.2 s | ~4.2 s if 3 concurrent requests are allowed |
+| gpt-oss-120b, Cerebras via HF | 1,105 tok/s, TTFT 0.29 s | 1.0 s | 3.7 s | ~3.7 s |
+| gpt-oss-120b, Groq via HF | 434 tok/s, TTFT 0.32 s | 2.2 s | 9.1 s | ~9 s |
+| Qwen3.8-27B, DeepInfra via HF | 46.5 tok/s, TTFT 0.30 s | 17.5 s | 82 s | ~82 s |
+| gemma-4-26B-A4B, DeepInfra via HF (Workers AI speed unpublished) | 53.7 tok/s | 15 s | 71 s | ~71 s |
+| Qwen3.8-27B Q4, RTX 4090, llama.cpp + MTP | 109 tok/s decode, ~2,800 tok/s prefill | 8.6 s | 36 s | ~108 s sequential (one slot) |
+
+The brief's "1 to 2 s per call" holds only without reasoning. With 3,000 reasoning tokens a Cerebras call takes about 4 s, and the ~1,850 tok/s on the Cerebras models overview page (https://inference-docs.cerebras.ai/models/overview) would give about 2 s; the 944 tok/s measured by the HF router is the planning figure; measure on the team's key.
+
+## 4. Local serving: one 24 GB GPU, Modal, laptop
+
+### 4.1 What fits
+
+| Model / file | Size on disk | Fits 24 GB? | Measured speed | Source |
+| --- | ---: | --- | --- | --- |
+| unsloth Qwen3.8-27B UD-Q4_K_XL GGUF | 17.56 GB | yes, 17.0 GiB VRAM at 8K, 20.0 GiB with MTP | 47.0 tok/s; 109.4 tok/s with MTP (RTX 4090, llama.cpp b11200) | HF API; https://computingforgeeks.com/run-qwen3-8-27b-locally/ (updated 2026-09-27) |
+| unsloth UD-Q4_K_M GGUF | 16.46 GB | yes | not measured in the source | HF API |
+| unsloth UD-Q5_K_XL GGUF | 20.88 GB | yes with MTP at 8K (22.8 GiB) | 95.8 tok/s with MTP | same |
+| unsloth UD-Q6_K GGUF | 21.98 GB | did not load with MTP | n/a | same |
+| MTP draft head `mtp-Qwen3.8-27B-Q4_0.gguf` | 1.37 GB | adds ~3 GiB | 69% draft acceptance | same |
+| Ollama `qwen3.8:27b` (Q4_K_M) | 18 GB | yes; 64K context at 21.9 GiB | 95.5 tok/s with MTP at 8K; 47.7 without | https://ollama.com/library/qwen3.8; computingforgeeks |
+| cyankiwi/Qwen3.8-27B-AWQ-INT4 (vLLM) | 21.0 GB | weights fit, little KV room; the vLLM recipe's single-card tests used 32 GB cards | not measured on 24 GB | HF API; https://recipes.vllm.ai/Qwen/Qwen3.8-27B |
+| Qwen/Qwen3.8-27B-FP8 (vLLM) | 30.9 GB | no; use Modal L40S 48 GB or larger | 44.4 tok/s single user, 71.9 with MTP, 542 tok/s at 16 users (RTX PRO 6000) | computingforgeeks |
+| issai/Qwen3.5-35B-A3B-Kazakh | not measured | Q4 GGUF not checked | not measured | model card |
+
+Modal GPU prices (per second, per hour computed): L40S $0.000542 ($1.95/h), A100 80 GB $0.000694 ($2.50/h), H100 $0.001097 ($3.95/h), RTX PRO 6000 $0.000842 ($3.03/h); Starter plan includes $30/month credit (https://modal.com/pricing). An FP8 Qwen3.8-27B on one L40S for the 24 hours costs about 24 × 1.95 = $46.80 if left running; scale-to-zero makes the demo cost close to the minutes used.
+
+### 4.2 Flags for JSON schema and reasoning
+
+| Engine | Reasoning split | Disable / cap thinking | JSON schema | Source |
+| --- | --- | --- | --- | --- |
+| vLLM | `--reasoning-parser qwen3` puts thinking in `reasoning_content` | per request `chat_template_kwargs: {"enable_thinking": false}`; `reasoning_effort` | `response_format: {type: "json_schema", ...}` or `extra_body: {"structured_outputs": {"json": ...}}`; backend via `--structured-outputs-config.backend` (xgrammar, guidance, auto); constraints apply after reasoning unless `--structured-outputs-config.enable_in_reasoning=True` | https://docs.vllm.ai/en/latest/features/structured_outputs.html (footer 2026-10-24); vLLM recipe |
+| llama.cpp `llama-server` | `--reasoning-format deepseek` moves thoughts to `reasoning_content`; `none` leaves them in content | `--reasoning-budget 0` ends thinking immediately; positive value caps it; `--reasoning off` | `-j` / `json_schema` documented for `/completion`; `/v1/chat/completions` section not visible in the fetched README | https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md |
+| Ollama | `think` per request (used in the benchmark) | `think: false` | `format: <JSON schema>`; OpenAI-compatible `response_format` supported; Ollama cloud does not support structured outputs | https://docs.ollama.com/capabilities/structured-outputs |
+| LM Studio | not checked | not checked | `response_format` `json_schema` on `/v1/chat/completions`; GGUF via llama.cpp grammar, MLX via Outlines | https://lmstudio.ai/docs/developer/openai-compat/structured-output |
+
+Recommended local command (24 GB, from the benchmark's flags): `llama-server -m Qwen3.8-27B-UD-Q4_K_XL.gguf -ngl 99 -fa on -c 16384 --jinja --reasoning-format deepseek --spec-type draft-mtp -md mtp-Qwen3.8-27B-Q4_0.gguf -ngld 99`. With MTP the practical context on a 4090 is about 8K, which fits a 1,500-token chat with a 2,000-token prompt plus 3,800 output tokens (7,300 total) but not a 6,000-token call with reasoning (11,800). For calls, drop MTP and use `-c 32768 -ctk q8_0 -ctv q8_0` (47 tok/s). The `--spec-type` and `-md` flags are as quoted by the benchmark article; they were not cross-checked against the llama.cpp README.
+
+### 4.3 What judges will see as "a local LLM solution"
+
+The case asks for diversity of approaches and validity (a live run). The strongest local story with these facts: the same Qwen3.8-27B weights run in the cloud (Cerebras) and locally (Q4 GGUF on the team GPU or a laptop with 24 GB), behind one OpenAI-compatible client with a base-URL toggle, with the model ID, endpoint, and timing shown on each evaluation. Run 2-3 dialogs locally during the demo (about 35 s each with reasoning, about 9 s without). Ollama is the simplest laptop path (`ollama run qwen3.8:27b`, 18 GB); LM Studio gives a GUI and the same `response_format` contract. Closeness: High. Borrow in 24 h: llama-server or Ollama with the MTP draft, plus the base-URL toggle.
+
+## 5. Audio-native evaluation of calls
+
+### 5.1 Models that take audio directly
+
+| Model | Access | Russian / Kazakh audio | Price | Tone / politeness use documented? | Source |
+| --- | --- | --- | --- | --- | --- |
+| Gemini (`gemini-3.8-flash`, `gemini-3.5-flash-lite`, `gemini-4-argon`) | API, audio file input, up to 9.5 h per prompt, 20 MB inline | API audio page lists no languages; Gemini app lists Kazakh and Russian among 71 languages | 32 tokens per second of audio (1,920/min). 3.8 Flash: no separate audio price listed, $0.75/M → $0.00144/min input; 3.5 Flash-Lite $0.30/M audio → $0.000576/min | page lists "emotion detection in speech" and speaker diarization as use cases; no politeness or tone-of-service evaluation documented | https://aistudio.google.com/docs/audio; https://aistudio.google.com/docs/pricing; https://support.google.com/gemini/answer/13575153?hl=en |
+| OpenAI `gpt-audio`, `gpt-audio-mini`, `gpt-realtime-2.1(-mini)` | API | not checked | audio input $32/M (gpt-audio), $10/M (mini); tokens per minute not verified, so no per-minute figure | not documented | https://developers.openai.com/api/docs/pricing |
+| Qwen3-Omni-30B-A3B-Instruct / Thinking (open, Sep 2025) | weights; vLLM fork needed | 19 speech-input languages incl. Russian; Kazakh not listed | self-host; 68.7-78.9 GB GPU minimum for 15 s of video input (BF16) | no tone benchmarks; MMAU 77.5 (self-reported) | https://huggingface.co/Qwen/Qwen3-Omni-30B-A3B-Instruct |
+| Qwen3.5-Omni-Plus | Alibaba API | Kazakh listed among speech-input languages (Table 3); no RU/KZ ASR numbers | not checked | not documented | https://arxiv.org/html/2604.15804v2 (2026-04-21) |
+| `qwen/qwen3.8-omni-flash` | OpenRouter (Alibaba only) | languages not verified from a primary page | $0.15 / $0.47 per M; audio price not shown in the catalog | not documented | OpenRouter JSON |
+| Voxtral Small 24B (open, Jul 2025) | weights, OpenRouter $0.10 / $0.30 | 8 languages; Russian and Kazakh not listed | ~55 GB GPU bf16 | audio QA and summaries; tone not mentioned | https://huggingface.co/mistralai/Voxtral-Small-24B-2507 |
+| ISSAI Qolda-AVL-34B / 9B / 5B-GGUF (open, 2026) | weights, Apache-2.0 | built for Kazakh, Russian, English; ASR WER KK 16.88%, RU 10.77%, EN 6.01% (34B); 9B KK 14.52% (self-reported) | self-host; 34B BF16 does not fit 24 GB | audio QA (WavCaps-QA KK 25.33); tone not documented | https://huggingface.co/issai/Qolda-AVL-34B |
+| `@cf/cloudflare/clef-omni` | Workers AI | languages not stated | $0.15/M input, output free; up to 4 clips × 300 s | returns probabilities for typed questions; no tone use documented | https://developers.cloudflare.com/workers-ai/models/clef-omni/ |
+| Kimi-Audio-7B, Step-Audio 2 mini / R1.1 | open weights (Apr 2025 to Jan 2026) | not investigated | self-host | not investigated | HF API listing only (https://huggingface.co/api/models?author=moonshotai&search=audio, https://huggingface.co/api/models?author=stepfun-ai&search=audio) |
+
+Per-model closeness for the audio table:
+- Qwen3-Omni-30B-A3B: Low. No Kazakh speech input and 69+ GB GPU minimum. Borrow in 24 h: nothing.
+- Voxtral Small 24B: Low. Neither Russian nor Kazakh is listed, and it needs about 55 GB. Borrow in 24 h: nothing.
+- OpenAI gpt-audio / gpt-realtime: Low. No per-minute cost could be verified and RU/KZ support was not checked. Borrow in 24 h: nothing. (gpt-transcribe in 5.2 is the usable OpenAI audio product.)
+- Qolda-AVL (ISSAI): Medium. It is the only audio LLM built for KK/RU/EN with published KK and RU WER, but the 34B does not fit 24 GB and the 9B/5B variants were not benchmarked here. Borrow in 24 h: nothing, unless the team already self-hosts it.
+- clef-omni: Medium. It runs in the Worker and is cheap, but its languages are not stated. Borrow in 24 h: an optional probability check on audio, unscored.
+- Kimi-Audio, Step-Audio: not investigated.
+
+Evidence on whether audio LLMs judge tone reliably (2026):
+- AudioJudge (EACL 2026): large audio models as judges show significant verbosity and positional biases; a multi-aspect ensemble (lexical, speech quality, paralinguistic) reaches up to 0.91 Spearman with human preferences on the authors' system-ranking benchmark. https://aclanthology.org/2026.eacl-long.168
+- Miller, Chandra, Saligrama (arXiv 2608.06718, Aug 2026): counterfactual audits show "contrastive success often overstates native judge reliability" for Gemini, GPT, and open audio judges. https://arxiv.org/abs/2608.06718
+
+No documented use was found of an audio LLM scoring operator politeness, diction, or empathy in customer-service calls, in any language. Cost per 5-minute call on Gemini 3.8 Flash: 5 × 1,920 (32 tokens/s, https://aistudio.google.com/docs/audio) = 9,600 audio tokens × $0.75/M = $0.0072 input, plus output. On clef-omni, audio is tokenized at "about 780 tokens per minute" (https://developers.cloudflare.com/workers-ai/models/clef-omni/): 5 × 780 = 3,900 tokens × $0.15/M = $0.00059, output free. Closeness: Medium for Gemini audio as an optional "voice tone" panel shown next to, not inside, the score (criteria 05 and 06 are judged by organizers on transcripts); Low for self-hosted omni models (memory, no Kazakh). Borrow in 24 h: one Gemini Flash call per call recording that returns a tone note per operator segment, labelled "experimental, not scored".
+
+### 5.2 Russian and Kazakh speech-to-text: deltas against the existing brief
+
+| Item | New since the brief | Numbers (self-reported unless noted) | Source |
+| --- | --- | --- | --- |
+| GigaAM-Multilingual (Sber, MIT, Hub repo created 2026-07-14 per https://huggingface.co/api/models/ai-sage/GigaAM-Multilingual; paper July 2026; 220M CTC and 600M large CTC) | New release; contradicts the brief's "GigaAM is Russian-only" | Large: RU FLEURS 3.0, RU internal 6.0, KK FLEURS 4.4, KK CV 13.8, KK internal 15.8; Whisper v3 large on KK internal 65.2. No telephony set, timestamps not mentioned | https://huggingface.co/ai-sage/GigaAM-Multilingual |
+| T-one (T-Bank, Apache-2.0, 71M, streaming, Jul 2025) | Not in the brief | Call-center WER 8.63 vs GigaAM-RNNT v2 10.22 and Whisper large-v3 19.39; word timestamps; Russian only | https://huggingface.co/t-tech/T-one |
+| shyngys879/kazakh-whisper-large-v3-turbo (Apache-2.0, 2026) | Better than tulpar on FLEURS | KK FLEURS WER 11.80 vs base turbo 19.75; code-switched KK/RU may degrade | https://huggingface.co/shyngys879/kazakh-whisper-large-v3-turbo |
+| Workers AI `@cf/openai/whisper-large-v3-turbo` | Runs inside the team's Worker | $0.0005 per audio minute; Deepgram nova-3 $0.0052/min | https://developers.cloudflare.com/workers-ai/platform/pricing/ |
+| OpenAI `gpt-transcribe`, `gpt-4o-transcribe-diarize` | New hosted options | $0.0045/min; $0.006/min with diarization | https://developers.openai.com/api/docs/pricing |
+| Gemini `gemini-3.5-transcribe` | New hosted option | $0.003/min audio in + $0.002/min text out | https://aistudio.google.com/docs/pricing |
+| xAI speech to text | New hosted option | $0.10 per hour REST | https://docs.x.ai/docs/models |
+| Cybernet AI Turkic ASR (Jan 2026) | Announced only | no WER, no weights found | https://astanatimes.com/?p=111145 |
+
+Closeness: High for GigaAM-Multilingual (one open model for both languages on the DEV calls); Medium for T-one (best published Russian call-center number, no Kazakh). Borrow in 24 h: GigaAM-Multilingual large CTC for RU+KZ segments if STT is attempted; otherwise Workers AI whisper-turbo as a zero-setup fallback for the demo.
+
+## 6. Reliability for the control run and live demo
+
+| Topic | What the sources say | Action | Source |
+| --- | --- | --- | --- |
+| HF router rate limits | Not documented on the pricing or index pages. Free accounts have no monthly credits; PRO $2.00/month; provider prices passed through with no markup | Buy credits or use a PRO token before the control run; measure 429s during calibration | https://huggingface.co/docs/inference-providers/pricing |
+| HF router failover | Automatic failover only with `provider="auto"`; a pinned `:cerebras` suffix does not fail over. Policies `:fastest` (default), `:cheapest`, `:preferred` | Keep `:cerebras` pinned for consistency; implement your own fallback to a second provider ID | https://huggingface.co/docs/inference-providers/index |
+| Cerebras limits | Free 5 RPM; Developer 300 RPM, 150K uncached TPM; 429 on exceed; any of RPM/TPM/TPD can trigger; rate-limited before processing if estimated tokens exceed quota | Concurrency 4, exponential backoff on 429, set `max_completion_tokens` so the estimate stays small | https://inference-docs.cerebras.ai/support/rate-limits |
+| Structured-output guarantee | Cerebras: `strict: true` constrains decoding; without strict the schema is a hint. Workers AI: "can't guarantee" schema compliance, returns error `JSON Mode couldn't be met`, no streaming in JSON mode; its JSON-mode list does not include gemma-4 or qwen3.8 | Always validate with Zod; treat Workers AI JSON errors as retryable | https://inference-docs.cerebras.ai/capabilities/structured-outputs; https://developers.cloudflare.com/workers-ai/features/json-mode/ |
+| Empty content on truncation | OpenAI: when the limit is hit, status `incomplete`, "might occur before any visible output tokens are produced", reasoning still billed; reserve 25,000 tokens when experimenting. Gemini: `max_output_tokens` counts thoughts; status `incomplete`. Cerebras: reasoning counts toward `max_completion_tokens`; truncation behavior not documented | Set `max_completion_tokens` to at least reasoning budget + 1,500; on empty `content` with non-empty `reasoning`, retry once with lower effort | https://developers.openai.com/api/docs/guides/reasoning; https://aistudio.google.com/docs/thinking; https://inference-docs.cerebras.ai/capabilities/reasoning |
+| Reasoning leaking into content | Cerebras `raw` format concatenates reasoning into `content` (GPT-OSS); vLLM disables structured outputs for Qwen3 Coder when reasoning is not parsed into its field; llama.cpp `--reasoning-format none` leaves thoughts in content | Use `parsed` on Cerebras, `--reasoning-parser qwen3` on vLLM, `--reasoning-format deepseek` on llama.cpp; strip `<think>...</think>` defensively before JSON.parse | https://inference-docs.cerebras.ai/capabilities/reasoning; https://docs.vllm.ai/en/latest/features/structured_outputs.html; llama.cpp README |
+| Tools plus response_format | Cerebras: do not combine `tools` and `response_format` unless the model's docs say so | Keep the judge call tool-free | https://inference-docs.cerebras.ai/capabilities/structured-outputs |
+| Price changes during the hackathon window | Gemini 4 Argon doubles on 2026-12-01; Gemini 3.8 Flash doubles on 2027-01-01 | Quote the price with its date in the cost statement | https://aistudio.google.com/docs/pricing |
+
+## 7. Recommendation
+
+| Role | Choice | Why | Closeness | Justifying URLs |
+| --- | --- | --- | --- | --- |
+| Best cloud judge for accuracy (within budget) | `Qwen/Qwen3.8-27B:cerebras`, `reasoning_effort` medium or high, 3 samples, schema validated in code | Verified live; 4 s per reasoning call; $0.027 per chat for 3 samples; same weights run locally. No RU/KZ judge evidence exists for any 2026 model, so the 20 labeled DEV dialogs must decide. If a paid frontier key is available, run the flagship `claude-fable-5-1` ($0.225 per chat reasoning call, $0.675 for 3 samples) or the cheaper `claude-sonnet-5-5` / `gemini-3.8-flash` ($0.045 / $0.017) once on the 6 held-out dialogs as an accuracy ceiling check; Fable 5.1 is excluded as the main judge only on cost (25x Qwen per call) and the absence of RU/KZ judge evidence | High | https://huggingface.co/Qwen/Qwen3.8-27B; https://inference-docs.cerebras.ai/models/qwen-3.8-27b; HF router `/v1/models` |
+| Tie-break from a second family (cheaper absolute options exist: gemma-4-26B-A4B on Workers AI $0.0015, gpt-6-luna and claude-haiku-5-5 $0.0023 per chat with reasoning) | `openai/gpt-oss-120b:cerebras` as tie-break voter ($0.0041 per chat with reasoning, 3.7 s); `gpt-6-luna` ($0.0023) if an OpenAI key exists | Different family, cheapest fast option; gpt-oss cannot turn reasoning off and its router SO flag is false | Medium | https://inference-docs.cerebras.ai/capabilities/reasoning; https://developers.openai.com/api/docs/models/gpt-6-luna |
+| Best open model for a local demo | Qwen3.8-27B UD-Q4_K_XL GGUF via llama-server or Ollama `qwen3.8:27b`, MTP on, on the 24 GB GPU | 17.6 GB file, 95-109 tok/s on a 4090; identical model to the cloud judge | High | https://computingforgeeks.com/run-qwen3-8-27b-locally/; https://ollama.com/library/qwen3.8 |
+| In-Worker option | `@cf/qwen/qwen3.8-27b` (replaces gemma-4-26b) and `@cf/cloudflare/clef` as a probability second opinion | No external key; clef returns per-option probabilities for up to 64 typed questions at $0.24/M input | Medium | https://developers.cloudflare.com/workers-ai/models/qwen3.8-27b/; https://developers.cloudflare.com/workers-ai/models/clef/ |
+| Best audio option | STT: GigaAM-Multilingual (RU+KZ). Audio-native: Gemini 3.8 Flash as an unscored tone panel | Only open model with strong published KZ and RU numbers; Gemini is the cheapest documented audio-understanding API ($0.0014/min input) | Medium | https://huggingface.co/ai-sage/GigaAM-Multilingual; https://aistudio.google.com/docs/audio |
+
+## 8. Negative results
+
+| Searched for | Result |
+| --- | --- |
+| Russian or Kazakh results on the Qwen3.8-27B card (MMMLU, INCLUDE, MMLU-ProX) | None; the card has no multilingual benchmarks and no language list |
+| A 2026 KazMMLU or Kazakh leaderboard covering Qwen3.6/3.8, Gemma 4, GPT-6, Claude 5.x, Gemini 3.x/4 | None found; only ISSAI's own Qwen3.5 adaptations report KazMMLU |
+| LLM-as-judge studies in Russian or Kazakh for 2026 models | None found |
+| HF router rate limits for Inference Providers | Not documented on the pages read |
+| Workers AI JSON-schema support for `qwen3.8-27b` and `gemma-4-26b-a4b-it` | Model pages list `response_format` but do not document `json_schema`; the JSON-mode page lists only six older models |
+| A primary Alibaba page for `qwen3.8-omni-flash` languages | Not found; secondary sources disagree (74 vs 113 languages) |
+| Any documented use of audio LLMs scoring politeness or diction of support operators | None found |
+| Gemini API language list including Kazakh | API docs do not list languages; only the consumer Gemini app page lists Kazakh |
+| Plain Q4_K_M llama.cpp throughput for Qwen3.8-27B on a 4090 | Not found; nearest is UD-Q4_K_XL |
+| Weights for the Cybernet AI Turkic ASR model, GigaChat 3 Ultra API price | Not found |
+| Kimi-Audio and Step-Audio language support, size, and tone use | Not investigated (only HF listings read) |
+| `Qwen/Qwen3.8-27B-AWQ`, `Qwen/Qwen3.8-27B-GGUF`, `bartowski/Qwen_Qwen3.8-27B-GGUF` | Do not exist (HF API returned an error); `ggml-org/Qwen3.8-27B-GGUF` and `lmstudio-community/Qwen3.8-27B-GGUF` exist |
+
+## Sources
+
+- https://router.huggingface.co/v1/models (JSON, fetched 2026-11-07)
+- https://openrouter.ai/api/v1/models (JSON, fetched 2026-11-07)
+- https://openrouter.ai/api/v1/models/qwen/qwen3.8-27b/endpoints (JSON)
+- https://openrouter.ai/api/v1/models/openai/gpt-oss-120b/endpoints (JSON)
+- https://openrouter.ai/api/v1/models/google/gemma-4-31b-it/endpoints (JSON)
+- https://huggingface.co/Qwen/Qwen3.8-27B (card; collection updated 2026-08-13; repo modified 2026-11-07)
+- https://huggingface.co/api/models/Qwen/Qwen3.8-27B (sizes)
+- https://huggingface.co/api/models/unsloth/Qwen3.8-27B-GGUF (file sizes; modified 2026-08-20)
+- https://huggingface.co/api/models/cyankiwi/Qwen3.8-27B-AWQ-INT4
+- https://recipes.vllm.ai/Qwen/Qwen3.8-27B
+- https://inference-docs.cerebras.ai/models/overview
+- https://inference-docs.cerebras.ai/models/qwen-3.8-27b
+- https://inference-docs.cerebras.ai/support/rate-limits
+- https://inference-docs.cerebras.ai/capabilities/structured-outputs
+- https://inference-docs.cerebras.ai/capabilities/reasoning
+- https://www.cerebras.ai/pricing (loaded, but pricing tables did not render; not used for numbers)
+- https://huggingface.co/docs/inference-providers/pricing
+- https://huggingface.co/docs/inference-providers/index
+- https://huggingface.co/docs/inference-providers/providers/cerebras
+- https://huggingface.co/docs/inference-providers/guides/structured-output
+- https://developers.cloudflare.com/workers-ai/platform/pricing/
+- https://developers.cloudflare.com/workers-ai/models/
+- https://developers.cloudflare.com/workers-ai/models/qwen3.8-27b/
+- https://developers.cloudflare.com/workers-ai/models/gemma-4-26b-a4b-it/
+- https://developers.cloudflare.com/workers-ai/models/clef/
+- https://developers.cloudflare.com/workers-ai/models/clef-omni/
+- https://developers.cloudflare.com/workers-ai/features/json-mode/
+- https://developers.openai.com/api/docs/pricing
+- https://developers.openai.com/api/docs/models
+- https://developers.openai.com/api/docs/models/gpt-6-luna
+- https://developers.openai.com/api/docs/guides/reasoning
+- https://platform.claude.com/docs/en/about-claude/pricing
+- https://platform.claude.com/docs/en/about-claude/models/overview
+- https://platform.claude.com/docs/en/build-with-claude/structured-outputs
+- https://aistudio.google.com/docs/pricing (redirect target of ai.google.dev/gemini-api/docs/pricing)
+- https://aistudio.google.com/docs/models
+- https://aistudio.google.com/docs/thinking
+- https://aistudio.google.com/docs/audio
+- https://support.google.com/gemini/answer/13575153?hl=en
+- https://docs.x.ai/docs/models
+- https://aistudio.yandex.ru/docs/en/ai-studio/pricing
+- https://developers.sber.ru/docs/ru/gigachat/tariffs/legal-tariffs (updated 2026-10-07)
+- https://huggingface.co/google/gemma-4-31B-it (tech report published Jul 2)
+- https://huggingface.co/issai/Qwen3.5-35B-A3B-Kazakh (created 2026-08-05)
+- https://huggingface.co/issai/Qolda-AVL-34B (created 2026-06-14)
+- https://huggingface.co/astanahub/alemllm (metadata only, via HF API; modified 2026-02-24)
+- https://ollama.com/library/qwen3.8
+- https://docs.ollama.com/capabilities/structured-outputs
+- https://lmstudio.ai/docs/developer/openai-compat/structured-output
+- https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
+- https://docs.vllm.ai/en/latest/features/structured_outputs.html (footer 2026-10-24)
+- https://computingforgeeks.com/run-qwen3-8-27b-locally/ (updated 2026-09-27)
+- https://modal.com/pricing
+- https://huggingface.co/Qwen/Qwen3-Omni-30B-A3B-Instruct (2025)
+- https://arxiv.org/html/2604.15804v2 (Qwen3.5-Omni technical report, 2026-04-21)
+- https://huggingface.co/mistralai/Voxtral-Small-24B-2507 (2025)
+- https://aclanthology.org/2026.eacl-long.168 (AudioJudge, March 2026)
+- https://arxiv.org/abs/2608.06718 (2026-08-07)
+- https://huggingface.co/ai-sage/GigaAM-Multilingual (paper July 2026)
+- https://huggingface.co/api/models/ai-sage/GigaAM-Multilingual (createdAt 2026-07-14)
+- https://huggingface.co/api/models?author=moonshotai&search=audio
+- https://huggingface.co/api/models?author=stepfun-ai&search=audio
+- https://huggingface.co/t-tech/T-one (2025-07-14)
+- https://huggingface.co/shyngys879/kazakh-whisper-large-v3-turbo (2026)
+- https://astanatimes.com/?p=111145 (2026-01-20)
+
+## Confidence
+
+Prices, model IDs, context lengths, and rate limits are high-confidence: each comes from a provider page or a machine-readable catalog read today, and the Cerebras price for Qwen3.8-27B matches across the HF router, OpenRouter, and Cerebras docs. Most page reads went through a summarizing fetch tool, so a misread number is possible; the router and OpenRouter catalogs were parsed directly and are the most reliable figures here. The structured-output status of `Qwen/Qwen3.8-27B:cerebras` through the HF router is unresolved: two aggregators flag it unsupported while Cerebras documents strict support, and no LLM call was allowed to settle it. Latency figures are estimates from the catalogs' measured throughput, not timed requests. Quality evidence is the weakest part: no source gives Russian or Kazakh judge accuracy for any 2026 model, the Qwen3.8 card has no multilingual results, and every ASR number is self-reported on a different test set. Not verified: Workers AI throughput and JSON-schema enforcement for qwen3.8 and gemma-4, HF router rate limits, OpenAI audio tokens per minute, Gemini API language coverage for Kazakh audio, Qwen3.8-Omni language list, the GigaChat price in USD, and AlemLLM's KazMMLU score.
