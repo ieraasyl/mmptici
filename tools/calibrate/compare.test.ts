@@ -201,6 +201,17 @@ describe("compare", () => {
     expect(rows.every((row) => row.evidence_turns === "1;2")).toBe(true);
   });
 
+  test("responses without usage are counted in run health", () => {
+    const run = JSON.parse(readFileSync(RUN, "utf8"));
+    run.dialogs[0].run.responsesWithoutUsage = 2;
+    const dir = tempDir();
+    writeFileSync(`${dir}/run.json`, JSON.stringify(run));
+    const r = runMain("--labels", LABELS, "--run", `${dir}/run.json`, "--set", "tuning");
+    const report = JSON.parse(readFileSync(`${r.dir}/r/t.json`, "utf8"));
+    expect(report.runHealth.responsesWithoutUsage).toBe(2);
+    expect(readFileSync(`${r.dir}/r/t.md`, "utf8")).toContain("cost is a lower bound");
+  });
+
   test("several label files and unfinished rows", () => {
     const [header, ...body] = readFileSync(LABELS, "utf8").trimEnd().split("\n");
     const dir = tempDir();

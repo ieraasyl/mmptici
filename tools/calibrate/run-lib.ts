@@ -1,7 +1,17 @@
-// Pure helpers for run.ts: dialog selection, sample aggregation, cost, retry, concurrency.
-// Kept free of I/O so they can be unit-tested.
+// Helpers for run.ts: dialog selection, sample aggregation, cost and request accounting,
+// retry, concurrency, and evaluation of one dialog. The model client is passed in and no
+// files are read here, so tests can use a fake client.
 
 import { createHash } from "node:crypto";
+import { scoreEvaluation } from "../../apps/api/src/evaluation.ts";
+import {
+  evaluateConversation,
+  EvaluationError,
+  type ConversationInput,
+  type LlmClient,
+  type ModelUsage,
+} from "../../apps/api/src/inference/index.ts";
+import type { Checklist } from "../../packages/contracts/src/cqa.ts";
 
 export type Answer = "yes" | "no" | "na" | number;
 
@@ -128,4 +138,176 @@ export function contentVersion(...parts: string[]): string {
   const hash = createHash("sha256");
   for (const part of parts) hash.update(part);
   return `p-${hash.digest("hex").slice(0, 8)}`;
+}
+
+/** Token and request accounting for one or more evaluations. */
+export type Accounting = {
+  /** Requests sent to the model, including ones that failed before a reply. */
+  requests: number;
+  /** Replies received, whether or not they passed validation. */
+  responses: number;
+  /** Replies that passed validation and produced ratings. */
+  parsedResponses: number;
+  /** Replies that reported no token usage; when above 0, usage and cost are lower bounds. */
+  responsesWithoutUsage: number;
+  usage: ModelUsage;
+  costUsd: number;
+};
+
+export function emptyAccounting(): Accounting {
+  return {
+    requests: 0,
+    responses: 0,
+    parsedResponses: 0,
+    responsesWithoutUsage: 0,
+    usage: { promptTokens: 0, completionTokens: 0 },
+    costUsd: 0,
+  };
+}
+
+export function sumAccounting(items: Accounting[]): Accounting {
+  const sum = emptyAccounting();
+  for (const a of items) {
+    sum.requests += a.requests;
+    sum.responses += a.responses;
+    sum.parsedResponses += a.parsedResponses;
+    sum.responsesWithoutUsage += a.responsesWithoutUsage;
+    sum.usage.promptTokens += a.usage.promptTokens;
+    sum.usage.completionTokens += a.usage.completionTokens;
+  }
+  sum.costUsd = costUsd(sum.usage);
+  return sum;
+}
+
+/**
+ * Wraps a client so every request and reply is counted, including replies that later fail
+ * validation and attempts that end in a transient error and are retried.
+ */
+export function meteredClient(llm: LlmClient): { client: LlmClient; accounting: Accounting } {
+  const accounting = emptyAccounting();
+  const client: LlmClient = {
+    model: llm.model,
+    async complete(messages, signal) {
+      accounting.requests++;
+      const reply = await llm.complete(messages, signal);
+      accounting.responses++;
+      if (reply.usage) {
+        accounting.usage.promptTokens += reply.usage.promptTokens;
+        accounting.usage.completionTokens += reply.usage.completionTokens;
+      } else accounting.responsesWithoutUsage++;
+      accounting.costUsd = costUsd(accounting.usage);
+      return reply;
+    },
+  };
+  return { client, accounting };
+}
+
+export type Pass = Accounting & { latencyMs: number; failedSamples: number; errors: string[] };
+
+/**
+ * Accounting kept on each dialog. The totals cover every pass over the dialog, so rerunning
+ * a failed dialog keeps the cost of the failed attempts; latency, failed samples, and errors
+ * describe the latest pass.
+ */
+export type DialogRun = Pass & { passes: Pass[] };
+
+export function dialogRun(passes: Pass[]): DialogRun {
+  const latest = passes.at(-1)!;
+  return {
+    ...sumAccounting(passes),
+    latencyMs: latest.latencyMs,
+    failedSamples: latest.failedSamples,
+    errors: latest.errors,
+    passes,
+  };
+}
+
+/** Passes recorded on a dialog, including run files written before passes were kept. */
+export function priorPasses(run: Record<string, any> | null | undefined): Pass[] {
+  if (!run) return [];
+  if (Array.isArray(run.passes)) return run.passes;
+  // Older files counted replies as calls and saved zero usage for failed samples, so a
+  // failed dialog's replies are counted as replies without usage.
+  const calls = run.calls ?? 0;
+  const usage = run.usage ?? { promptTokens: 0, completionTokens: 0 };
+  const measured = usage.promptTokens + usage.completionTokens > 0;
+  return [
+    {
+      requests: calls,
+      responses: calls,
+      parsedResponses: 0,
+      responsesWithoutUsage: measured ? 0 : calls,
+      usage,
+      costUsd: run.costUsd ?? 0,
+      latencyMs: run.latencyMs ?? 0,
+      failedSamples: run.failedSamples ?? 0,
+      errors: run.errors ?? [],
+    },
+  ];
+}
+
+export type BatchRecord = ConversationInput & { conversation_id: string; language: string };
+
+type SampleResult = { ratings: SampleRating[] | null; accounting: Accounting; errors: string[] };
+
+export type BatchOptions = {
+  llm: LlmClient;
+  checklist: Checklist;
+  samples: number;
+  retry?: { tries?: number; baseMs?: number };
+};
+
+async function sample(record: BatchRecord, options: BatchOptions): Promise<SampleResult> {
+  const { client, accounting } = meteredClient(options.llm);
+  try {
+    const run = await withRetry(
+      () => evaluateConversation(client, record, options.checklist),
+      options.retry,
+    );
+    accounting.parsedResponses++;
+    return { ratings: run.ratings as SampleRating[], accounting, errors: [] };
+  } catch (error) {
+    const attempts = error instanceof EvaluationError ? error.attempts : [];
+    return {
+      ratings: null,
+      accounting,
+      errors: attempts.length
+        ? attempts.flatMap((a) => a.errors)
+        : [error instanceof Error ? error.message : String(error)],
+    };
+  }
+}
+
+/** Evaluates one dialog with the app's evaluator and scorer; earlier passes are kept. */
+export async function evaluateDialog(
+  record: BatchRecord & { channel: string },
+  options: BatchOptions,
+  previous: Pass[] = [],
+) {
+  const t0 = Date.now();
+  const results = await Promise.all(
+    Array.from({ length: options.samples }, () => sample(record, options)),
+  );
+  const latencyMs = Date.now() - t0;
+  const criterionIds = options.checklist.criteria.map((c) => c.id);
+  const ratings = aggregate(
+    results.map((r) => r.ratings),
+    criterionIds,
+  );
+  const scored = ratings ? scoreEvaluation(options.checklist, ratings, []) : null;
+  const pass: Pass = {
+    ...sumAccounting(results.map((r) => r.accounting)),
+    latencyMs,
+    failedSamples: results.filter((r) => r.ratings === null).length,
+    errors: results.flatMap((r) => r.errors),
+  };
+  return {
+    conversationId: record.conversation_id,
+    language: record.language,
+    channel: record.channel,
+    ratings: ratings ?? [],
+    total: scored?.total ?? null,
+    seriousViolation: scored?.seriousViolation ?? null,
+    run: dialogRun([...previous, pass]),
+  };
 }

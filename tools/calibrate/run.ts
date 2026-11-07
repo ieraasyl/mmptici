@@ -15,22 +15,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { defaultChecklist } from "../../apps/api/src/checklist.ts";
-import { scoreEvaluation } from "../../apps/api/src/evaluation.ts";
-import {
-  createHfClient,
-  DEFAULT_MODEL,
-  evaluateConversation,
-  EvaluationError,
-} from "../../apps/api/src/inference/index.ts";
-import {
-  aggregate,
-  contentVersion,
-  costUsd,
-  mapLimit,
-  selectIds,
-  withRetry,
-  type SampleRating,
-} from "./run-lib.ts";
+import { createHfClient, DEFAULT_MODEL } from "../../apps/api/src/inference/index.ts";
+import { contentVersion, evaluateDialog, mapLimit, priorPasses, selectIds } from "./run-lib.ts";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 
@@ -65,7 +51,7 @@ type RunFile = {
   set: string;
   samples: number;
   temperature: number;
-  dialogs: { conversationId: string; ratings: unknown[] }[];
+  dialogs: { conversationId: string; ratings: unknown[]; run?: Record<string, unknown> }[];
 };
 const rerunPath = args["rerun-failed"];
 const prior: RunFile | undefined = rerunPath
@@ -123,7 +109,6 @@ if (ids.length === 0) {
 }
 
 const llm = createHfClient({ apiKey, model, temperature });
-const criterionIds = defaultChecklist.criteria.map((c) => c.id);
 let commit = "unknown";
 try {
   commit = execFileSync("git", ["rev-parse", "--short", "HEAD"], { cwd: root }).toString().trim();
@@ -131,82 +116,23 @@ try {
   // Not a git checkout; the prompt version still identifies the run.
 }
 
-type SampleResult = {
-  ratings: SampleRating[] | null;
-  usage: { promptTokens: number; completionTokens: number };
-  calls: number;
-  errors: string[];
-};
-
-async function sample(record: Record_): Promise<SampleResult> {
-  try {
-    // Six tries with 2 s doubling backoff span about a minute, enough for the router's
-    // tokens-per-minute quota to reset.
-    const run = await withRetry(() => evaluateConversation(llm, record, defaultChecklist), {
-      tries: 6,
-      baseMs: 2000,
-    });
-    return {
-      ratings: run.ratings as SampleRating[],
-      usage: run.usage,
-      calls: run.attempts.length,
-      errors: [],
-    };
-  } catch (error) {
-    const attempts = error instanceof EvaluationError ? error.attempts : [];
-    return {
-      ratings: null,
-      usage: { promptTokens: 0, completionTokens: 0 },
-      calls: attempts.length,
-      errors: attempts.length
-        ? attempts.flatMap((a) => a.errors)
-        : [error instanceof Error ? error.message : String(error)],
-    };
-  }
-}
-
 console.log(
   `${ids.length} dialog(s) · ${model} · ${samples} sample(s) at T=${temperature} · prompt ${promptVersion}`,
 );
 const started = Date.now();
+// Six tries with 2 s doubling backoff span about a minute, enough for the router's
+// tokens-per-minute quota to reset.
+const options = { llm, checklist: defaultChecklist, samples, retry: { tries: 6, baseMs: 2000 } };
+// A rerun adds a pass to each dialog, so the cost of the earlier failed attempts is kept.
+const priorRuns = new Map(prior?.dialogs.map((d) => [d.conversationId, d.run]) ?? []);
 const dialogs = await mapLimit(ids, concurrency, async (id) => {
-  const record = byId.get(id)!;
-  const t0 = Date.now();
-  const results = await Promise.all(Array.from({ length: samples }, () => sample(record)));
-  const latencyMs = Date.now() - t0;
-  const usage = results.reduce(
-    (sum, r) => ({
-      promptTokens: sum.promptTokens + r.usage.promptTokens,
-      completionTokens: sum.completionTokens + r.usage.completionTokens,
-    }),
-    { promptTokens: 0, completionTokens: 0 },
-  );
-  const ratings = aggregate(
-    results.map((r) => r.ratings),
-    criterionIds,
-  );
-  const scored = ratings ? scoreEvaluation(defaultChecklist, ratings, []) : null;
-  const failedSamples = results.filter((r) => r.ratings === null).length;
+  const dialog = await evaluateDialog(byId.get(id)!, options, priorPasses(priorRuns.get(id)));
+  const { failedSamples, latencyMs } = dialog.run;
   console.log(
-    `${id.padEnd(10)} ${String(scored?.total ?? "FAILED").padEnd(7)} ${(latencyMs / 1000).toFixed(1)}s` +
+    `${id.padEnd(10)} ${String(dialog.total ?? "FAILED").padEnd(7)} ${(latencyMs / 1000).toFixed(1)}s` +
       (failedSamples ? ` · ${failedSamples} failed sample(s)` : ""),
   );
-  return {
-    conversationId: id,
-    language: record.language,
-    channel: record.channel,
-    ratings: ratings ?? [],
-    total: scored?.total ?? null,
-    seriousViolation: scored?.seriousViolation ?? null,
-    run: {
-      latencyMs,
-      usage,
-      costUsd: costUsd(usage),
-      failedSamples,
-      calls: results.reduce((n, r) => n + r.calls, 0),
-      errors: results.flatMap((r) => r.errors),
-    },
-  };
+  return dialog;
 });
 
 const merged = prior
@@ -237,10 +163,14 @@ writeFileSync(
 );
 
 const failed = dialogs.filter((d) => d.total === null && d.ratings.length === 0).length;
-const cost = dialogs.reduce((sum, d) => sum + d.run.costUsd, 0);
+// Cost incurred in this invocation: the latest pass of each dialog evaluated now.
+const latest = dialogs.map((d) => d.run.passes.at(-1)!);
+const cost = latest.reduce((sum, p) => sum + p.costUsd, 0);
+const withoutUsage = latest.reduce((sum, p) => sum + p.responsesWithoutUsage, 0);
 const meanLatency = dialogs.reduce((sum, d) => sum + d.run.latencyMs, 0) / dialogs.length / 1000;
 console.log(
-  `\n${dialogs.length - failed}/${dialogs.length} evaluated${prior ? " in this rerun" : ""} · ${failed} failed · $${cost.toFixed(3)} total · ` +
-    `${meanLatency.toFixed(1)}s mean per dialog · ${((Date.now() - started) / 1000).toFixed(0)}s wall`,
+  `\n${dialogs.length - failed}/${dialogs.length} evaluated${prior ? " in this rerun" : ""} · ${failed} failed · $${cost.toFixed(3)} total` +
+    (withoutUsage ? ` (lower bound: ${withoutUsage} response(s) without usage)` : "") +
+    ` · ${meanLatency.toFixed(1)}s mean per dialog · ${((Date.now() - started) / 1000).toFixed(0)}s wall`,
 );
 console.log(`wrote ${path}`);

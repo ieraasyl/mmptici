@@ -1,12 +1,19 @@
 import { describe, expect, test } from "vite-plus/test";
+import { defaultChecklist } from "../../apps/api/src/checklist.ts";
+import type { LlmClient } from "../../apps/api/src/inference/index.ts";
+import { fakeLlm, invalid, valid } from "./fake-llm.ts";
 import {
   aggregate,
   contentVersion,
   costUsd,
+  evaluateDialog,
   isRetryable,
   mapLimit,
+  meteredClient,
+  priorPasses,
   selectIds,
   withRetry,
+  type BatchOptions,
   type SampleRating,
 } from "./run-lib.ts";
 
@@ -120,5 +127,78 @@ describe("helpers", () => {
     expect(contentVersion("a", "b")).toBe(contentVersion("a", "b"));
     expect(contentVersion("a", "b")).not.toBe(contentVersion("a", "c"));
     expect(contentVersion("x")).toMatch(/^p-[0-9a-f]{8}$/);
+  });
+});
+
+const record = {
+  conversation_id: "x1",
+  language: "EN",
+  channel: "agent chat",
+  transcript: [
+    { timestamp: "00:00", speaker: "client" as const, text: "hello" },
+    { timestamp: "00:10", speaker: "operator" as const, text: "hi, I am Ann" },
+  ],
+};
+const options = (llm: LlmClient, samples = 1): BatchOptions => ({
+  llm,
+  checklist: defaultChecklist,
+  samples,
+  retry: { tries: 3, baseMs: 0 },
+});
+
+describe("usage accounting", () => {
+  test("a sample that exhausts validation retries keeps its tokens and cost", async () => {
+    const { llm } = fakeLlm([invalid]);
+    const dialog = await evaluateDialog(record, options(llm));
+    expect(dialog.ratings).toEqual([]);
+    expect(dialog.run).toMatchObject({
+      requests: 2,
+      responses: 2,
+      parsedResponses: 0,
+      responsesWithoutUsage: 0,
+      usage: { promptTokens: 200, completionTokens: 100 },
+      failedSamples: 1,
+    });
+    expect(dialog.run.costUsd).toBeGreaterThan(0);
+    expect(dialog.run.errors.length).toBeGreaterThan(0);
+  });
+
+  test("attempts before a transient error are counted", async () => {
+    const { llm } = fakeLlm([invalid, new Error("Inference API error 429: slow down"), valid]);
+    const dialog = await evaluateDialog(record, options(llm));
+    expect(dialog.total).not.toBeNull();
+    expect(dialog.run).toMatchObject({
+      requests: 3,
+      responses: 2,
+      parsedResponses: 1,
+      usage: { promptTokens: 200, completionTokens: 100 },
+      failedSamples: 0,
+    });
+  });
+
+  test("replies without usage are recorded as such, not as zero cost", async () => {
+    const { llm } = fakeLlm([{ content: valid, model: "fake" }]);
+    const { client, accounting } = meteredClient(llm);
+    await client.complete([]);
+    expect(accounting).toMatchObject({ requests: 1, responses: 1, responsesWithoutUsage: 1 });
+    const dialog = await evaluateDialog(record, options(llm, 2));
+    expect(dialog.run).toMatchObject({
+      responses: 2,
+      parsedResponses: 2,
+      responsesWithoutUsage: 2,
+    });
+  });
+
+  test("older run files become one pass; a failed dialog's replies have unknown usage", () => {
+    const [pass] = priorPasses({
+      latencyMs: 900,
+      usage: { promptTokens: 0, completionTokens: 0 },
+      costUsd: 0,
+      failedSamples: 1,
+      calls: 2,
+      errors: ["bad"],
+    });
+    expect(pass).toMatchObject({ requests: 2, responses: 2, responsesWithoutUsage: 2 });
+    expect(priorPasses(undefined)).toEqual([]);
   });
 });

@@ -36,6 +36,9 @@ const bump = (m: Counts, key: string) => m.set(key, (m.get(key) ?? 0) + 1);
 const sorted = (xs: Iterable<string>) => [...xs].sort();
 const meanOf = (xs: number[]) => xs.reduce((s, x) => s + x, 0) / xs.length;
 
+/** Requests to the model; older run files called them calls. */
+const requests = (run: Record<string, any>) => run.requests ?? run.calls ?? 0;
+
 /** Counts in first-seen order, which the Markdown keeps for ties. */
 export function collect(run: RunFile) {
   const dialogs = run.dialogs;
@@ -73,6 +76,7 @@ export function collect(run: RunFile) {
     .filter((t): t is number => t !== null && t !== undefined);
   const metas = dialogs.filter((d) => d.run).map((d) => d.run!);
   const latencies = metas.map((m) => m.latencyMs as number);
+  const withoutUsage = metas.reduce((s, m) => s + (m.responsesWithoutUsage ?? 0), 0);
   // Python printed int sums and means without ".0"; keep that in the Markdown.
   const allInts = (xs: number[]) => xs.every((x) => Number.isInteger(x));
   const format = {
@@ -108,7 +112,9 @@ export function collect(run: RunFile) {
     cost: {
       totalUsd: round(pySum(metas.map((m) => m.costUsd)), 4),
       meanLatencyS: latencies.length ? round(meanOf(latencies) / 1000, 2) : null,
-      calls: metas.reduce((s, m) => s + (m.calls ?? 0), 0),
+      calls: metas.reduce((s, m) => s + requests(m), 0),
+      // Present only when some responses had no usage, which makes totalUsd a lower bound.
+      ...(withoutUsage ? { responsesWithoutUsage: withoutUsage } : {}),
     },
   };
 }
@@ -200,12 +206,15 @@ export function renderMd(name: string, s: Collected) {
     `- Flagged but not a known case: ${v.unexpected.join(", ") || "none"}`,
   );
   const { totals: t, cost: c } = s;
+  const lowerBound = c.responsesWithoutUsage
+    ? ` (lower bound: ${c.responsesWithoutUsage} response(s) reported no token usage)`
+    : "";
   lines.push(
     "",
     "## Totals and cost",
     "",
     `- Totals: n=${t.n}, mean ${s.format.mean(t.mean)}, min ${pyStr(t.min)}, max ${pyStr(t.max)}`,
-    `- Cost $${s.format.cost(c.totalUsd)} over ${c.calls} model calls, mean ${pyFloat(c.meanLatencyS)} s per dialog`,
+    `- Cost $${s.format.cost(c.totalUsd)}${lowerBound} over ${c.calls} model calls, mean ${pyFloat(c.meanLatencyS)} s per dialog`,
     "",
   );
   return lines.join("\n");

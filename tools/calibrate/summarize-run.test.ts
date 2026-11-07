@@ -72,6 +72,15 @@ describe("summarize-run", () => {
     expect(s.totals.mean).toBe(80);
   });
 
+  test("new run files count requests and flag missing usage", () => {
+    const run = structuredClone(RUN);
+    run.dialogs[0].run = { ...run.dialogs[0].run, requests: 4, responsesWithoutUsage: 1 } as never;
+    const s = summarize(run);
+    expect(s.cost.calls).toBe(6);
+    expect(s.cost.responsesWithoutUsage).toBe(1);
+    expect(summarize(RUN).cost).not.toHaveProperty("responsesWithoutUsage");
+  });
+
   test("reports hold no text fields", () => {
     const dir = tempDir();
     writeFileSync(`${dir}/run.json`, JSON.stringify(RUN));

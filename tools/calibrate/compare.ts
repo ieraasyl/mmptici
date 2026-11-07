@@ -289,6 +289,8 @@ export function runHealth(run: RunFile, labelConvs: string[], ratings: Ratings) 
     failedSamples: meta.reduce((s, m) => s + (m.failedSamples || 0), 0),
     meanLatencyMs: mean(latencies),
     costUsd: cost,
+    // Responses without token usage make costUsd a lower bound.
+    responsesWithoutUsage: meta.reduce((s, m) => s + (m.responsesWithoutUsage || 0), 0),
     missingFromRun: labelConvs.filter((c) => !ratings.get(c)?.size).sort(),
   };
 }
@@ -473,6 +475,9 @@ export function renderMd(r: Report, costIsFloat = false): string {
       `- mean latency ms: ${pyFloat(h.meanLatencyMs)}`,
       `- cost USD: ${costIsFloat ? pyFloat(h.costUsd) : h.costUsd}`,
     );
+    if (h.responsesWithoutUsage) {
+      L.push(`- responses without token usage: ${h.responsesWithoutUsage} (cost is a lower bound)`);
+    }
     L.push(`- missing from run: ${h.missingFromRun.join(", ") || "none"}`);
   }
   L.push("", "## Mismatches", "", `Count: ${r.mismatches.length}`, "");
