@@ -22,6 +22,9 @@ export default defineConfig(({ mode }) => ({
       },
     }),
   ]),
+  // Route code splitting hides page imports from the dependency scan; scan the sources directly so late
+  // discovery does not re-bundle React mid-session ("Cannot read properties of null (reading 'useContext')").
+  optimizeDeps: { entries: ["index.html", "src/**/*.{ts,tsx}", "!src/**/*.test.{ts,tsx}"] },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

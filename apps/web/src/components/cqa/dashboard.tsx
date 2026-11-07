@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Bar, BarChart, Pie, PieChart, Rectangle, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, Rectangle, XAxis, YAxis } from "recharts";
+import { answerLabel } from "@app/contracts";
 import { cn } from "cn";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -16,8 +17,9 @@ import {
 import {
   channelName,
   dashboardQuery,
-  dateLabel,
   languageName,
+  pointLabel,
+  speakerName,
   scoreLabel,
   type DashboardConversation,
 } from "@/lib/cqa";
@@ -63,10 +65,20 @@ const scoreChartConfig = {
   count: { label: "Conversations", color: "var(--primary)" },
 } satisfies ChartConfig;
 
-const coverageChartConfig = {
-  evaluated: { label: "Evaluated", color: "var(--primary)" },
-  awaiting: { label: "Awaiting evaluation", color: "var(--muted)" },
-} satisfies ChartConfig;
+type Failure = NonNullable<DashboardConversation["evaluation"]>["failures"][number];
+type Option = { value: string; label: string };
+
+const violationOptions: Option[] = [
+  { value: "", label: "All results" },
+  { value: "yes", label: "Serious violation" },
+  { value: "no", label: "No serious violation" },
+];
+const sortOptions: Option[] = [
+  { value: "asc", label: "Lowest score first" },
+  { value: "desc", label: "Highest score first" },
+  { value: "latest", label: "Latest evaluation first" },
+];
+const failurePage = 20;
 
 export function Dashboard() {
   const query = useQuery(dashboardQuery);
@@ -75,7 +87,12 @@ export function Dashboard() {
   const [refreshConfirmedAt, setRefreshConfirmedAt] = useState<number | null>(null);
   const [group, setGroup] = useState("");
   const [language, setLanguage] = useState("");
+  const [checklist, setChecklist] = useState("");
+  const [violation, setViolation] = useState("");
+  const [criterion, setCriterion] = useState("");
+  const [sort, setSort] = useState("asc");
   const [reviewOnly, setReviewOnly] = useState(false);
+  const [failureLimit, setFailureLimit] = useState(failurePage);
 
   useEffect(() => {
     if (refreshConfirmedAt === null) return;
@@ -94,9 +111,44 @@ export function Dashboard() {
     { value: "", label: "All languages" },
     ...Object.entries(languageName).map(([value, label]) => ({ value, label })),
   ];
-  const conversations = all.filter(
-    (item) => (!group || item.group === group) && (!language || item.language === language),
+  const checklists = [
+    { value: "", label: "All checklists" },
+    ...[
+      ...new Map(
+        all.flatMap(({ evaluation }) =>
+          evaluation
+            ? [
+                [
+                  evaluation.checklistId,
+                  `${evaluation.checklistName} · v${evaluation.revision} · ${evaluation.checklistId.slice(0, 8)}`,
+                ] as const,
+              ]
+            : [],
+        ),
+      ),
+    ].map(([value, label]) => ({ value, label })),
+  ];
+  const criterionTitles = new Map(
+    all.flatMap(
+      ({ evaluation }) =>
+        evaluation?.failures.map(({ criterionId, title }) => [criterionId, title] as const) ?? [],
+    ),
   );
+  const criteria = [
+    { value: "", label: "Any criterion" },
+    ...[...criterionTitles].map(([value, label]) => ({ value, label })),
+  ];
+  const conversations = all.filter(
+    (item) =>
+      (!group || item.group === group) &&
+      (!language || item.language === language) &&
+      (!checklist || item.evaluation?.checklistId === checklist) &&
+      (!violation ||
+        (item.evaluation && item.evaluation.seriousViolation === (violation === "yes"))) &&
+      (!criterion ||
+        item.evaluation?.failures.some(({ criterionId }) => criterionId === criterion)),
+  );
+  const filtered = !!(group || language || checklist || violation || criterion);
   const evaluated = conversations.filter((item) => item.evaluation);
   const scores = evaluated.flatMap((item) =>
     item.evaluation?.total == null ? [] : [item.evaluation.total],
@@ -113,19 +165,62 @@ export function Dashboard() {
     label,
     count: scores.filter((score) => score >= min && score < max).length,
   }));
-  const coverageSegments = [
-    { value: evaluated.length, fill: "var(--color-evaluated)" },
-    { value: Math.max(conversations.length, 1) - evaluated.length, fill: "var(--color-awaiting)" },
-  ];
-  const ordered = evaluated.toSorted(
-    (a, b) =>
+  const ordered = evaluated.toSorted((a, b) => {
+    const byDate =
       (b.evaluation?.createdAt ?? "").localeCompare(a.evaluation?.createdAt ?? "") ||
-      (b.evaluation?.id ?? "").localeCompare(a.evaluation?.id ?? ""),
-  );
+      (b.evaluation?.id ?? "").localeCompare(a.evaluation?.id ?? "");
+    if (sort === "latest") return byDate;
+    // N/A totals go last in both directions.
+    const left = a.evaluation?.total ?? null;
+    const right = b.evaluation?.total ?? null;
+    if (left === null || right === null) return (left === null ? 1 : 0) - (right === null ? 1 : 0);
+    return (sort === "asc" ? left - right : right - left) || byDate;
+  });
   const attention = ordered.filter(
     (item) => item.pendingAppeals > 0 || item.evaluation?.seriousViolation,
   );
-  const visible = reviewOnly ? attention : ordered.slice(0, 8);
+  const visible = reviewOnly ? attention : ordered;
+  const failures = ordered.flatMap((item) =>
+    (item.evaluation?.failures ?? [])
+      .filter((failure) => !criterion || failure.criterionId === criterion)
+      .map((failure) => ({ conversation: item, failure })),
+  );
+  // Per criterion over the selected evaluations: average points where it applied, how often it was
+  // missed (No, below the top of the scale, or a flagged violation) and how often it was N/A.
+  type Row = {
+    id: string;
+    title: string;
+    kind: string;
+    weight: number;
+    applied: number;
+    na: number;
+    points: number;
+    missed: number;
+  };
+  const breakdownMap = new Map<string, Row>();
+  for (const { evaluation } of evaluated) {
+    const missed = new Set(evaluation?.failures.map(({ criterionId }) => criterionId));
+    for (const item of evaluation?.criteria ?? []) {
+      const entry = breakdownMap.get(item.criterionId) ?? {
+        id: item.criterionId,
+        title: item.title,
+        kind: item.kind,
+        weight: item.weight,
+        applied: 0,
+        na: 0,
+        points: 0,
+        missed: 0,
+      };
+      if (item.answer === "na") entry.na += 1;
+      else {
+        entry.applied += 1;
+        entry.points += item.points ?? 0;
+        if (missed.has(item.criterionId)) entry.missed += 1;
+      }
+      breakdownMap.set(item.criterionId, entry);
+    }
+  }
+  const breakdown = [...breakdownMap.values()];
   const metrics = [
     {
       label: "Average score",
@@ -275,12 +370,42 @@ export function Dashboard() {
                 </SelectContent>
               </Select>
             </Field>
-            {(group || language) && (
+            <FilterSelect
+              id="dashboard-checklist"
+              label="Checklist"
+              className="sm:w-72"
+              items={checklists}
+              value={checklist}
+              onChange={setChecklist}
+            />
+            <FilterSelect
+              id="dashboard-violation"
+              label="Serious violation"
+              className="sm:w-52"
+              items={violationOptions}
+              value={violation}
+              onChange={setViolation}
+            />
+            <FilterSelect
+              id="dashboard-criterion"
+              label="Failed criterion"
+              className="sm:w-64"
+              items={criteria}
+              value={criterion}
+              onChange={(value) => {
+                setCriterion(value);
+                setFailureLimit(failurePage);
+              }}
+            />
+            {filtered && (
               <Button
                 variant="ghost"
                 onClick={() => {
                   setGroup("");
                   setLanguage("");
+                  setChecklist("");
+                  setViolation("");
+                  setCriterion("");
                 }}
               >
                 Clear filters
@@ -305,8 +430,8 @@ export function Dashboard() {
             ))}
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-2">
-            <Card>
+          <div className="grid gap-5 lg:grid-cols-5">
+            <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>
                   <h2>Score distribution</h2>
@@ -380,59 +505,94 @@ export function Dashboard() {
                 )}
               </CardContent>
             </Card>
-            <Card>
+            <Card className="lg:col-span-3">
               <CardHeader>
                 <CardTitle>
-                  <h2>Evaluation coverage</h2>
+                  <h2>Criterion breakdown</h2>
                 </CardTitle>
-                <CardDescription>Evaluated conversations by language</CardDescription>
+                <CardDescription>
+                  Where operators lose points. Averages leave out N/A answers. Select a criterion to
+                  filter.
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap items-center gap-6">
-                  <div className="relative shrink-0">
-                    <ChartContainer
-                      config={coverageChartConfig}
-                      className="size-36 aspect-square"
-                      initialDimension={{ width: 144, height: 144 }}
-                      aria-hidden="true"
-                    >
-                      <PieChart accessibilityLayer={false}>
-                        <Pie
-                          data={coverageSegments}
-                          dataKey="value"
-                          innerRadius={55}
-                          outerRadius={65}
-                          startAngle={90}
-                          endAngle={-270}
-                          stroke="none"
-                          isAnimationActive={false}
-                        />
-                      </PieChart>
-                    </ChartContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-2xl font-semibold tabular-nums">{coverage}%</span>
-                      <span className="text-xs text-muted-foreground">evaluated</span>
-                    </div>
-                  </div>
-                  <dl className="min-w-40 flex-1 divide-y">
-                    {Object.entries(languageName)
-                      .filter(([code]) => !language || code === language)
-                      .map(([code, name]) => {
-                        const items = conversations.filter((item) => item.language === code);
+                {breakdown.length ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead scope="col">Criterion</TableHead>
+                        <TableHead scope="col" className="text-right">
+                          Avg points
+                        </TableHead>
+                        <TableHead scope="col" className="text-right">
+                          Missed
+                        </TableHead>
+                        <TableHead scope="col" className="text-right">
+                          N/A
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {breakdown.map((row) => {
+                        const share = row.applied ? row.missed / row.applied : 0;
                         return (
-                          <div key={code} className="flex justify-between gap-3 py-3 text-sm">
-                            <dt>{name}</dt>
-                            <dd className="font-medium tabular-nums">
-                              {items.filter((item) => item.evaluation).length} / {items.length}
-                            </dd>
-                          </div>
+                          <TableRow
+                            key={row.id}
+                            data-state={criterion === row.id ? "selected" : undefined}
+                          >
+                            <TableCell className="whitespace-normal">
+                              <button
+                                type="button"
+                                aria-pressed={criterion === row.id}
+                                onClick={() => {
+                                  setCriterion(criterion === row.id ? "" : row.id);
+                                  setFailureLimit(failurePage);
+                                }}
+                                className="text-left font-medium wrap-anywhere hover:text-primary hover:underline"
+                              >
+                                {row.title}
+                              </button>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <span className="tabular-nums">
+                                {row.kind === "flag" || !row.applied ? (
+                                  <span className="text-muted-foreground">–</span>
+                                ) : (
+                                  <>
+                                    {pointLabel(row.points / row.applied)}
+                                    <span className="text-xs text-muted-foreground">
+                                      {" "}
+                                      / {row.weight}
+                                    </span>
+                                  </>
+                                )}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <span className="tabular-nums">
+                                <span
+                                  className={cn(share >= 0.25 && "font-semibold text-destructive")}
+                                >
+                                  {Math.round(share * 100)}%
+                                </span>
+                                <span className="block text-xs text-muted-foreground">
+                                  {row.missed} of {row.applied}
+                                </span>
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <span className="text-muted-foreground tabular-nums">{row.na}</span>
+                            </TableCell>
+                          </TableRow>
                         );
                       })}
-                  </dl>
-                </div>
-                <p className="mt-4 text-xs text-muted-foreground">
-                  Awaiting evaluation: {conversations.length - evaluated.length}
-                </p>
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <p className="py-8 text-sm text-muted-foreground">
+                    Run an evaluation to see the criterion breakdown.
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -440,22 +600,42 @@ export function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle>
-                <h2>{reviewOnly ? "Needs review" : "Latest evaluations"}</h2>
+                <h2>{reviewOnly ? "Needs review" : "Evaluated conversations"}</h2>
               </CardTitle>
               <CardDescription>
                 {reviewOnly
                   ? "Serious violations and unresolved appeals"
-                  : "Up to eight conversations, ordered by their latest evaluation"}
+                  : `${visible.length} ${visible.length === 1 ? "conversation" : "conversations"}, latest evaluation each`}
               </CardDescription>
               <CardAction>
-                <Toggle
-                  size="sm"
-                  variant="outline"
-                  pressed={reviewOnly}
-                  onPressedChange={setReviewOnly}
-                >
-                  Needs review ({attention.length})
-                </Toggle>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Select
+                    items={sortOptions}
+                    value={sort}
+                    onValueChange={(value) => setSort(value ?? "asc")}
+                  >
+                    <SelectTrigger size="sm" aria-label="Sort by" className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {sortOptions.map(({ value, label }) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <Toggle
+                    size="sm"
+                    variant="outline"
+                    pressed={reviewOnly}
+                    onPressedChange={setReviewOnly}
+                  >
+                    Needs review ({attention.length})
+                  </Toggle>
+                </div>
               </CardAction>
             </CardHeader>
             <CardContent>
@@ -485,9 +665,137 @@ export function Dashboard() {
               )}
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <h2>Checklist failures</h2>
+              </CardTitle>
+              <CardDescription>
+                {failures.length} {failures.length === 1 ? "point" : "points"} where the operator
+                did not follow the checklist, with the model's reason and the cited messages.
+                Ordered like the table above.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {failures.length ? (
+                <>
+                  <ul className="divide-y">
+                    {failures.slice(0, failureLimit).map(({ conversation, failure }) => (
+                      <FailureItem
+                        key={`${conversation.id}-${failure.criterionId}`}
+                        conversation={conversation}
+                        failure={failure}
+                      />
+                    ))}
+                  </ul>
+                  {failures.length > failureLimit && (
+                    <Button
+                      className="mt-4"
+                      variant="outline"
+                      onClick={() => setFailureLimit((limit) => limit + failurePage)}
+                    >
+                      Show {Math.min(failurePage, failures.length - failureLimit)} more
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <p className="py-6 text-sm text-muted-foreground">
+                  No missed checklist points in this selection.
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </>
       )}
     </>
+  );
+}
+
+function FilterSelect({
+  id,
+  label,
+  items,
+  value,
+  onChange,
+  className,
+}: {
+  id: string;
+  label: string;
+  items: Option[];
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+}) {
+  return (
+    <Field className={cn("w-full", className)}>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      <Select items={items} value={value} onValueChange={(next) => onChange(next ?? "")}>
+        <SelectTrigger id={id} className="w-full">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {items.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                <span className="wrap-anywhere whitespace-normal">{item.label}</span>
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </Field>
+  );
+}
+
+function FailureItem({
+  conversation,
+  failure,
+}: {
+  conversation: DashboardConversation;
+  failure: Failure;
+}) {
+  return (
+    <li className="flex flex-col gap-2 py-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Link
+          to="/conversations/$id"
+          params={{ id: conversation.id }}
+          search={{ evaluation: conversation.evaluation?.id }}
+          className="font-semibold wrap-anywhere hover:text-primary hover:underline"
+        >
+          {conversation.sourceId}
+        </Link>
+        <span className="text-xs text-muted-foreground">
+          {languageName[conversation.language]} · {channelName[conversation.channel]} ·{" "}
+          {scoreLabel(conversation.evaluation?.total ?? null)}
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="font-medium">{failure.title}</span>
+        <Badge variant={failure.kind === "flag" ? "destructive" : "outline"}>
+          {failure.kind === "flag" ? "Serious violation" : answerLabel(failure.answer)}
+        </Badge>
+        {failure.lost !== null && (
+          <span className="text-xs text-muted-foreground tabular-nums">
+            −{pointLabel(failure.lost)} of {failure.weight} pts
+          </span>
+        )}
+      </div>
+      <p className="text-sm text-muted-foreground">{failure.explanation}</p>
+      {failure.evidence.length > 0 && (
+        <ul className="flex flex-col gap-1.5">
+          {failure.evidence.map(({ number, speaker, text }) => (
+            <li key={number} className="rounded-md border bg-muted/40 px-3 py-2 text-sm">
+              <span className="mr-2 text-xs font-medium text-muted-foreground">
+                #{number} · {speakerName[speaker]}
+              </span>
+              <span className="wrap-anywhere">{text}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
   );
 }
 
@@ -499,8 +807,8 @@ function ConversationTable({ conversations }: { conversations: DashboardConversa
           <TableHead scope="col">Conversation</TableHead>
           <TableHead scope="col">Checklist</TableHead>
           <TableHead scope="col">Score</TableHead>
+          <TableHead scope="col">Missed points</TableHead>
           <TableHead scope="col">Review</TableHead>
-          <TableHead scope="col">Evaluated</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -532,6 +840,20 @@ function ConversationTable({ conversations }: { conversations: DashboardConversa
             </TableCell>
             <TableCell>
               <div className="flex flex-wrap gap-1">
+                {item.evaluation?.failures
+                  .filter(({ kind }) => kind !== "flag")
+                  .map(({ criterionId, title }) => (
+                    <Badge key={criterionId} variant="outline">
+                      {title}
+                    </Badge>
+                  ))}
+                {!item.evaluation?.failures.some(({ kind }) => kind !== "flag") && (
+                  <span className="text-muted-foreground">None</span>
+                )}
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="flex flex-wrap gap-1">
                 {item.evaluation?.seriousViolation && (
                   <Badge variant="destructive">Serious violation</Badge>
                 )}
@@ -544,11 +866,6 @@ function ConversationTable({ conversations }: { conversations: DashboardConversa
                   <span className="text-muted-foreground">No flags</span>
                 )}
               </div>
-            </TableCell>
-            <TableCell>
-              <span className="text-xs whitespace-nowrap text-muted-foreground">
-                {item.evaluation && dateLabel(item.evaluation.createdAt)}
-              </span>
             </TableCell>
           </TableRow>
         ))}

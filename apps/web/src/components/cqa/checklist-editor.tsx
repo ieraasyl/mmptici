@@ -43,6 +43,7 @@ import {
 } from "@app/contracts";
 import { cqa, checklistsQuery } from "@/lib/cqa";
 import { ApiRequestError, request } from "@/lib/request";
+import { selectChecklist } from "@/lib/selected-checklist";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -234,6 +235,8 @@ function ChecklistForm({
       if (data?.checklist) {
         const saved = data.checklist;
         setRevision(saved.revision);
+        // A checklist you just saved is the one you most likely want to run next.
+        selectChecklist(saved.id);
         queryClient.setQueryData(
           checklistsQuery.queryKey,
           (current) =>
