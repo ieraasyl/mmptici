@@ -18,8 +18,8 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "better-sqlite3": "^13.0.3",
-    "dotenv": "^17.2.3",
+    "better-sqlite3": "catalog:",
+    "dotenv": "catalog:",
     "drizzle-kit": "catalog:",
     "typescript": "catalog:",
     "wrangler": "catalog:"

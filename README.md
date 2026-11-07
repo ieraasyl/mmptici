@@ -18,7 +18,7 @@ See [AGENTS.md](AGENTS.md) for implementation conventions.
 
 ## Local setup
 
-Use Node.js 24 and Vite+ (`vp`).
+Use Node.js 26 and Vite+ (`vp`).
 
 ```sh
 vp install
