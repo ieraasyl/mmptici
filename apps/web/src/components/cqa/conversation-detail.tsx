@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { Message, MessageContent, MessageHeader } from "@/components/ui/message";
 import { Badge } from "@/components/ui/badge";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -35,6 +35,7 @@ import {
   type EvaluationHistory,
 } from "@/lib/cqa";
 import { ApiRequestError, request } from "@/lib/request";
+import { selectChecklist, useSelectedChecklist } from "@/lib/selected-checklist";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
@@ -101,7 +102,7 @@ function Detail({
   selectedEvaluation?: string;
   onSelectEvaluation: (id: string) => void;
 }) {
-  const [selectedChecklist, setSelectedChecklist] = useState("");
+  const selectedChecklist = useSelectedChecklist();
   const pendingRun = useRef<{ id: string; checklistId: string } | null>(null);
   const queryClient = useQueryClient();
   const checklists = useQuery(checklistsQuery);
@@ -114,9 +115,9 @@ function Detail({
     ? selectedChecklist
     : (checklists.data?.defaultId ?? "");
   const evaluationId = selectedEvaluation || history[0]?.id || "";
-  const historyItems = history.map(({ id, checklistName, revision, createdAt }) => ({
+  const historyItems = history.map(({ id, model, checklistName, revision, createdAt }) => ({
     value: id,
-    label: `${checklistName} · v${revision} · ${dateLabel(createdAt)}`,
+    label: `${model} · ${checklistName} · v${revision} · ${dateLabel(createdAt)}`,
   }));
   if (evaluationId && !historyItems.some(({ value }) => value === evaluationId)) {
     historyItems.unshift({ value: evaluationId, label: "Selected evaluation" });
@@ -202,7 +203,7 @@ function Detail({
                   items={checklistItems}
                   value={checklistId || null}
                   disabled={!checklists.data || evaluate.isPending}
-                  onValueChange={(value) => setSelectedChecklist(value ?? "")}
+                  onValueChange={(value) => selectChecklist(value ?? "")}
                 >
                   <SelectTrigger id="run-checklist" className="w-full">
                     <SelectValue

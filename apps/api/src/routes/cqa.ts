@@ -11,6 +11,7 @@ import {
   datasetFileSchema,
   datasetSchema,
   decideAppealSchema,
+  precomputedEvaluationsSchema,
   runEvaluationSchema,
   saveChecklistSchema,
   type Dataset,
@@ -18,6 +19,7 @@ import {
 import { and, asc, createDb, desc, eq, exists, isNull } from "@app/db";
 import { cqaAppeals, cqaChecklists, cqaConversations, cqaEvaluations } from "@app/db/schema";
 import devDataset from "../../../../data/invoke.json";
+import devEvaluations from "../../../../data/evaluations-dev.json";
 import { defaultChecklist } from "../checklist.ts";
 import type { Bindings } from "../env.ts";
 import { validationError } from "../errors.ts";
@@ -30,6 +32,7 @@ import {
 } from "../inference/index.ts";
 import { resolveRecordingUrl } from "../recording.ts";
 import { readDashboard } from "../dashboard.ts";
+import { importPrecomputed } from "../precomputed.ts";
 
 type Db = ReturnType<typeof createDb>;
 type CqaEnv = { Bindings: Bindings; Variables: { workspace: string; db: Db } };
@@ -197,6 +200,11 @@ export const cqaRoutes = new Hono<CqaEnv>()
     const result = await importConversations(c.get("db"), c.get("workspace"), dataset);
     return c.json(result, 201);
   })
+  .post("/evaluations/import-dev", async (c) => {
+    const data = precomputedEvaluationsSchema.parse(devEvaluations);
+    const result = await importPrecomputed(c.get("db"), c.get("workspace"), defaultChecklist, data);
+    return c.json(result, 201);
+  })
   .get("/conversations/:id/recording", async (c) => {
     const conversation = await findConversation(c.get("db"), c.get("workspace"), c.req.param("id"));
     if (!conversation?.audioUrl) throw new HTTPException(404, { message: "Recording not found." });
@@ -212,6 +220,7 @@ export const cqaRoutes = new Hono<CqaEnv>()
       .select({
         id: cqaEvaluations.id,
         checklist: cqaEvaluations.checklist,
+        model: cqaEvaluations.model,
         createdAt: cqaEvaluations.createdAt,
       })
       .from(cqaEvaluations)
@@ -220,8 +229,9 @@ export const cqaRoutes = new Hono<CqaEnv>()
     const { id, sourceId, group, channel, language, transcript, audioUrl } = conversation;
     return c.json({
       conversation: { id, sourceId, group, channel, language, transcript, audioUrl },
-      evaluations: evaluations.map(({ id, checklist, createdAt }) => ({
+      evaluations: evaluations.map(({ id, checklist, model, createdAt }) => ({
         id,
+        model,
         checklistName: checklist.name,
         revision: checklist.revision,
         createdAt,

@@ -18,6 +18,7 @@ export async function readDashboard(db: ReturnType<typeof createDb>, workspaceId
         group: cqaConversations.group,
         language: cqaConversations.language,
         channel: cqaConversations.channel,
+        transcript: cqaConversations.transcript,
         evaluation: cqaEvaluations,
       })
       .from(cqaConversations)
@@ -51,13 +52,13 @@ export async function readDashboard(db: ReturnType<typeof createDb>, workspaceId
     }
   }
 
-  return rows.map(({ evaluation, ...conversation }) => {
+  return rows.map(({ evaluation, transcript, ...conversation }) => {
     const summary = {
       ...conversation,
       pendingAppeals: pendingByConversation.get(conversation.id) ?? 0,
     };
     if (!evaluation) return { ...summary, evaluation: null };
-    const { total, seriousViolation } = scoreEvaluation(
+    const { total, seriousViolation, criteria } = scoreEvaluation(
       evaluation.checklist,
       evaluation.ratings,
       byEvaluation.get(evaluation.id) ?? [],
@@ -67,11 +68,47 @@ export async function readDashboard(db: ReturnType<typeof createDb>, workspaceId
       evaluation: {
         id: evaluation.id,
         createdAt: evaluation.createdAt,
+        checklistId: evaluation.checklist.id,
         checklistName: evaluation.checklist.name,
         revision: evaluation.checklist.revision,
+        model: evaluation.model,
         total,
         seriousViolation,
+        criteria: criteria.map(({ criterion, finalAnswer, finalPoints }) => ({
+          criterionId: criterion.id,
+          title: criterion.title,
+          kind: criterion.kind,
+          weight: criterion.weight,
+          answer: finalAnswer,
+          points: finalPoints,
+        })),
+        failures: criteria
+          .filter(isFailure)
+          .map(({ criterion, original, finalAnswer, finalPoints }) => ({
+            criterionId: criterion.id,
+            title: criterion.title,
+            kind: criterion.kind,
+            answer: finalAnswer,
+            lost: criterion.kind === "flag" ? null : criterion.weight - (finalPoints ?? 0),
+            weight: criterion.weight,
+            explanation: original.explanation,
+            evidence: original.evidence.flatMap((number) => {
+              const turn = transcript[number - 1];
+              return turn ? [{ number, speaker: turn.speaker, text: turn.text }] : [];
+            }),
+          })),
       },
     };
   });
+}
+
+/** A criterion the operator did not meet: "No", a scale value below the top, or a flagged violation. N/A is not a failure. */
+function isFailure({
+  criterion,
+  finalAnswer,
+}: ReturnType<typeof scoreEvaluation>["criteria"][number]) {
+  if (finalAnswer === "na") return false;
+  if (criterion.kind === "flag") return finalAnswer === "yes";
+  if (criterion.kind === "numeric") return finalAnswer !== Math.max(...criterion.scale);
+  return finalAnswer === "no";
 }

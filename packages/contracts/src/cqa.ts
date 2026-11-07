@@ -142,6 +142,17 @@ export const modelRatingsSchema = z.object({
     ratingSchema.omit({ criterionId: true }).extend({ answer: modelAnswer }),
   ),
 });
+/** Evaluations produced outside the app (other models, hand scoring) that ship with the DEV data. */
+export const precomputedEvaluationsSchema = z.object({
+  checklistId: z.string(),
+  evaluations: z.array(
+    z.object({
+      conversation_id: z.string(),
+      model: z.string().trim().min(1).max(100),
+      ratings: z.array(ratingSchema),
+    }),
+  ),
+});
 export const createAppealSchema = z.object({
   criterionId,
   comment: z.string().trim().min(1).max(2000),
@@ -160,6 +171,7 @@ export type Checklist = ChecklistDraft & { id: string; revision: number };
 export type Rating = z.infer<typeof ratingSchema>;
 export type AppealDecision = z.infer<typeof decideAppealSchema>;
 export type Dataset = z.infer<typeof datasetSchema>;
+export type PrecomputedEvaluations = z.infer<typeof precomputedEvaluationsSchema>;
 
 export function answerOptions(criterion: Criterion): Answer[] {
   const answers: Answer[] = criterion.kind === "numeric" ? [...criterion.scale] : ["yes", "no"];

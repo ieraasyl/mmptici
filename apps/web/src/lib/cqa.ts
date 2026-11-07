@@ -74,3 +74,5 @@ export const dateLabel = (date: string) =>
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(date));
+/** "Qwen/Qwen3.8-27B:cerebras" -> "Qwen3.8-27B"; names without an org or provider stay as they are. */
+export const modelLabel = (model: string) => model.split("/").at(-1)!.split(":")[0];

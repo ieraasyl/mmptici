@@ -36,7 +36,10 @@ import {
   channelName,
   conversationsQuery,
   dashboardQuery,
+  type DashboardConversation,
   languageName,
+  modelLabel,
+  scoreLabel,
 } from "@/lib/cqa";
 import { request } from "@/lib/request";
 import { Button } from "@/components/ui/button";
@@ -60,11 +63,20 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
+import { BatchEvaluate } from "./batch-evaluate";
 
 const PAGE_SIZE = 12;
 
+const sortOptions = [
+  { value: "", label: "Sort by ID" },
+  { value: "asc", label: "Lowest score first" },
+  { value: "desc", label: "Highest score first" },
+];
+
 export function ConversationList() {
   const list = useQuery(conversationsQuery);
+  // Latest evaluation per conversation (score, violation, model) comes from the dashboard summary.
+  const summary = useQuery(dashboardQuery);
   const appeals = useQuery(appealsQuery);
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -72,6 +84,7 @@ export function ConversationList() {
   const [language, setLanguage] = useState("");
   const [channel, setChannel] = useState("");
   const [group, setGroup] = useState("");
+  const [sort, setSort] = useState("");
   const [page, setPage] = useState(1);
 
   const importDataset = useMutation({
@@ -85,8 +98,12 @@ export function ConversationList() {
       });
     },
     mutationFn: async (file: File | "dev") => {
-      if (file === "dev")
-        return request((init) => cqa.conversations["import-dev"].$post({}, { init }));
+      if (file === "dev") {
+        const result = await request((init) => cqa.conversations["import-dev"].$post({}, { init }));
+        // The DEV data ships with finished evaluations (several models), so nothing has to be re-run.
+        await request((init) => cqa.evaluations["import-dev"].$post({}, { init }));
+        return result;
+      }
       if (file.size > 5 * 1024 * 1024) throw new Error("Import a JSON file under 5 MB.");
       const text = await file.text();
       let value: unknown;
@@ -163,14 +180,27 @@ export function ConversationList() {
       options: groups.map((name) => [name, name] as const),
     },
   ];
+  const latest = new Map(
+    (summary.data?.conversations ?? []).map((item) => [item.id, item.evaluation] as const),
+  );
   const term = search.trim().toLowerCase();
-  const filtered = conversations.filter(
+  const matching = conversations.filter(
     (item) =>
       item.sourceId.toLowerCase().includes(term) &&
       (!language || item.language === language) &&
       (!channel || item.channel === channel) &&
       (!group || item.group === group),
   );
+  // Unscored conversations (not evaluated or N/A) stay at the end in both directions.
+  const filtered = sort
+    ? matching.toSorted((a, b) => {
+        const left = latest.get(a.id)?.total ?? null;
+        const right = latest.get(b.id)?.total ?? null;
+        if (left === null || right === null)
+          return (left === null ? 1 : 0) - (right === null ? 1 : 0);
+        return sort === "asc" ? left - right : right - left;
+      })
+    : matching;
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
   const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
@@ -275,6 +305,11 @@ export function ConversationList() {
               ? `${filtered.length} of ${conversations.length} conversations`
               : "Imported transcripts"}
           </CardDescription>
+          {conversations.length > 0 && (
+            <CardAction>
+              <BatchEvaluate conversations={filtered} />
+            </CardAction>
+          )}
         </CardHeader>
         {conversations.length > 0 && (
           <CardContent>
@@ -322,6 +357,27 @@ export function ConversationList() {
                     </Select>
                   );
                 })}
+              <Select
+                items={sortOptions}
+                value={sort}
+                onValueChange={(value) => {
+                  setSort(value ?? "");
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger aria-label="Sort" className="w-44 max-w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {sortOptions.map(({ value, label }) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         )}
@@ -345,7 +401,9 @@ export function ConversationList() {
                     <TableHead scope="col">Conversation</TableHead>
                     <TableHead scope="col">Language</TableHead>
                     <TableHead scope="col">Channel</TableHead>
-                    <TableHead scope="col">Status</TableHead>
+                    <TableHead scope="col">Score</TableHead>
+                    <TableHead scope="col">Model</TableHead>
+                    <TableHead scope="col">Review</TableHead>
                     <TableHead scope="col">
                       <span className="sr-only">Open</span>
                     </TableHead>
@@ -375,11 +433,7 @@ export function ConversationList() {
                           {channelName[item.channel]}
                         </span>
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={item.evaluated ? "default" : "secondary"}>
-                          {item.evaluated ? "Evaluated" : "Not evaluated"}
-                        </Badge>
-                      </TableCell>
+                      <LatestCells evaluated={item.evaluated} evaluation={latest.get(item.id)} />
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
@@ -445,6 +499,40 @@ export function ConversationList() {
           </>
         )}
       </Card>
+    </>
+  );
+}
+
+function LatestCells({
+  evaluated,
+  evaluation,
+}: {
+  evaluated: boolean;
+  evaluation: DashboardConversation["evaluation"] | undefined;
+}) {
+  if (!evaluation)
+    return (
+      <TableCell colSpan={3}>
+        <Badge variant="secondary">{evaluated ? "Evaluated" : "Not evaluated"}</Badge>
+      </TableCell>
+    );
+  return (
+    <>
+      <TableCell>
+        <span className="font-semibold tabular-nums">{scoreLabel(evaluation.total)}</span>
+      </TableCell>
+      <TableCell>
+        <span className="text-sm whitespace-nowrap text-muted-foreground" title={evaluation.model}>
+          {modelLabel(evaluation.model)}
+        </span>
+      </TableCell>
+      <TableCell>
+        {evaluation.seriousViolation ? (
+          <Badge variant="destructive">Serious violation</Badge>
+        ) : (
+          <span className="text-sm text-muted-foreground">No flags</span>
+        )}
+      </TableCell>
     </>
   );
 }
