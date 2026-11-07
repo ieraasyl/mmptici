@@ -127,12 +127,14 @@ export function parseRunFile(value: unknown, path: string): RunFile {
 
 /** Writes checkpoints one after another through a temporary file and a rename. */
 export class RunStore {
+  readonly path: string;
+  readonly file: RunFile;
   private queue: Promise<void> = Promise.resolve();
 
-  constructor(
-    readonly path: string,
-    readonly file: RunFile,
-  ) {}
+  constructor(path: string, file: RunFile) {
+    this.path = path;
+    this.file = file;
+  }
 
   update(id: string, patch: Partial<RunRecord>): Promise<void> {
     const current = this.file.records[id] ?? emptyRecord();

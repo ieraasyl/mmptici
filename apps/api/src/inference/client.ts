@@ -53,6 +53,11 @@ export class InferenceApiError extends Error {
     return this.status === 401 || this.status === 403;
   }
 
+  /** The provider wants payment or credits before it serves another request. */
+  get isBillingError() {
+    return this.status === 402;
+  }
+
   /** A rate limit or a server error, which may pass if the request is sent again. */
   get isTransient() {
     return this.status === 429 || this.status >= 500;

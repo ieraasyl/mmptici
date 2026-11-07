@@ -370,6 +370,19 @@ export const cqaRoutes = new Hono<CqaEnv>()
             503,
           );
         }
+        if (cause instanceof InferenceApiError && cause.isBillingError) {
+          console.warn("CQA evaluation refused by the model provider for billing", cause.status);
+          return c.json(
+            {
+              error: {
+                code: "AI_UNAVAILABLE",
+                message:
+                  "The model provider has no remaining credits for HF_TOKEN. Top up the account, then run the evaluation again.",
+              },
+            },
+            503,
+          );
+        }
         if (cause instanceof EvaluationError) {
           console.warn("CQA evaluation rejected", cause.attempts.at(-1)?.errors);
         } else {
