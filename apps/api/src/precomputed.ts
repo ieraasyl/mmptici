@@ -174,7 +174,7 @@ export async function importPrecomputed(
       .map(({ id, conversationId, model, ratings, createdAt }) =>
         db
           .insert(cqaEvaluations)
-          .values({ id, conversationId, checklist, ratings, model, createdAt })
+          .values({ id, conversationId, checklist, ratings, model, origin: "imported", createdAt })
           .onConflictDoNothing()
           .returning({ id: cqaEvaluations.id }),
       );

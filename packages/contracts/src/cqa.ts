@@ -122,6 +122,9 @@ export const runEvaluationSchema = z.object({
   id: z.uuid(),
   checklistId: z.uuid(),
 });
+/** Where a saved evaluation came from: a model call made by the app, a bundled import, or unknown for rows saved before origins were recorded. */
+export const evaluationOrigins = ["live", "imported", "unknown"] as const;
+export type EvaluationOrigin = (typeof evaluationOrigins)[number];
 export const ratingSchema = z.object({
   criterionId,
   answer: answerSchema,

@@ -232,6 +232,7 @@ export const cqaRoutes = new Hono<CqaEnv>()
         id: cqaEvaluations.id,
         checklist: cqaEvaluations.checklist,
         model: cqaEvaluations.model,
+        origin: cqaEvaluations.origin,
         createdAt: cqaEvaluations.createdAt,
       })
       .from(cqaEvaluations)
@@ -240,9 +241,10 @@ export const cqaRoutes = new Hono<CqaEnv>()
     const { id, sourceId, group, channel, language, transcript, audioUrl } = conversation;
     return c.json({
       conversation: { id, sourceId, group, channel, language, transcript, audioUrl },
-      evaluations: evaluations.map(({ id, checklist, model, createdAt }) => ({
+      evaluations: evaluations.map(({ id, checklist, model, origin, createdAt }) => ({
         id,
         model,
+        origin,
         checklistName: checklist.name,
         revision: checklist.revision,
         createdAt,
@@ -393,6 +395,7 @@ export const cqaRoutes = new Hono<CqaEnv>()
           checklist,
           ratings,
           model: run.model,
+          origin: "live",
           createdAt: new Date(),
         })
         .onConflictDoNothing()
@@ -425,6 +428,7 @@ export const cqaRoutes = new Hono<CqaEnv>()
         conversationId: evaluation.conversationId,
         checklist: evaluation.checklist,
         model: evaluation.model,
+        origin: evaluation.origin,
         createdAt: evaluation.createdAt,
         appeals,
         originalTotal: scoreEvaluation(evaluation.checklist, evaluation.ratings, []).total,

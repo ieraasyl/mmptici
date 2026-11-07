@@ -147,7 +147,10 @@ test("attaches bundled evaluations once, only to matching DEV transcripts", asyn
   expect(conversations.filter(({ evaluated }) => evaluated)).toHaveLength(64);
   const dashboard = await (await cqa.dashboard.$get({}, { headers })).json();
   const latest = dashboard.conversations.find(({ sourceId }) => sourceId === "p1-ru-002");
-  expect(latest?.evaluation?.model).toBe("Qwen/Qwen3.8-27B:cerebras");
+  expect(latest?.evaluation).toMatchObject({
+    model: "Qwen/Qwen3.8-27B:cerebras",
+    origin: "imported",
+  });
 
   // The other workspace holds the same DEV conversations and received nothing.
   const elsewhere = await (await cqa.conversations.$get({}, { headers: other })).json();
@@ -276,9 +279,14 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
   const evaluationRequest = { param: { id: evaluationId } };
   const before = await evaluationEndpoint.$get(evaluationRequest, { headers });
   expect(before.status).toBe(200);
+  const history = await (
+    await cqa.conversations[":id"].$get({ param: { id: conversationId } }, { headers })
+  ).json();
+  expect(history.evaluations.map(({ origin }) => origin)).toEqual(["live", "live"]);
   expect(await before.json()).toMatchObject({
     evaluation: {
       total: 75,
+      origin: "live",
       checklist: { revision: 1 },
       criteria: [
         {

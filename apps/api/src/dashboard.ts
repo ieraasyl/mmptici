@@ -78,6 +78,7 @@ export async function readDashboard(db: ReturnType<typeof createDb>, workspaceId
         checklistName: evaluation.checklist.name,
         revision: evaluation.checklist.revision,
         model: evaluation.model,
+        origin: evaluation.origin,
         total,
         seriousViolation,
         criteria: criteria.map(({ criterion, finalAnswer, finalPoints }) => ({

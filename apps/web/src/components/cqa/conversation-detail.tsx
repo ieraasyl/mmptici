@@ -30,6 +30,7 @@ import {
   dashboardQuery,
   evaluationQuery,
   languageName,
+  originLabel,
   speakerName,
   type Conversation,
   type EvaluationHistory,
@@ -115,9 +116,9 @@ function Detail({
     ? selectedChecklist
     : (checklists.data?.defaultId ?? "");
   const evaluationId = selectedEvaluation || history[0]?.id || "";
-  const historyItems = history.map(({ id, model, checklistName, revision, createdAt }) => ({
+  const historyItems = history.map(({ id, model, origin, checklistName, revision, createdAt }) => ({
     value: id,
-    label: `${model} · ${checklistName} · v${revision} · ${dateLabel(createdAt)}`,
+    label: `${originLabel[origin]} · ${model} · ${checklistName} · v${revision} · ${dateLabel(createdAt)}`,
   }));
   if (evaluationId && !historyItems.some(({ value }) => value === evaluationId)) {
     historyItems.unshift({ value: evaluationId, label: "Selected evaluation" });

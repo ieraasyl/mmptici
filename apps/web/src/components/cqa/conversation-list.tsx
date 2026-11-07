@@ -39,6 +39,7 @@ import {
   type DashboardConversation,
   languageName,
   modelLabel,
+  originLabel,
   scoreLabel,
 } from "@/lib/cqa";
 import { request } from "@/lib/request";
@@ -530,6 +531,9 @@ function LatestCells({
         <span className="text-sm whitespace-nowrap text-muted-foreground" title={evaluation.model}>
           {modelLabel(evaluation.model)}
         </span>
+        <Badge variant={evaluation.origin === "live" ? "secondary" : "outline"} className="ml-1">
+          {originLabel[evaluation.origin]}
+        </Badge>
       </TableCell>
       <TableCell>
         {evaluation.seriousViolation ? (

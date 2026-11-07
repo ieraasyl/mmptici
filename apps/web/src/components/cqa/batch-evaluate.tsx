@@ -28,7 +28,7 @@ import { selectChecklist, useSelectedChecklist } from "@/lib/selected-checklist"
 // Calls the model once per conversation, so keep a few runs in flight rather than all at once.
 const CONCURRENCY = 3;
 
-type Target = { id: string; evaluated: boolean };
+type Target = { id: string; sourceId: string; evaluated: boolean };
 
 /** Runs the selected checklist on the conversations currently shown in the library. */
 export function BatchEvaluate({ conversations }: { conversations: Target[] }) {
@@ -54,9 +54,9 @@ export function BatchEvaluate({ conversations }: { conversations: Target[] }) {
   async function run(targets: Target[]) {
     setConfirm(false);
     stop.current = false;
-    const tally: { done: number; failed: number; fatal: Error | null } = {
+    const tally: { done: number; failed: string[]; fatal: Error | null } = {
       done: 0,
-      failed: 0,
+      failed: [],
       fatal: null,
     };
     setProgress({ done: 0, total: targets.length });
@@ -64,7 +64,7 @@ export function BatchEvaluate({ conversations }: { conversations: Target[] }) {
 
     async function worker() {
       while (queue.length && !stop.current && !tally.fatal) {
-        const { id } = queue.shift()!;
+        const { id, sourceId } = queue.shift()!;
         try {
           await request((init) =>
             cqa.conversations[":id"].evaluations.$post(
@@ -75,7 +75,7 @@ export function BatchEvaluate({ conversations }: { conversations: Target[] }) {
         } catch (error) {
           // A malformed response after a confirmed write still counts as a saved run.
           if (!(error instanceof ApiRequestError && error.code === "INVALID_RESPONSE")) {
-            tally.failed += 1;
+            tally.failed.push(sourceId);
             // A missing or rejected token fails every run the same way, so stop early.
             if (error instanceof ApiRequestError && error.code === "AI_UNAVAILABLE")
               tally.fatal = error;
@@ -92,24 +92,22 @@ export function BatchEvaluate({ conversations }: { conversations: Target[] }) {
     void queryClient.invalidateQueries(dashboardQuery);
 
     const { done, failed, fatal } = tally;
-    const saved = done - failed;
+    const saved = done - failed.length;
     const skipped = targets.length - done;
+    const failedList = failed.length
+      ? `${failed.length} failed: ${failed.slice(0, 10).join(", ")}${failed.length > 10 ? ", …" : ""}. Run them again.`
+      : "";
     toast.add({
       id: "batch-evaluate",
       title: fatal
         ? "Evaluations stopped"
         : `Evaluated ${saved} ${saved === 1 ? "conversation" : "conversations"}.`,
       description:
-        fatal?.message ??
-        ([
-          failed > 0 && `${failed} failed; try them again.`,
-          skipped > 0 && `${skipped} not started after you stopped.`,
-        ]
+        [fatal?.message, failedList, skipped > 0 && `${skipped} not started after you stopped.`]
           .filter(Boolean)
-          .join(" ") ||
-          undefined),
-      type: fatal || failed ? "error" : "success",
-      timeout: 8_000,
+          .join(" ") || undefined,
+      type: fatal || failed.length ? "error" : "success",
+      timeout: failed.length ? 20_000 : 8_000,
     });
   }
 
@@ -156,9 +154,10 @@ export function BatchEvaluate({ conversations }: { conversations: Target[] }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Run evaluations?</AlertDialogTitle>
             <AlertDialogDescription className="wrap-anywhere">
-              {checklistLabel} on the {conversations.length} conversations shown with the current
-              filters. {pending.length} of them have no evaluation yet. Each run calls the model
-              once and is saved as a new evaluation.
+              Checklist {checklistLabel} on the {conversations.length} conversations shown with the
+              current filters. {pending.length} of them have no saved evaluation. Each run calls the
+              model, with a repair or retry call when a reply is unusable, and is saved as a new
+              live evaluation; earlier evaluations stay in the history.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -169,7 +168,7 @@ export function BatchEvaluate({ conversations }: { conversations: Target[] }) {
               disabled={pending.length === 0}
               onClick={() => void run(pending)}
             >
-              Only not evaluated ({pending.length})
+              Without any saved evaluation ({pending.length})
             </Button>
             <Button type="button" onClick={() => void run(conversations)}>
               All shown ({conversations.length})
