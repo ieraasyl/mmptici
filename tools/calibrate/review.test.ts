@@ -175,7 +175,8 @@ describe("review sheet", () => {
     expect(three.errText()).toContain("exactly two labelers");
   });
 
-  test("the round 1 sheet reproduces the committed decisions file", () => {
+  // These read the AI label files but never the decisions sheet, which reviewers fill in.
+  const round1 = (...extra: string[]) => {
     const dir = tempDir();
     const c = capture();
     const code = main(
@@ -192,14 +193,19 @@ describe("review sheet", () => {
         `${dir}/runs`,
         "--labels-dir",
         `${dir}/lab`,
+        ...extra,
       ],
       c.io,
     );
     expect(code).toBe(0);
-    expect(c.text()).toContain("total rows: 136, agreed: 113, to review: 23");
-    expect(readFileSync(`${dir}/lab/ai-round1-decisions.csv`, "utf8")).toBe(
-      readFileSync(`${DEFAULT_LABELS_DIR}/ai-round1-decisions.csv`, "utf8"),
-    );
+    const key = (r: Record<string, string>) => `${r.conversation_id}:${r.criterion_id}`;
+    return { text: c.text(), keys: csvRows(`${dir}/lab/ai-round1-decisions.csv`).map(key) };
+  };
+
+  test("the round 1 AI labels give 136 rows with 23 to review", () => {
+    const { text, keys } = round1();
+    expect(text).toContain("total rows: 136, agreed: 113, to review: 23");
+    expect(keys).toHaveLength(23);
   });
 
   test("--include puts agreed rows up for review", () => {
@@ -231,38 +237,14 @@ describe("review sheet", () => {
   });
 
   test("regenerating the round 1 sheet with --include keeps its rows and adds the included", () => {
-    const dir = tempDir();
-    const c = capture();
-    const code = main(
-      [
-        "sheet",
-        "--labels",
-        `${DEFAULT_LABELS_DIR}/ai-fable.csv`,
-        `${DEFAULT_LABELS_DIR}/ai-opus.csv`,
-        "--set",
-        "chats17",
-        "--name",
-        "ai-round1",
-        "--runs-dir",
-        `${dir}/runs`,
-        "--labels-dir",
-        `${dir}/lab`,
-        "--include",
-        "p1-ru-003:closing,p1-ru-007:guidance",
-      ],
-      c.io,
-    );
-    expect(code).toBe(0);
-    expect(c.text()).toContain("total rows: 136, agreed: 111, to review: 25");
-    const key = (r: Record<string, string>) => `${r.conversation_id}:${r.criterion_id}`;
-    const committed = csvRows(`${DEFAULT_LABELS_DIR}/ai-round1-decisions.csv`).map(key);
-    const regenerated = csvRows(`${dir}/lab/ai-round1-decisions.csv`).map(key);
-    expect(committed).toHaveLength(23);
-    expect(regenerated.filter((k) => !committed.includes(k))).toEqual([
+    const before = round1().keys;
+    const after = round1("--include", "p1-ru-003:closing,p1-ru-007:guidance");
+    expect(after.text).toContain("total rows: 136, agreed: 111, to review: 25");
+    expect(after.keys.filter((k) => !before.includes(k))).toEqual([
       "p1-ru-003:closing",
       "p1-ru-007:guidance",
     ]);
-    expect(regenerated.filter((k) => committed.includes(k))).toEqual(committed);
+    expect(after.keys.filter((k) => before.includes(k))).toEqual(before);
   });
 });
 
