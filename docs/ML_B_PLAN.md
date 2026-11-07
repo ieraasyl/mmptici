@@ -6,15 +6,15 @@ ML B does not write prompts. Prompt changes belong to ML A. ML B decides whether
 
 ## Deliverables
 
-| Item | Path | Used by |
-| --- | --- | --- |
-| Labeling guide | `docs/LABELING_GUIDE.md` | All labelers, ML A for the prompt |
-| Dialog printer | `tools/calibrate/print_dialogs.py` | Labelers |
-| Labels | `tools/calibrate/labels/labels.csv` | Calibration |
-| Run script | `tools/calibrate/run.ts`, output in `tools/calibrate/runs/` (ignored) | Calibration |
-| Scoring and metrics | `tools/calibrate/compare.py`, `tools/calibrate/score.py` | Calibration |
-| Reports | `tools/calibrate/reports/<date>-<prompt>-<provider>.md` and `.json` | ML A, Fullstack calibration page |
-| Local provider config | `apps/api/.dev.vars` and Worker secrets, values given to Fullstack | ML A, Fullstack |
+| Item                  | Path                                                                  | Used by                           |
+| --------------------- | --------------------------------------------------------------------- | --------------------------------- |
+| Labeling guide        | `docs/LABELING_GUIDE.md`                                              | All labelers, ML A for the prompt |
+| Dialog printer        | `tools/calibrate/print_dialogs.py`                                    | Labelers                          |
+| Labels                | `tools/calibrate/labels/labels.csv`                                   | Calibration                       |
+| Run script            | `tools/calibrate/run.ts`, output in `tools/calibrate/runs/` (ignored) | Calibration                       |
+| Scoring and metrics   | `tools/calibrate/compare.py`, `tools/calibrate/score.py`              | Calibration                       |
+| Reports               | `tools/calibrate/reports/<date>-<prompt>-<provider>.md` and `.json`   | ML A, Fullstack calibration page  |
+| Local provider config | `apps/api/.dev.vars` and Worker secrets, values given to Fullstack    | ML A, Fullstack                   |
 
 Labels and aggregate reports are our own work, so they are committed. They become the proof of process in the demo. Reports hold metrics, confusion tables, and mismatches as dialog IDs and answers only.
 
@@ -32,33 +32,33 @@ Each scenario family sits entirely in one split, so a prompt tuned on the Russia
 
 **Tuning set, 14 dialogs**
 
-| Dialog | Family | Why it is in |
-| --- | --- | --- |
-| p1-ru-003 | Commission | Two questions, one left open |
+| Dialog    | Family                          | Why it is in                                     |
+| --------- | ------------------------------- | ------------------------------------------------ |
+| p1-ru-003 | Commission                      | Two questions, one left open                     |
 | p1-ru-007 | Withdrawal needs profile update | Second question ignored, closing without goodbye |
-| p1-ru-022 | Investment advice | Paid service outside the company |
-| p1-ru-025 | Asks for a human | Client leaves before stating a request |
-| p1-ru-028 | Update personal data | Announced wait |
-| p1-ru-029 | Cannot find sign-in | Insult, then a useful answer |
-| p1-kz-003 | Deposit not credited | Explicit identity check |
-| p1-kz-008 | Cannot find sign-in | Details already given to the bot |
-| p1-kz-011 | D-account | Cut off before closing |
-| p1-en-008 | Similar securities | Late new question |
-| p1-en-009 | Margin checkbox | Cut off before closing |
-| p1-en-014 | Withdrawals blocked | Protected account action |
-| p4-ru-001 | Call | ASR noise, duplicate turn |
-| p4-ru-003 | Call | Verbal identity confirmation |
+| p1-ru-022 | Investment advice               | Paid service outside the company                 |
+| p1-ru-025 | Asks for a human                | Client leaves before stating a request           |
+| p1-ru-028 | Update personal data            | Announced wait                                   |
+| p1-ru-029 | Cannot find sign-in             | Insult, then a useful answer                     |
+| p1-kz-003 | Deposit not credited            | Explicit identity check                          |
+| p1-kz-008 | Cannot find sign-in             | Details already given to the bot                 |
+| p1-kz-011 | D-account                       | Cut off before closing                           |
+| p1-en-008 | Similar securities              | Late new question                                |
+| p1-en-009 | Margin checkbox                 | Cut off before closing                           |
+| p1-en-014 | Withdrawals blocked             | Protected account action                         |
+| p4-ru-001 | Call                            | ASR noise, duplicate turn                        |
+| p4-ru-003 | Call                            | Verbal identity confirmation                     |
 
 **Held-out set, 6 dialogs**
 
-| Dialog | Family | Why it is in |
-| --- | --- | --- |
-| p1-ru-012 | 1042-S form | Cut off before closing |
-| p1-kz-012 | Bond orders rejected | Escalation as a correct next step |
-| p1-kz-013 | Finding bonds | Paid service outside the company |
-| p1-en-001 | Login already taken | Plain resolved chat |
-| p1-en-004 | Broker report | Plain resolved chat with a follow-up question |
-| p4-ru-002 | Call | Staff consultation during hold |
+| Dialog    | Family               | Why it is in                                  |
+| --------- | -------------------- | --------------------------------------------- |
+| p1-ru-012 | 1042-S form          | Cut off before closing                        |
+| p1-kz-012 | Bond orders rejected | Escalation as a correct next step             |
+| p1-kz-013 | Finding bonds        | Paid service outside the company              |
+| p1-en-001 | Login already taken  | Plain resolved chat                           |
+| p1-en-004 | Broker report        | Plain resolved chat with a follow-up question |
+| p4-ru-002 | Call                 | Staff consultation during hold                |
 
 The mix is 7 RU, 5 KZ, 5 EN, and 3 calls.
 
@@ -95,16 +95,16 @@ This goes first because ML A needs the answer before building providers.
 
 `docs/LABELING_GUIDE.md` gives one decision rule per criterion. Draft rules follow. They are provisional until the organizers answer, and the guide marks which question each one depends on.
 
-| Criterion | Provisional rule | Depends on organizer question |
-| --- | --- | --- |
-| opening | Judge only the operator's first message. Yes needs a greeting in the client's language and a name. "[Имя скрыто]" counts as a name. The bot's greeting never counts. | 4 |
-| understanding | N/A when the client's messages before the operator's first reply, including those sent to the bot, already contain enough to answer. Yes when the operator used the known details and asked only for what was missing. No when the operator answered without a needed clarification or asked again for something already stated. | 5 |
-| verification | N/A for general information. Required for account-specific data or a protected action. Yes only when a check is visibly confirmed, by a system event or an explicit operator statement, before the disclosure. A confirmed bot check before handoff counts. | 6 |
-| guidance | First list every distinct client question. Score with the PDF scale. A correct escalation or next step earns 20. Treat bot information as correct context unless the operator contradicts it. N/A only when no request was ever stated. | 7 |
-| empathy | Yes when the operator is polite and no complaint or inconvenience the client voiced was ignored. Politeness alone is Yes. | 8 |
-| management | Start at 10 and drop to the PDF step that matches the worst lapse. A visible delay after "let me check" with no wait warning counts as a lapse. The three-minute first-response rule does not apply. ASR noise is never a lapse. | 9, 11 |
-| closing | Yes needs a goodbye plus either a summary or an offer of further help. A goodbye alone is No. N/A when the chat or call was cut off before the operator could close. This is the most uncertain rule, so revisit it first when answers arrive. | 10 |
-| violations | Yes on an insult, an offer of paid service outside the company, or disclosure of confidential data. The offer alone is enough. | none |
+| Criterion     | Provisional rule                                                                                                                                                                                                                                                                                                                 | Depends on organizer question |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| opening       | Judge only the operator's first message. Yes needs a greeting in the client's language and a name. "[Имя скрыто]" counts as a name. The bot's greeting never counts.                                                                                                                                                             | 4                             |
+| understanding | N/A when the client's messages before the operator's first reply, including those sent to the bot, already contain enough to answer. Yes when the operator used the known details and asked only for what was missing. No when the operator answered without a needed clarification or asked again for something already stated. | 5                             |
+| verification  | N/A for general information. Required for account-specific data or a protected action. Yes only when a check is visibly confirmed, by a system event or an explicit operator statement, before the disclosure. A confirmed bot check before handoff counts.                                                                      | 6                             |
+| guidance      | First list every distinct client question. Score with the PDF scale. A correct escalation or next step earns 20. Treat bot information as correct context unless the operator contradicts it. N/A only when no request was ever stated.                                                                                          | 7                             |
+| empathy       | Yes when the operator is polite and no complaint or inconvenience the client voiced was ignored. Politeness alone is Yes.                                                                                                                                                                                                        | 8                             |
+| management    | Start at 10 and drop to the PDF step that matches the worst lapse. A visible delay after "let me check" with no wait warning counts as a lapse. The three-minute first-response rule does not apply. ASR noise is never a lapse.                                                                                                 | 9, 11                         |
+| closing       | Yes needs a goodbye plus either a summary or an offer of further help. A goodbye alone is No. N/A when the chat or call was cut off before the operator could close. This is the most uncertain rule, so revisit it first when answers arrive.                                                                                   | 10                            |
+| violations    | Yes on an insult, an offer of paid service outside the company, or disclosure of confidential data. The offer alone is enough.                                                                                                                                                                                                   | none                          |
 
 Each row also gets one worked example from the tuning set and the evidence to cite. The examples come from the tuning set only, never from the held-out set.
 
@@ -127,17 +127,17 @@ p1-ru-007,dauka,closing,no,13,"Closed without goodbye after a second question"
 
 **`compare.py`** takes two sources, either two labelers or labels and a run file. It prints the metrics below and writes them to the `.md` and `.json` reports.
 
-| Metric | Applies to | Note |
-| --- | --- | --- |
-| Exact agreement with count | Every criterion | N/A counts as its own answer |
-| Cohen's kappa | Binary criteria | Reported as NA when one side never varies, as with `violations` |
-| Quadratic weighted kappa | `guidance`, `management` | Only on rows where both sides are not N/A |
-| N/A agreement | Criteria that allow N/A | Both N/A or both not N/A |
-| Confusion table | Every criterion | Printed, not just summarized |
-| Total MAE and max error | Per dialog | Uses `score.py` on both sides |
-| Violation precision and recall | `violations` | |
-| Breakdown | Language and channel | KZ row is required |
-| Run health | Model runs | Failed samples, retries, mean latency, cost |
+| Metric                         | Applies to               | Note                                                            |
+| ------------------------------ | ------------------------ | --------------------------------------------------------------- |
+| Exact agreement with count     | Every criterion          | N/A counts as its own answer                                    |
+| Cohen's kappa                  | Binary criteria          | Reported as NA when one side never varies, as with `violations` |
+| Quadratic weighted kappa       | `guidance`, `management` | Only on rows where both sides are not N/A                       |
+| N/A agreement                  | Criteria that allow N/A  | Both N/A or both not N/A                                        |
+| Confusion table                | Every criterion          | Printed, not just summarized                                    |
+| Total MAE and max error        | Per dialog               | Uses `score.py` on both sides                                   |
+| Violation precision and recall | `violations`             |                                                                 |
+| Breakdown                      | Language and channel     | KZ row is required                                              |
+| Run health                     | Model runs               | Failed samples, retries, mean latency, cost                     |
 
 Agreement and total MAE get 95% bootstrap intervals over dialogs, with 1000 resamples. With 14 dialogs the intervals will be wide, and the report must show that.
 
@@ -153,12 +153,12 @@ Python dependencies are pandas and scikit-learn, in a venv inside `tools/calibra
 
 Assignment for four people. Each person labels about eight dialogs, and 10 of the 14 tuning dialogs get a second labeler.
 
-| Labeler | Primary | Second label |
-| --- | --- | --- |
-| dauka | p1-ru-003, p1-ru-007, p1-ru-022, p1-ru-025, p4-ru-001 | p1-kz-003, p1-en-014 |
-| ML A | p1-ru-028, p1-ru-029, p1-en-008, p1-en-009 | p1-ru-003, p1-ru-022, p4-ru-001 |
-| ML C | p1-kz-003, p1-kz-008, p1-kz-011, p4-ru-003 | p1-ru-007, p1-en-009 |
-| Fullstack | p1-en-014, p1-ru-012, p1-en-001, p1-en-004 | p1-ru-025, p1-kz-008, p1-ru-028 |
+| Labeler   | Primary                                               | Second label                    |
+| --------- | ----------------------------------------------------- | ------------------------------- |
+| dauka     | p1-ru-003, p1-ru-007, p1-ru-022, p1-ru-025, p4-ru-001 | p1-kz-003, p1-en-014            |
+| ML A      | p1-ru-028, p1-ru-029, p1-en-008, p1-en-009            | p1-ru-003, p1-ru-022, p4-ru-001 |
+| ML C      | p1-kz-003, p1-kz-008, p1-kz-011, p4-ru-003            | p1-ru-007, p1-en-009            |
+| Fullstack | p1-en-014, p1-ru-012, p1-en-001, p1-en-004            | p1-ru-025, p1-kz-008, p1-ru-028 |
 
 Swap rows so that whoever reads Kazakh best takes the Kazakh dialogs. The held-out dialogs p1-kz-012, p1-kz-013, and p4-ru-002 go to whoever finishes first. Labelers never discuss the held-out dialogs with ML A.
 
@@ -176,11 +176,34 @@ After labeling:
 `run.ts` imports `evaluate` from `packages/evaluator`. It runs a list of dialogs at concurrency 4 with backoff and writes `tools/calibrate/runs/<date>-<prompt>-<provider>.json`.
 
 ```json
-{ "promptVersion": "v1", "provider": "cerebras-qwen", "model": "Qwen/Qwen3.8-27B:cerebras",
-  "dialogs": [{ "conversationId": "p1-ru-007",
-    "ratings": [{ "criterionId": "closing", "answer": "no", "confidence": 1, "votes": ["no","no","no"], "evidence": [13], "explanation": "..." }],
-    "total": 64.71, "seriousViolation": false,
-    "run": { "latencyMs": 4800, "usage": { "promptTokens": 2900, "completionTokens": 4100 }, "costUsd": 0.009, "failedSamples": 0 } }] }
+{
+  "promptVersion": "v1",
+  "provider": "cerebras-qwen",
+  "model": "Qwen/Qwen3.8-27B:cerebras",
+  "dialogs": [
+    {
+      "conversationId": "p1-ru-007",
+      "ratings": [
+        {
+          "criterionId": "closing",
+          "answer": "no",
+          "confidence": 1,
+          "votes": ["no", "no", "no"],
+          "evidence": [13],
+          "explanation": "..."
+        }
+      ],
+      "total": 64.71,
+      "seriousViolation": false,
+      "run": {
+        "latencyMs": 4800,
+        "usage": { "promptTokens": 2900, "completionTokens": 4100 },
+        "costUsd": 0.009,
+        "failedSamples": 0
+      }
+    }
+  ]
+}
 ```
 
 Flags: `--set tuning|heldout|all|<ids>`, `--provider cerebras|local`, and `--samples n`. `--set heldout` refuses to run unless `--frozen <prompt-version>` is given, so the held-out set can't be run by accident.
@@ -229,11 +252,11 @@ Run the tuning set on the self-hosted Qwen with the accepted prompt. The report 
 
 ## Risks
 
-| Risk | Response |
-| --- | --- |
-| Humans disagree on closing or understanding | Report the ceiling, ask the organizers, and do not tune on that criterion until they answer |
-| 14 dialogs are too few to separate two prompts | Accept a change only on clear gains. Show the bootstrap intervals. |
-| The held-out result is worse than tuning | Report it honestly in the README. Do not reopen prompt tuning, since that would turn the held-out set into tuning data. |
-| No one on the team reads Kazakh well | Label KZ with a Russian gloss of each operator turn and mark those labels low-confidence |
-| Modal cold start during the demo | Warm the endpoint before the demo and keep cloud as the default |
-| The evaluator package lands late | Phase 1 and labeling do not depend on it. Only B2b and later wait for it. |
+| Risk                                           | Response                                                                                                                |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Humans disagree on closing or understanding    | Report the ceiling, ask the organizers, and do not tune on that criterion until they answer                             |
+| 14 dialogs are too few to separate two prompts | Accept a change only on clear gains. Show the bootstrap intervals.                                                      |
+| The held-out result is worse than tuning       | Report it honestly in the README. Do not reopen prompt tuning, since that would turn the held-out set into tuning data. |
+| No one on the team reads Kazakh well           | Label KZ with a Russian gloss of each operator turn and mark those labels low-confidence                                |
+| Modal cold start during the demo               | Warm the endpoint before the demo and keep cloud as the default                                                         |
+| The evaluator package lands late               | Phase 1 and labeling do not depend on it. Only B2b and later wait for it.                                               |
