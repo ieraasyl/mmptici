@@ -148,9 +148,10 @@ export function EvaluationResult({
                           </Badge>
                           <Link
                             to="/appeals"
+                            search={{ appeal: appeal.id }}
                             className="text-xs font-medium text-primary hover:underline"
                           >
-                            Review appeals
+                            View appeal
                           </Link>
                         </div>
                         <p className="wrap-anywhere">

@@ -130,73 +130,42 @@
     --motion-fast: 0ms;
     --motion-panel: 0ms;
   }
-
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none;
-  }
-}
-
-::view-transition {
-  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  :root:active-view-transition-type(slide-from-left, slide-from-right) {
+  #main-content:active-view-transition-type(slide-from-left, slide-from-right) {
     --workspace-page-rise: 0px;
     --workspace-page-edge-opacity: 1;
     --workspace-slide-duration: 380ms;
   }
 
-  :root:active-view-transition-type(slide-from-left) {
+  #main-content:active-view-transition-type(slide-from-left) {
     --workspace-page-offset: -100%;
   }
 
-  :root:active-view-transition-type(slide-from-right) {
+  #main-content:active-view-transition-type(slide-from-right) {
     --workspace-page-offset: 100%;
   }
 
-  #main-content {
-    view-transition-name: workspace-page;
+  #main-content::view-transition {
+    pointer-events: none;
   }
 
-  [data-slot="navigation-menu-highlight"] {
-    view-transition-name: workspace-active-link;
-  }
-
-  ::view-transition-old(root),
-  ::view-transition-old(workspace-active-link) {
-    display: none;
-  }
-
-  ::view-transition-group(root),
-  ::view-transition-new(root),
-  ::view-transition-group(workspace-page) {
+  #main-content::view-transition-group(root) {
     animation: none;
   }
 
-  ::view-transition-image-pair(workspace-page) {
+  #main-content::view-transition-image-pair(root) {
     overflow-x: clip;
   }
 
-  ::view-transition-old(workspace-page) {
+  #main-content::view-transition-old(root) {
     animation: workspace-page-exit var(--workspace-slide-duration, var(--motion-fast))
       var(--motion-ease) both;
   }
 
-  ::view-transition-new(workspace-page) {
+  #main-content::view-transition-new(root) {
     animation: workspace-page-enter var(--workspace-slide-duration, 300ms) var(--motion-ease) both;
-  }
-
-  ::view-transition-group(workspace-active-link) {
-    animation-duration: 320ms;
-    animation-timing-function: var(--motion-ease);
-  }
-
-  ::view-transition-new(workspace-active-link) {
-    height: 100%;
-    animation: none;
   }
 }
 

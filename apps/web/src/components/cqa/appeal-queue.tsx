@@ -1,280 +1,194 @@
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { useState, type FormEvent } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
-import { answerLabel, answerOptions, type Answer } from "@app/contracts";
-import {
-  appealsQuery,
-  cqa,
-  dashboardQuery,
-  dateLabel,
-  evaluationQuery,
-  speakerName,
-  type Appeal,
-} from "@/lib/cqa";
-import { ApiRequestError, request } from "@/lib/request";
+import { useTable, type ColumnDef } from "@tanstack/react-table";
+import { answerLabel } from "@app/contracts";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { DataTable } from "@/components/ui/data-table";
+import { dataTableFeatures } from "@/components/ui/data-table-features";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { appealsQuery, dateLabel, type Appeal } from "@/lib/cqa";
+import { AppealReview } from "./appeal-review";
 import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
 
-export function AppealQueue() {
+type AppealColumn = ColumnDef<typeof dataTableFeatures, Appeal>;
+
+const columns: AppealColumn[] = [
+  {
+    id: "appeal",
+    accessorFn: ({ conversation, criterion }) => `${conversation.sourceId} ${criterion.title}`,
+    header: "Appeal",
+    filterFn: "includesString",
+    enableSorting: false,
+    meta: { cellClassName: "wrap-anywhere whitespace-normal" },
+    cell: ({ row: { original: appeal } }) => (
+      <>
+        <div className="font-medium">{appeal.criterion.title}</div>
+        <div className="text-xs text-muted-foreground">
+          {appeal.conversation.sourceId} · {appeal.conversation.group}
+        </div>
+        <div className="mt-1 sm:hidden">
+          <AppealRating appeal={appeal} />
+        </div>
+      </>
+    ),
+  },
+  {
+    id: "rating",
+    header: "Rating",
+    meta: { headerClassName: "hidden sm:table-cell", cellClassName: "hidden sm:table-cell" },
+    cell: ({ row }) => <AppealRating appeal={row.original} />,
+  },
+  {
+    id: "date",
+    accessorFn: (appeal) => (appeal.decision ? (appeal.decidedAt ?? undefined) : appeal.createdAt),
+    header: ({ table }) => (table.options.data[0]?.decision ? "Resolved" : "Submitted"),
+    sortFn: "basic",
+    sortUndefined: "last",
+    meta: { headerClassName: "hidden md:table-cell", cellClassName: "hidden md:table-cell" },
+    cell: ({ getValue }) => {
+      const date = getValue<string | undefined>();
+      return date ? (
+        <span className="text-muted-foreground">{dateLabel(date)}</span>
+      ) : (
+        <span className="text-muted-foreground">Decision saved</span>
+      );
+    },
+  },
+  {
+    id: "review",
+    header: () => <span className="sr-only">Actions</span>,
+    meta: { align: "right" },
+    cell: ({ row: { original: appeal } }) => (
+      <SheetTrigger
+        id={appeal.id}
+        render={<Button size="sm" variant="outline" />}
+        aria-label={`${appeal.decision ? "View" : "Review"} appeal for ${appeal.criterion.title}, ${appeal.conversation.sourceId} in ${appeal.conversation.group}`}
+      >
+        {appeal.decision ? "View" : "Review"}
+      </SheetTrigger>
+    ),
+  },
+];
+
+function AppealRating({ appeal }: { appeal: Appeal }) {
+  return (
+    <div className="inline-flex items-center gap-1.5">
+      <span className="sr-only">Original rating</span>
+      <Badge variant="outline">{answerLabel(appeal.original.answer)}</Badge>
+      {appeal.decision && (
+        <>
+          <span aria-hidden="true" className="text-muted-foreground">
+            →
+          </span>
+          <span className="sr-only">Final rating</span>
+          <Badge variant="secondary">{answerLabel(appeal.decision.answer)}</Badge>
+        </>
+      )}
+    </div>
+  );
+}
+
+export function AppealQueue({
+  appealId,
+  resolved,
+  onChange,
+}: {
+  appealId?: string;
+  resolved: boolean;
+  onChange: (appealId: string | undefined, resolved: boolean) => void;
+}) {
   const query = useQuery(appealsQuery);
-  const [filter, setFilter] = useState<"pending" | "resolved">("pending");
-  const pending = query.data?.appeals.filter((item) => !item.decision) ?? [];
-  const resolved = query.data?.appeals.filter((item) => item.decision) ?? [];
+  const activeTab = useRef<HTMLButtonElement>(null);
+  const [closingAppeal, setClosingAppeal] = useState<Appeal>();
+  const { pending, completed, selected } = useMemo(() => {
+    const items = query.data?.appeals ?? [];
+    return {
+      pending: items.filter((item) => !item.decision),
+      completed: items.filter((item) => item.decision),
+      selected: items.find((item) => item.id === appealId),
+    };
+  }, [query.data, appealId]);
+  const showResolved = selected ? !!selected.decision : resolved;
+  const status = showResolved ? "resolved" : "pending";
+  const rows = showResolved ? completed : pending;
+  const review = selected ?? closingAppeal;
 
   return (
     <>
       <PageHeading title="Appeals" hideTitle />
-      {query.error && (
-        <ErrorMessage
-          error={query.error}
-          retry={() => {
-            void query.refetch();
-          }}
-        />
-      )}
+      {query.error && <ErrorMessage error={query.error} retry={() => void query.refetch()} />}
       {query.isPending && <Loading>Loading appeals…</Loading>}
+      {appealId && query.isSuccess && !query.isFetching && !selected && (
+        <ErrorMessage error={new Error("This appeal is unavailable in this workspace.")} />
+      )}
       {query.data && (
-        <Tabs
-          value={filter}
-          onValueChange={(value) => setFilter(value === "resolved" ? "resolved" : "pending")}
+        <Sheet
+          open={!!selected}
+          triggerId={review?.id ?? null}
+          onOpenChange={(open, { trigger }) => {
+            if (open && trigger?.id) {
+              onChange(trigger.id, showResolved);
+            } else if (!open) {
+              setClosingAppeal(selected);
+              onChange(undefined, showResolved);
+            }
+          }}
+          onOpenChangeComplete={(open) => {
+            if (!open) setClosingAppeal(undefined);
+          }}
         >
-          <TabsList aria-label="Appeal status">
-            <TabsTrigger value="pending">Pending ({pending.length})</TabsTrigger>
-            <TabsTrigger value="resolved">Resolved ({resolved.length})</TabsTrigger>
-          </TabsList>
-          <TabsContent value="pending">
-            <div className="space-y-4">
-              {pending.length === 0 && (
-                <EmptyState title="No pending appeals">
-                  Appeals submitted from a conversation’s evaluation appear here.
+          <Tabs value={status} onValueChange={(value) => onChange(undefined, value === "resolved")}>
+            <TabsList aria-label="Appeal status">
+              <TabsTrigger value="pending" ref={showResolved ? undefined : activeTab}>
+                Pending ({pending.length})
+              </TabsTrigger>
+              <TabsTrigger value="resolved" ref={showResolved ? activeTab : undefined}>
+                Resolved ({completed.length})
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value={status} className="min-w-0">
+              {rows.length > 0 ? (
+                <AppealsTable key={status} appeals={rows} status={status} />
+              ) : showResolved ? (
+                <EmptyState title="No resolved appeals">Completed reviews appear here.</EmptyState>
+              ) : (
+                <EmptyState
+                  title="No pending appeals"
+                  actions={
+                    <Button variant="outline" nativeButton={false} render={<Link to="/" />}>
+                      Open conversations
+                    </Button>
+                  }
+                >
+                  Open a conversation’s evaluation to appeal a rating.
                 </EmptyState>
               )}
-              {pending.map((appeal) => (
-                <AppealCard
-                  key={appeal.id}
-                  appeal={appeal}
-                  onDecided={() => setFilter("resolved")}
-                />
-              ))}
-            </div>
-          </TabsContent>
-          <TabsContent value="resolved">
-            <div className="space-y-4">
-              {resolved.length === 0 && (
-                <EmptyState title="No resolved appeals">
-                  Appeals appear here after a reviewer saves a decision.
-                </EmptyState>
-              )}
-              {resolved.map((appeal) => (
-                <AppealCard key={appeal.id} appeal={appeal} />
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+          {review && <AppealReview key={review.id} appeal={review} activeTab={activeTab} />}
+        </Sheet>
       )}
     </>
   );
 }
 
-function AppealCard({ appeal, onDecided }: { appeal: Appeal; onDecided?: () => void }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <h2 className="wrap-anywhere">{appeal.criterion.title}</h2>
-        </CardTitle>
-        <CardDescription>
-          <Link
-            to="/conversations/$id"
-            params={{ id: appeal.conversation.id }}
-            search={{ evaluation: appeal.evaluationId }}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
-          >
-            {appeal.conversation.sourceId}
-            <HugeiconsIcon icon={ArrowUpRight01Icon} size={13} aria-hidden="true" />
-          </Link>
-          <span className="block">Submitted {dateLabel(appeal.createdAt)}</span>
-        </CardDescription>
-        <CardAction>
-          <Badge variant={appeal.decision ? "secondary" : "outline"}>
-            {appeal.decision ? "Resolved" : "Pending review"}
-          </Badge>
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="min-w-0 space-y-4">
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold">Appeal comment</h3>
-              <p className="text-sm wrap-anywhere whitespace-pre-wrap">{appeal.comment}</p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold">
-                Original rating <Badge>{answerLabel(appeal.original.answer)}</Badge>
-              </h3>
-              <p className="text-sm wrap-anywhere text-muted-foreground">
-                {appeal.original.explanation}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold">Cited transcript turns</h3>
-              {appeal.evidence.map((turn) => (
-                <blockquote key={turn.number} className="rounded-md border p-3">
-                  <Link
-                    to="/conversations/$id"
-                    params={{ id: appeal.conversation.id }}
-                    search={{ evaluation: appeal.evaluationId }}
-                    hash={`turn-${turn.number}`}
-                    className="text-xs font-medium text-primary hover:underline"
-                  >
-                    #{turn.number} · {speakerName[turn.speaker]} · {turn.timestamp}
-                  </Link>
-                  <p className="mt-1 text-sm wrap-anywhere whitespace-pre-wrap">{turn.text}</p>
-                </blockquote>
-              ))}
-            </div>
-          </div>
-          {appeal.decision ? (
-            <div className="space-y-3">
-              <h3 className="font-semibold">Reviewer decision</h3>
-              <p className="text-sm">
-                {appeal.decision.answer === appeal.original.answer
-                  ? "Confirmed original rating"
-                  : "Changed rating"}{" "}
-                · {answerLabel(appeal.decision.answer)}
-              </p>
-              <p className="text-sm wrap-anywhere whitespace-pre-wrap">{appeal.decision.reason}</p>
-              {appeal.decidedAt && (
-                <p className="text-xs text-muted-foreground">{dateLabel(appeal.decidedAt)}</p>
-              )}
-            </div>
-          ) : (
-            <DecisionForm appeal={appeal} onDecided={onDecided} />
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function DecisionForm({ appeal, onDecided }: { appeal: Appeal; onDecided?: () => void }) {
-  const client = useQueryClient();
-  const [answer, setAnswer] = useState<Answer>(appeal.original.answer);
-  const [reason, setReason] = useState("");
-  const options = answerOptions(appeal.criterion).map((value) => ({
-    value,
-    label: `${answerLabel(value)}${value === appeal.original.answer ? " (confirm original)" : ""}`,
-  }));
-  const save = useMutation({
-    mutationFn: async () => {
-      try {
-        return await request((init) =>
-          cqa.appeals[":id"].decision.$put(
-            {
-              param: { id: appeal.id },
-              json: { answer, reason: reason.trim() },
-            },
-            { init },
-          ),
-        );
-      } catch (error) {
-        if (error instanceof ApiRequestError && error.code === "INVALID_RESPONSE") return undefined;
-        throw error;
-      }
-    },
-    onSuccess: async (data) => {
-      await client.cancelQueries(appealsQuery);
-      const decision = data?.decision ?? { answer, reason: reason.trim() };
-      client.setQueryData(
-        appealsQuery.queryKey,
-        (current) =>
-          current && {
-            appeals: current.appeals.map((item) =>
-              item.id === appeal.id
-                ? { ...item, decision, decidedAt: data?.decidedAt ?? null }
-                : item,
-            ),
-          },
-      );
-      void client.invalidateQueries(appealsQuery);
-      void client.invalidateQueries(evaluationQuery(appeal.evaluationId));
-      void client.invalidateQueries(dashboardQuery);
-      onDecided?.();
-    },
+function AppealsTable({ appeals, status }: { appeals: Appeal[]; status: "pending" | "resolved" }) {
+  const table = useTable({
+    features: dataTableFeatures,
+    columns,
+    data: appeals,
+    getRowId: (appeal) => appeal.id,
+    initialState: { sorting: [{ id: "date", desc: true }] },
   });
 
-  function submit(event: FormEvent) {
-    event.preventDefault();
-    if (!save.isPending && reason.trim()) save.mutate();
-  }
-
   return (
-    <form onSubmit={submit} className="space-y-4">
-      <h3 className="font-semibold">Decide appeal</h3>
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor={`answer-${appeal.id}`}>Final rating</FieldLabel>
-          <Select<Answer>
-            items={options}
-            disabled={save.isPending}
-            value={answer}
-            onValueChange={(value) => {
-              if (value !== null) setAnswer(value);
-            }}
-          >
-            <SelectTrigger id={`answer-${appeal.id}`}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {options.map(({ value, label }) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor={`reason-${appeal.id}`}>Reason for decision</FieldLabel>
-          <Textarea
-            id={`reason-${appeal.id}`}
-            required
-            maxLength={2000}
-            rows={3}
-            disabled={save.isPending}
-            value={reason}
-            onChange={(event) => setReason(event.target.value)}
-          />
-        </Field>
-      </FieldGroup>
-      {save.error && <ErrorMessage error={save.error} />}
-      <Button type="submit" disabled={save.isPending || !reason.trim()}>
-        {save.isPending ? "Saving…" : "Save decision"}
-      </Button>
-    </form>
+    <DataTable
+      table={table}
+      label={status === "resolved" ? "Resolved appeals" : "Pending appeals"}
+      filter={{ column: "appeal", label: "Search ID or criterion" }}
+    />
   );
 }
