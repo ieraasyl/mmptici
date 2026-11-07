@@ -34,11 +34,21 @@ def normalize(answer):
 
 
 def read_labels(path) -> list[dict]:
-    with open(path, encoding="utf-8", newline="") as f:
-        rows = list(csv.DictReader(f))
-    for i, row in enumerate(rows, start=2):
+    """Read one labels CSV; rows with an empty answer are skipped with a stderr warning."""
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        raw = list(csv.DictReader(f))
+    rows, skipped = [], 0
+    for i, row in enumerate(raw, start=2):
+        row = {k: (v or "").strip() for k, v in row.items() if k is not None}
+        if not row.get("answer"):
+            skipped += 1
+            continue
         row["row"] = i
+        row["file"] = Path(path).name
         row["answer"] = normalize(row["answer"])
+        rows.append(row)
+    if skipped:
+        print(f"warning: {Path(path).name}: skipped {skipped} row(s) with an empty answer", file=sys.stderr)
     return rows
 
 
@@ -51,16 +61,16 @@ def check_labels(rows, checklist, conversations) -> list[str]:
     criteria = {c["id"]: c for c in checklist["criteria"]}
     problems, seen = [], set()
     for r in rows:
-        n, cid = r["row"], r["criterion_id"]
+        n, cid = f"{r['file']} row {r['row']}", r["criterion_id"]
         if r["conversation_id"] not in conversations:
-            problems.append(f"row {n}: unknown conversation {r['conversation_id']!r}")
+            problems.append(f"{n}: unknown conversation {r['conversation_id']!r}")
         if cid not in criteria:
-            problems.append(f"row {n}: unknown criterion {cid!r}")
+            problems.append(f"{n}: unknown criterion {cid!r}")
         elif r["answer"] not in allowed_answers(criteria[cid]):
-            problems.append(f"row {n}: answer {r['answer']!r} not allowed for {cid}")
+            problems.append(f"{n}: answer {r['answer']!r} not allowed for {cid}")
         key = (r["conversation_id"], r["labeler"], cid)
         if key in seen:
-            problems.append(f"row {n}: duplicate label for {key}")
+            problems.append(f"{n}: duplicate label for {key}")
         seen.add(key)
     return problems
 
@@ -70,7 +80,7 @@ def run_ratings(run: dict) -> dict:
     out = {}
     for d in run["dialogs"]:
         out[d["conversationId"]] = {
-            r["criterionId"]: {**r, "answer": normalize(r["answer"])} for r in d["ratings"]
+            r["criterionId"]: {**r, "answer": normalize(r["answer"])} for r in d.get("ratings") or []
         }
     return out
 
@@ -99,8 +109,10 @@ def select_conversations(spec, sets, available) -> list[str]:
     return sorted(chosen)
 
 
-def _turns(text) -> list[int]:
-    return [int(t) for t in re.findall(r"\d+", text or "")]
+def _turns(value) -> list[int]:
+    if isinstance(value, (list, tuple)):
+        value = ";".join(str(v) for v in value if v is not None)
+    return [int(t) for t in re.findall(r"\d+", value or "")]
 
 
 def _votes_text(votes) -> str:
@@ -144,7 +156,7 @@ def build_pairs(mode, rows, set_spec, sets, labeler="final", ratings=None):
                 rating = b_rows[cid]
                 pairs.append({
                     "conv": conv, "cid": cid, "a": a_rows[cid]["answer"], "b": rating["answer"],
-                    "a_note": a_rows[cid]["note"], "turns": list(rating.get("evidence") or []),
+                    "a_note": a_rows[cid]["note"], "turns": _turns(rating.get("evidence")),
                     "votes": _votes_text(rating.get("votes")),
                     "explanation": rating.get("explanation") or "",
                 })
@@ -239,13 +251,15 @@ def run_health(run, label_convs, ratings) -> dict:
         "failedSamples": sum(m.get("failedSamples") or 0 for m in meta),
         "meanLatencyMs": sum(lat) / len(lat) if lat else None,
         "costUsd": sum(m.get("costUsd") or 0 for m in meta),
-        "missingFromRun": sorted(c for c in label_convs if c not in ratings),
+        "missingFromRun": sorted(c for c in label_convs if not ratings.get(c)),
     }
 
 
-def build_report(args_mode, name, set_spec, labels_path, sets, checklist, records, run=None,
+def build_report(args_mode, name, set_spec, labels_paths, sets, checklist, records, run=None,
                  labeler="final") -> tuple[dict, list[dict]]:
-    rows = read_labels(labels_path)
+    if isinstance(labels_paths, (str, Path)):
+        labels_paths = [labels_paths]
+    rows = [r for p in labels_paths for r in read_labels(p)]
     conversations = {r["conversation_id"] for r in records}
     problems = check_labels(rows, checklist, conversations)
     ratings = run_ratings(run) if run else None
@@ -294,18 +308,28 @@ def _f(x):
     return "-" if x is None else f"{x:.3f}"
 
 
+def _answer_key(a):
+    return (0, int(a), "") if str(a).isdigit() else (1, 0, str(a))
+
+
+def _sorted_confusion(conf):
+    return {a: {b: conf[a][b] for b in sorted(conf[a], key=_answer_key)}
+            for a in sorted(conf, key=_answer_key)}
+
+
 def render_md(r) -> str:
     L = [f"# Comparison report: {r['name']}", "",
          f"- Created: {r['createdAt']}", f"- Mode: {r['mode']}", f"- Set: {r['set']}",
          f"- Labeler A: {r['labelerA']}"]
-    L.append(f"- Run: {r['run']}" if "run" in r else f"- Labeler B: {r['labelerB']}")
+    L.append("- Run: " + ", ".join(f"{k}={v}" for k, v in r["run"].items())
+             if "run" in r else f"- Labeler B: {r['labelerB']}")
     L += ["", "## Per criterion", "",
           "| criterion | n | exact | exact rate | kappa | qwk | NA agreement |", "|---|---|---|---|---|---|---|"]
     for cid, c in r["perCriterion"].items():
         L.append(f"| {cid} | {c['n']} | {c['exact']} | {_f(c['exactRate'])} | {_f(c['kappa'])} | "
                  f"{_f(c.get('qwk'))} | {_f(c.get('naAgreement'))} |")
     for cid, c in r["perCriterion"].items():
-        L += ["", f"Confusion {cid} (A rows, B columns): `{json.dumps(c['confusion'], sort_keys=True)}`"]
+        L += ["", f"Confusion {cid} (A rows, B columns): `{json.dumps(_sorted_confusion(c['confusion']))}`"]
     p, t, v = r["pooled"], r["totals"], r["violations"]
     L += ["", "## Pooled", "", f"- n: {p['n']}, exact: {p['exact']}, rate: {_f(p['exactRate'])}, "
           f"95% CI: {p['ci'] and [round(x, 3) for x in p['ci']]}",
@@ -331,7 +355,7 @@ def render_md(r) -> str:
 
 def main(argv=None, reports_dir=DEFAULT_REPORTS, runs_dir=DEFAULT_RUNS) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--labels", default=str(DEFAULT_LABELS))
+    ap.add_argument("--labels", nargs="+", default=[str(DEFAULT_LABELS)])
     ap.add_argument("--sets", default=str(DEFAULT_SETS))
     ap.add_argument("--checklist", default=None)
     ap.add_argument("--data", default=str(DEFAULT_DATA))
@@ -354,6 +378,11 @@ def main(argv=None, reports_dir=DEFAULT_REPORTS, runs_dir=DEFAULT_RUNS) -> int:
                                           args.labels, sets, checklist, records, run, args.labeler)
     except ValueError as e:
         print(e, file=sys.stderr)
+        return 1
+
+    if report["pooled"]["n"] == 0:
+        print(f"error: nothing to compare (mode={report['mode']}, set={args.set_spec}, "
+              f"labeler={args.labeler}); no report written", file=sys.stderr)
         return 1
 
     reports, runs = Path(args.reports_dir), Path(args.runs_dir)
