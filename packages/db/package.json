@@ -17,6 +17,7 @@
     "drizzle-orm": "catalog:"
   },
   "devDependencies": {
+    "@app/contracts": "workspace:*",
     "@types/node": "catalog:",
     "better-sqlite3": "catalog:",
     "dotenv": "catalog:",

@@ -1,0 +1,191 @@
+import { inject, test, expect } from "vite-plus/test";
+import { hc } from "hono/client";
+import type { AppType } from "@app/api/types";
+
+const origin = inject("origin");
+const cqa = hc<AppType>(origin).api.cqa;
+const example = {
+  group: "CONTROL",
+  records: [
+    {
+      conversation_id: "example-kz",
+      channel: "voice call" as const,
+      language: "KZ" as const,
+      transcript: [
+        {
+          timestamp: "2026-10-15T15:20:00+05:00",
+          speaker: "client" as const,
+          text: "Комиссия қанша?",
+        },
+        {
+          timestamp: "2026-10-15T15:20:05+05:00",
+          speaker: "operator" as const,
+          text: "Сәлеметсіз бе! Менің атым Айша.",
+        },
+      ],
+      audio_url: "https://example.invalid/recording",
+    },
+  ],
+};
+
+async function openWorkspace() {
+  const response = await cqa.workspace.$get();
+  expect(response.status).toBe(200);
+  expect(response.headers.get("cache-control")).toContain("no-store");
+  return { Cookie: response.headers.get("set-cookie")!.split(";")[0] };
+}
+
+async function importExample(headers: { Cookie: string }) {
+  const response = await cqa.conversations.$post({ json: example }, { headers });
+  expect(response.status, await response.clone().text()).toBe(201);
+  const list = await cqa.conversations.$get({}, { headers });
+  expect(list.status).toBe(200);
+  const { conversations } = await list.json();
+  expect(conversations).toHaveLength(1);
+  return conversations[0].id;
+}
+
+test("imports conversations once and isolates browser workspaces", async () => {
+  expect((await cqa.conversations.$get()).status).toBe(401);
+  const headers = await openWorkspace();
+  const other = await openWorkspace();
+  const id = await importExample(headers);
+
+  const duplicate = await cqa.conversations.$post({ json: example }, { headers });
+  expect(await duplicate.json()).toEqual({ imported: 0, skipped: 1 });
+
+  const detail = await cqa.conversations[":id"].$get({ param: { id } }, { headers });
+  expect(detail.status).toBe(200);
+  expect(await detail.json()).toMatchObject({
+    conversation: {
+      transcript: example.records[0].transcript,
+      audioUrl: example.records[0].audio_url,
+    },
+  });
+  expect((await cqa.conversations[":id"].$get({ param: { id } }, { headers: other })).status).toBe(
+    404,
+  );
+  expect(await (await cqa.conversations.$get({}, { headers: other })).json()).toEqual({
+    conversations: [],
+  });
+  expect(
+    (
+      await cqa.conversations.$post(
+        { json: example },
+        {
+          headers: { ...headers, Origin: "https://example.invalid" },
+        },
+      )
+    ).status,
+  ).toBe(403);
+});
+
+test("evaluates the selected checklist snapshot and recalculates a resolved appeal", async () => {
+  const headers = await openWorkspace();
+  const other = await openWorkspace();
+  const conversationId = await importExample(headers);
+  const { checklists } = await (await cqa.checklists.$get({}, { headers })).json();
+  const draft = { name: "Custom review", criteria: checklists[0].criteria };
+  const created = await cqa.checklists.$post({ json: draft }, { headers });
+  if (created.status !== 201) throw new Error(await created.text());
+  const { checklist } = await created.json();
+
+  const evaluationId = crypto.randomUUID();
+  const run = {
+    param: { id: conversationId },
+    json: { id: evaluationId, checklistId: checklist.id },
+  };
+  const endpoint = cqa.conversations[":id"].evaluations;
+  expect((await endpoint.$post(run, { headers })).status).toBe(503);
+  expect(
+    (await endpoint.$post(run, { headers: { ...headers, "X-CQA-Test-Model": "invalid" } })).status,
+  ).toBe(502);
+  const modelHeaders = { ...headers, "X-CQA-Test-Model": "valid" };
+  expect((await endpoint.$post(run, { headers: modelHeaders })).status).toBe(201);
+  expect((await endpoint.$post(run, { headers })).status).toBe(200);
+
+  const update = {
+    param: { id: checklist.id },
+    json: {
+      ...draft,
+      revision: 1,
+      criteria: [{ ...draft.criteria[0], title: "Revised opening" }, ...draft.criteria.slice(1)],
+    },
+  };
+  expect((await cqa.checklists[":id"].$put(update, { headers })).status).toBe(200);
+  expect((await cqa.checklists[":id"].$put(update, { headers })).status).toBe(409);
+  const newId = crypto.randomUUID();
+  expect(
+    (await endpoint.$post({ ...run, json: { ...run.json, id: newId } }, { headers: modelHeaders }))
+      .status,
+  ).toBe(201);
+
+  const evaluationEndpoint = cqa.evaluations[":id"];
+  const evaluationRequest = { param: { id: evaluationId } };
+  const before = await evaluationEndpoint.$get(evaluationRequest, { headers });
+  expect(before.status).toBe(200);
+  expect(await before.json()).toMatchObject({
+    evaluation: {
+      total: 75,
+      checklist: { revision: 1 },
+      criteria: [
+        {
+          criterion: { title: "Opening the conversation" },
+          original: { answer: "no", evidence: [2] },
+        },
+        ...draft.criteria.slice(1).map((item) => ({ criterion: { id: item.id } })),
+      ],
+    },
+  });
+  const revised = await evaluationEndpoint.$get({ param: { id: newId } }, { headers });
+  expect((await revised.json()).evaluation.checklist).toMatchObject({
+    revision: 2,
+    criteria: [{ ...draft.criteria[0], title: "Revised opening" }, ...draft.criteria.slice(1)],
+  });
+  expect((await evaluationEndpoint.$get(evaluationRequest, { headers: other })).status).toBe(404);
+
+  const appeal = {
+    ...evaluationRequest,
+    json: { criterionId: "opening", comment: "The operator introduced herself." },
+  };
+  const submitted = await evaluationEndpoint.appeals.$post(appeal, { headers });
+  expect(submitted.status).toBe(201);
+  expect((await evaluationEndpoint.appeals.$post(appeal, { headers })).status).toBe(409);
+  const { appeals } = await (await cqa.appeals.$get({}, { headers })).json();
+  expect(appeals[0]).toMatchObject({
+    comment: appeal.json.comment,
+    original: { answer: "no" },
+    decision: null,
+    evidence: [{ number: 2, ...example.records[0].transcript[1] }],
+  });
+
+  const decision = cqa.appeals[":id"].decision;
+  const review = {
+    param: { id: appeals[0].id },
+    json: { answer: "yes" as const, reason: "The greeting and name are in turn 2." },
+  };
+  expect((await decision.$put(review, { headers: other })).status).toBe(404);
+  expect(
+    (await decision.$put({ ...review, json: { ...review.json, answer: 10 } }, { headers })).status,
+  ).toBe(400);
+  const submissions = await Promise.all([
+    decision.$put(review, { headers }),
+    decision.$put(review, { headers }),
+  ]);
+  expect(submissions.map(({ status }) => status).sort((a, b) => a - b)).toEqual([200, 409]);
+
+  const after = await evaluationEndpoint.$get(evaluationRequest, { headers });
+  expect(after.status).toBe(200);
+  const { evaluation } = await after.json();
+  expect(evaluation).toMatchObject({
+    originalTotal: 75,
+    total: 100,
+    appeals: [{ decision: review.json }],
+  });
+  expect(evaluation.criteria[0]).toMatchObject({
+    original: { answer: "no" },
+    originalPoints: 0,
+    finalAnswer: "yes",
+    finalPoints: 10,
+  });
+});

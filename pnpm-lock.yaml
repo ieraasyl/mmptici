@@ -383,9 +383,6 @@ importers:
       '@tanstack/react-router':
         specifier: 'catalog:'
         version: 1.170.44(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      better-auth:
-        specifier: 'catalog:'
-        version: 1.7.10(drizzle-kit@0.31.11)(drizzle-orm@0.45.4(@cloudflare/workers-types@5.20261016.1)(better-sqlite3@13.0.3)(kysely@0.29.6))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.1.0)
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -479,6 +476,9 @@ importers:
         specifier: 'catalog:'
         version: 0.45.4(@cloudflare/workers-types@5.20261016.1)(better-sqlite3@13.0.3)(kysely@0.29.6)
     devDependencies:
+      '@app/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.6

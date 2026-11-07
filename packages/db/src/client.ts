@@ -8,3 +8,4 @@ export function createDb(binding: D1Database) {
 
 export { notes } from "./schema.ts";
 export { and, eq } from "drizzle-orm";
+export { asc, desc, exists, isNull } from "drizzle-orm";

@@ -52,7 +52,7 @@ export default async function setup({ provide }: TestProject) {
       configPath,
       JSON.stringify({
         name: "mmptici-test",
-        main: join(root, "apps/api/src/index.ts"),
+        main: join(root, "tests/cqa-test-worker.ts"),
         compatibility_date: "2026-10-16",
         compatibility_flags: ["nodejs_compat"],
         assets: {

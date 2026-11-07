@@ -1,43 +1,50 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
-import { SessionContext } from "@/lib/session-context";
+import { api } from "@/lib/api";
+import { request } from "@/lib/request";
 import { createAppRouter } from "@/router";
 
-export default function App({
-  router: suppliedRouter,
-}: {
-  router?: ReturnType<typeof createAppRouter>;
-}) {
-  const [router] = useState(() => suppliedRouter ?? createAppRouter());
-  const { data: session, isPending, error, refetch } = authClient.useSession();
-  const userId = session?.user.id;
+function Workspace({ router }: { router: ReturnType<typeof createAppRouter> }) {
+  const workspace = useQuery({
+    queryKey: ["workspace"],
+    queryFn: ({ signal }) => request((init) => api.cqa.workspace.$get({}, { init }), { signal }),
+    staleTime: Infinity,
+  });
 
-  useEffect(() => {
-    if (!isPending && !error) void router.invalidate();
-  }, [router, userId, isPending, error]);
-
-  if (isPending) {
+  if (workspace.isPending)
     return (
-      <main className="mx-auto max-w-lg p-6" role="status">
-        Loading session…
+      <main className="p-8" role="status">
+        Opening workspace…
       </main>
     );
-  }
-
-  if (error) {
+  if (workspace.isError)
     return (
-      <main className="mx-auto max-w-lg space-y-6 p-6">
-        <p role="alert">Could not load session.</p>
-        <Button onClick={() => void refetch()}>Retry loading session</Button>
+      <main className="space-y-3 p-8">
+        <p role="alert">{workspace.error.message}</p>
+        <Button onClick={() => void workspace.refetch()}>Retry</Button>
       </main>
     );
-  }
+
+  return <RouterProvider router={router} />;
+}
+
+export default function App() {
+  const [router] = useState(createAppRouter);
+  const [client] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { staleTime: 15_000, retry: false },
+          mutations: { retry: false },
+        },
+      }),
+  );
 
   return (
-    <SessionContext value={session}>
-      <RouterProvider router={router} context={{ session }} />
-    </SessionContext>
+    <QueryClientProvider client={client}>
+      <Workspace router={router} />
+    </QueryClientProvider>
   );
 }

@@ -11,3 +11,5 @@ export const notes = sqliteTable("notes", {
   title: text("title").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
+
+export * from "./cqa-schema.ts";
