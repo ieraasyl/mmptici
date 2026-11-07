@@ -3,33 +3,21 @@ import {
   Link,
   Outlet,
   useRouter,
-  useLocation,
+  useRouterState,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
 import {
-  AnalyticsUpIcon,
-  CheckListIcon,
-  Chat01Icon,
-  JusticeScale01Icon,
-} from "@hugeicons/core-free-icons";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { useSidebar } from "@/hooks/use-sidebar";
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu";
 import { EmptyState, ErrorMessage } from "@/components/cqa/ui";
+import { appealsQuery } from "@/lib/cqa";
+import { workspaceDestinationIndex, workspaceDestinations } from "@/lib/workspace-navigation";
 
 export const Route = createRootRoute({
   component: WorkspaceLayout,
@@ -37,92 +25,72 @@ export const Route = createRootRoute({
   errorComponent: RouteError,
 });
 
-const destinations = [
-  { to: "/dashboard", label: "Dashboard", icon: AnalyticsUpIcon },
-  { to: "/", label: "Conversations", icon: Chat01Icon },
-  { to: "/checklists", label: "Checklists", icon: CheckListIcon },
-  { to: "/appeals", label: "Appeals", icon: JusticeScale01Icon },
-] as const;
-
 function WorkspaceLayout() {
   return (
-    <SidebarProvider>
+    <>
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:z-10 focus:bg-background focus:p-3"
       >
         Skip to content
       </a>
-      <WorkspaceSidebar />
-      <SidebarInset id="main-content" className="min-w-0">
-        <header className="flex items-center gap-2 border-b p-3">
-          <SidebarTrigger aria-label="Toggle navigation" />
-          <span className="text-sm font-medium md:hidden">Conversation QA</span>
-        </header>
-        <div className="mx-auto w-full max-w-7xl min-w-0 space-y-6 p-4 sm:p-6 lg:p-8">
-          <Outlet />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+      <WorkspaceHeader />
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto w-full max-w-7xl min-w-0 space-y-6 p-4 sm:p-6 lg:p-8"
+      >
+        <Outlet />
+      </main>
+    </>
   );
 }
 
-function WorkspaceSidebar() {
-  const pathname = useLocation({ select: (location) => location.pathname });
-  const { setOpenMobile } = useSidebar();
+function WorkspaceHeader() {
+  const { data: pendingAppealCount = 0 } = useQuery({
+    ...appealsQuery,
+    select: ({ appeals }) => appeals.filter(({ decision }) => !decision).length,
+  });
+  const { activeIndex, isConversationDetail } = useRouterState({
+    select: ({ location, resolvedLocation }) => ({
+      activeIndex: workspaceDestinationIndex((resolvedLocation ?? location).pathname),
+      isConversationDetail: location.pathname.startsWith("/conversations/"),
+    }),
+    structuralSharing: true,
+  });
 
   return (
-    <Sidebar>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              render={<Link to="/" onClick={() => setOpenMobile(false)} />}
-            >
-              <HugeiconsIcon icon={AnalyticsUpIcon} aria-hidden="true" />
-              <span className="flex flex-col">
-                <span className="font-semibold">Conversation QA</span>
-                <span className="text-xs text-muted-foreground">Freedom Broker</span>
-              </span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <nav aria-label="Workspace">
-              <SidebarMenu>
-                {destinations.map(({ to, label, icon }) => (
-                  <SidebarMenuItem key={to}>
-                    <SidebarMenuButton
-                      isActive={
-                        pathname === to || (to === "/" && pathname.startsWith("/conversations/"))
-                      }
-                      render={
-                        <Link
-                          to={to}
-                          activeOptions={{ exact: true }}
-                          onClick={() => setOpenMobile(false)}
-                        />
-                      }
-                    >
-                      <HugeiconsIcon icon={icon} aria-hidden="true" />
-                      <span>{label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </nav>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter>
-        <span className="p-2 text-xs text-muted-foreground">Demo workspace</span>
-      </SidebarFooter>
-    </Sidebar>
+    <header className="flex justify-center px-2 pt-4 sm:pt-6">
+      <NavigationMenu aria-label="Workspace">
+        <NavigationMenuList className="flex-wrap justify-center">
+          {workspaceDestinations.map(({ to, label, icon }, index) => {
+            const showPending = to === "/appeals" && pendingAppealCount > 0;
+            return (
+              <NavigationMenuItem key={to}>
+                <NavigationMenuLink
+                  active={index === activeIndex}
+                  aria-current={to === "/" && isConversationDetail ? "page" : undefined}
+                  aria-label={showPending ? `${label}, ${pendingAppealCount} pending` : undefined}
+                  render={<Link to={to} activeOptions={{ exact: true }} />}
+                >
+                  <HugeiconsIcon
+                    icon={icon}
+                    className="hidden size-4 md:block"
+                    aria-hidden="true"
+                  />
+                  {label}
+                  {showPending && (
+                    <Badge variant="secondary" aria-hidden="true">
+                      {pendingAppealCount}
+                    </Badge>
+                  )}
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            );
+          })}
+        </NavigationMenuList>
+      </NavigationMenu>
+    </header>
   );
 }
 

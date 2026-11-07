@@ -154,8 +154,8 @@ export const cqaRoutes = new Hono<CqaEnv>()
   })
   .use("*", workspace)
   .get("/dashboard", async (c) => {
-    const conversations = await readDashboard(c.get("db"), c.get("workspace"));
-    return c.json({ conversations });
+    const dashboard = await readDashboard(c.get("db"), c.get("workspace"));
+    return c.json(dashboard);
   })
   .get("/conversations", async (c) => {
     const db = c.get("db");

@@ -7,6 +7,8 @@ import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
 export default defineConfig(({ mode }) => ({
+  // Tests start another Vite server; its dependency bundle must not replace the live app's cache.
+  cacheDir: `node_modules/.vite/${mode}`,
   plugins: lazyPlugins(() => [
     tanstackRouter({ target: "react", autoCodeSplitting: true, quoteStyle: "double" }),
     react(),

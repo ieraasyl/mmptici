@@ -96,6 +96,7 @@ export function ChecklistEditor() {
     <>
       <PageHeading
         title="Checklists"
+        hideTitle
         actions={
           <Button size="lg" onClick={() => choose("new")}>
             <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" aria-hidden="true" /> New

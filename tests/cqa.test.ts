@@ -59,6 +59,7 @@ test("imports conversations once and isolates browser workspaces", async () => {
   });
   expect(await (await cqa.dashboard.$get({}, { headers: other })).json()).toEqual({
     conversations: [],
+    checklistResults: [],
   });
 
   const duplicate = await cqa.conversations.$post({ json: example }, { headers });
@@ -121,7 +122,10 @@ test("loads the bundled DEV dataset once per workspace", async () => {
 
 test("dashboard handles empty workspaces and evaluations with only violation flags", async () => {
   const headers = await openWorkspace();
-  expect(await (await cqa.dashboard.$get({}, { headers })).json()).toEqual({ conversations: [] });
+  expect(await (await cqa.dashboard.$get({}, { headers })).json()).toEqual({
+    conversations: [],
+    checklistResults: [],
+  });
   const conversationId = await importExample(headers);
   const { checklists } = await (await cqa.checklists.$get({}, { headers })).json();
   const created = await cqa.checklists.$post(
@@ -155,6 +159,108 @@ test("dashboard handles empty workspaces and evaluations with only violation fla
     ],
   });
   expect(dashboard.conversations[0]).not.toHaveProperty("transcript");
+});
+
+test("dashboard keeps the latest result per checklist revision after deletion and appeal decisions", async () => {
+  const headers = await openWorkspace();
+  const other = await openWorkspace();
+  const conversationId = await importExample(headers);
+  const { checklists, defaultId } = await (await cqa.checklists.$get({}, { headers })).json();
+  const draft = { name: "Historical checklist", criteria: checklists[0].criteria };
+  const created = await cqa.checklists.$post({ json: draft }, { headers });
+  if (created.status !== 201) throw new Error(await created.text());
+  const { checklist } = await created.json();
+
+  async function run(checklistId: string) {
+    const id = crypto.randomUUID();
+    const response = await cqa.conversations[":id"].evaluations.$post(
+      { param: { id: conversationId }, json: { id, checklistId } },
+      { headers: { ...headers, "X-CQA-Test-Model": "valid" } },
+    );
+    expect(response.status).toBe(201);
+    // Give consecutive runs distinct timestamps, regardless of UUID ordering.
+    await new Promise((resolve) => setTimeout(resolve, 2));
+    return id;
+  }
+
+  const first = await run(checklist.id);
+  const updated = await cqa.checklists[":id"].$put(
+    {
+      param: { id: checklist.id },
+      json: {
+        ...draft,
+        revision: 1,
+        criteria: draft.criteria.map((criterion, index) =>
+          index === 0 ? { ...criterion, weight: 1 } : criterion,
+        ),
+      },
+    },
+    { headers },
+  );
+  expect(updated.status).toBe(200);
+  const second = await run(checklist.id);
+  const third = await run(checklist.id);
+  const latest = await run(defaultId);
+  expect(
+    (await cqa.checklists[":id"].$delete({ param: { id: checklist.id } }, { headers })).status,
+  ).toBe(200);
+
+  const appeal = await cqa.evaluations[":id"].appeals.$post(
+    { param: { id: first }, json: { criterionId: "opening", comment: "Review the greeting." } },
+    { headers },
+  );
+  if (appeal.status !== 201) throw new Error(await appeal.text());
+  const appealId = (await appeal.json()).appeal.id;
+  const before = await (await cqa.dashboard.$get({}, { headers })).json();
+  expect(before.conversations).toMatchObject([{ pendingAppeals: 1, evaluation: { id: latest } }]);
+  expect(
+    before.checklistResults.find(({ evaluation }) => evaluation.id === first)?.pendingAppeals,
+  ).toBe(1);
+  expect(
+    before.checklistResults
+      .filter(({ evaluation }) => evaluation.id !== first)
+      .every((row) => row.pendingAppeals === 0),
+  ).toBe(true);
+
+  expect(
+    (
+      await cqa.appeals[":id"].decision.$put(
+        { param: { id: appealId }, json: { answer: "yes", reason: "The greeting is confirmed." } },
+        { headers },
+      )
+    ).status,
+  ).toBe(200);
+  const after = await (await cqa.dashboard.$get({}, { headers })).json();
+  expect(after.conversations).toMatchObject([
+    { pendingAppeals: 0, evaluation: { id: latest, total: 75 } },
+  ]);
+  expect(after.checklistResults.map(({ evaluation }) => evaluation.id)).toEqual([
+    latest,
+    third,
+    first,
+  ]);
+  const historical = after.checklistResults.find(({ evaluation }) => evaluation.id === first)!;
+  expect(historical.evaluation).toMatchObject({
+    checklistId: checklist.id,
+    revision: 1,
+    total: 100,
+  });
+  expect(historical.evaluation.criteria[0]).toMatchObject({ weight: 10, answer: "yes" });
+  expect(historical.evaluation.failures.some(({ criterionId }) => criterionId === "opening")).toBe(
+    false,
+  );
+  const revised = after.checklistResults.find(({ evaluation }) => evaluation.id === third)!;
+  expect(revised.evaluation).toMatchObject({ checklistId: checklist.id, revision: 2 });
+  expect(revised.evaluation.criteria[0]).toMatchObject({ weight: 1, answer: "no" });
+  expect(after.checklistResults.every((row) => !Object.hasOwn(row, "transcript"))).toBe(true);
+  const detail = await (
+    await cqa.conversations[":id"].$get({ param: { id: conversationId } }, { headers })
+  ).json();
+  expect(detail.evaluations.map(({ id }) => id)).toEqual([latest, third, second, first]);
+  expect(await (await cqa.dashboard.$get({}, { headers: other })).json()).toEqual({
+    conversations: [],
+    checklistResults: [],
+  });
 });
 
 test("returns JSON errors for malformed and invalid imports", async () => {

@@ -2,7 +2,7 @@
 
 See [README.md](README.md) for setup and commands.
 
-- Use `vp` for tooling. Check package scripts; run them with `vp run <name>`. Run `vp install` before work and after dependency changes.
+- Use `vp` for tooling. Check package scripts; run them with `vp run <name>`. Run `vp install` on a fresh checkout, when dependencies are missing, or after a package manifest, workspace catalog, or lockfile changes.
 - Set external dependency versions in the workspace catalog in [`pnpm-workspace.yaml`](pnpm-workspace.yaml) and use `catalog:` in package manifests.
 - Import tooling from `vite-plus`, tests from `vite-plus/test`. For tooling failures, consult `node_modules/vite-plus/docs` and run `vp env doctor`.
 - Keep UI in `apps/web` and shared validation in `packages/contracts`. Keep database access and workspace cookie handling out of browser imports. Use scoped `@cloudflare/workers-types` imports and keep Worker ambient globals confined to the API project.

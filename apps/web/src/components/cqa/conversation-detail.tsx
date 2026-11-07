@@ -216,7 +216,7 @@ function Detail({
                     <SelectGroup>
                       {checklistItems.map(({ value, label }) => (
                         <SelectItem key={value} value={value}>
-                          <span className="wrap-anywhere whitespace-normal">{label}</span>
+                          {label}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -280,7 +280,7 @@ function Detail({
                   <SelectGroup>
                     {historyItems.map(({ value, label }) => (
                       <SelectItem key={value} value={value}>
-                        <span className="wrap-anywhere whitespace-normal">{label}</span>
+                        {label}
                       </SelectItem>
                     ))}
                   </SelectGroup>

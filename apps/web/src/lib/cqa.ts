@@ -15,6 +15,9 @@ export type DashboardConversation = InferResponseType<
   200
 >["conversations"][number];
 
+export type DashboardData = InferResponseType<typeof cqa.dashboard.$get, 200>;
+export type DashboardChecklistResult = DashboardData["checklistResults"][number];
+
 export const conversationsQuery = queryOptions({
   queryKey: ["conversations"],
   queryFn: ({ signal }) => request((init) => cqa.conversations.$get({}, { init }), { signal }),

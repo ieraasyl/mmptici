@@ -3,13 +3,6 @@ import { cqaAppeals, cqaConversations, cqaEvaluations } from "@app/db/schema";
 import { scoreEvaluation } from "./evaluation.ts";
 
 export async function readDashboard(db: ReturnType<typeof createDb>, workspaceId: string) {
-  const latest = db
-    .select({ id: cqaEvaluations.id })
-    .from(cqaEvaluations)
-    .where(eq(cqaEvaluations.conversationId, cqaConversations.id))
-    .orderBy(desc(cqaEvaluations.createdAt), desc(cqaEvaluations.id))
-    .limit(1);
-
   const [rows, appeals] = await Promise.all([
     db
       .select({
@@ -22,9 +15,14 @@ export async function readDashboard(db: ReturnType<typeof createDb>, workspaceId
         evaluation: cqaEvaluations,
       })
       .from(cqaConversations)
-      .leftJoin(cqaEvaluations, eq(cqaEvaluations.id, latest))
+      .leftJoin(cqaEvaluations, eq(cqaEvaluations.conversationId, cqaConversations.id))
       .where(eq(cqaConversations.workspaceId, workspaceId))
-      .orderBy(asc(cqaConversations.group), asc(cqaConversations.sourceId)),
+      .orderBy(
+        asc(cqaConversations.group),
+        asc(cqaConversations.sourceId),
+        desc(cqaEvaluations.createdAt),
+        desc(cqaEvaluations.id),
+      ),
     db
       .select({
         conversationId: cqaEvaluations.conversationId,
@@ -52,7 +50,17 @@ export async function readDashboard(db: ReturnType<typeof createDb>, workspaceId
     }
   }
 
-  return rows.map(({ evaluation, transcript, ...conversation }) => {
+  // The dashboard needs the latest result per conversation and checklist revision.
+  // Older individual runs remain available on the conversation's history page.
+  const seenVersions = new Set<string>();
+  const latestRows = rows.filter(({ id, evaluation }) => {
+    if (!evaluation) return true;
+    const key = `${id}:${evaluation.checklist.id}:${evaluation.checklist.revision}`;
+    if (seenVersions.has(key)) return false;
+    seenVersions.add(key);
+    return true;
+  });
+  const summaries = latestRows.map(({ evaluation, transcript, ...conversation }) => {
     const summary = {
       ...conversation,
       pendingAppeals: pendingByConversation.get(conversation.id) ?? 0,
@@ -100,6 +108,25 @@ export async function readDashboard(db: ReturnType<typeof createDb>, workspaceId
       },
     };
   });
+
+  const latest = new Map<string, (typeof summaries)[number]>();
+  for (const summary of summaries) {
+    if (!latest.has(summary.id)) latest.set(summary.id, summary);
+  }
+  const checklistResults = summaries.flatMap((summary) =>
+    summary.evaluation
+      ? [
+          {
+            ...summary,
+            evaluation: summary.evaluation,
+            pendingAppeals:
+              byEvaluation.get(summary.evaluation.id)?.filter((appeal) => !appeal.decision)
+                .length ?? 0,
+          },
+        ]
+      : [],
+  );
+  return { conversations: [...latest.values()], checklistResults };
 }
 
 /** A criterion the operator did not meet: "No", a scale value below the top, or a flagged violation. N/A is not a failure. */
