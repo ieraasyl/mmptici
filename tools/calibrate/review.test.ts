@@ -81,9 +81,9 @@ function setup() {
   /** Writes the sheet, fills decisions row by row (or by key), and runs finalize. */
   const finalize = (
     fill: Record<string, string>[] | Record<string, Record<string, string>>,
-    options: { extra?: string[] } = {},
+    options: { include?: string; extra?: string[] } = {},
   ) => {
-    sheet(scenario());
+    sheet(scenario(), ...(options.include ? ["--include", options.include] : []));
     const rows = decisions();
     if (Array.isArray(fill)) fill.forEach((d, i) => Object.assign(rows[i], d));
     else {
@@ -201,6 +201,69 @@ describe("review sheet", () => {
       readFileSync(`${DEFAULT_LABELS_DIR}/ai-round1-decisions.csv`, "utf8"),
     );
   });
+
+  test("--include puts agreed rows up for review", () => {
+    const s = setup();
+    const { code, text } = s.sheet(s.scenario(), "--include", "d1:opening");
+    expect(code).toBe(0);
+    const rows = s.decisions();
+    expect(rows.map((r) => r.criterion_id)).toEqual([
+      "opening",
+      "understanding",
+      CRITS[2],
+      CRITS[3],
+    ]);
+    expect(rows[0]).toMatchObject({ a_answer: "yes", b_answer: "yes", decision: "" });
+    expect(text()).toContain("total rows: 4, agreed: 0, to review: 4");
+    const md = readFileSync(`${s.dir}/runs/t-review.md`, "utf8");
+    expect(md).toContain("### opening: Opening the conversation");
+  });
+
+  test("--include rejects rows that are not labeled in the set", () => {
+    const s = setup();
+    const bad = s.sheet(s.scenario(), "--include", "d1:closing");
+    expect(bad.code).toBe(1);
+    expect(bad.errText()).toContain("d1:closing");
+    expect(existsSync(`${s.dir}/lab/t-decisions.csv`)).toBe(false);
+    const malformed = s.sheet(s.scenario(), "--include", "d1");
+    expect(malformed.code).toBe(1);
+    expect(malformed.errText()).toContain("conversation_id:criterion_id");
+  });
+
+  test("regenerating the round 1 sheet with --include keeps its rows and adds the included", () => {
+    const dir = tempDir();
+    const c = capture();
+    const code = main(
+      [
+        "sheet",
+        "--labels",
+        `${DEFAULT_LABELS_DIR}/ai-fable.csv`,
+        `${DEFAULT_LABELS_DIR}/ai-opus.csv`,
+        "--set",
+        "chats17",
+        "--name",
+        "ai-round1",
+        "--runs-dir",
+        `${dir}/runs`,
+        "--labels-dir",
+        `${dir}/lab`,
+        "--include",
+        "p1-ru-003:closing,p1-ru-007:guidance",
+      ],
+      c.io,
+    );
+    expect(code).toBe(0);
+    expect(c.text()).toContain("total rows: 136, agreed: 111, to review: 25");
+    const key = (r: Record<string, string>) => `${r.conversation_id}:${r.criterion_id}`;
+    const committed = csvRows(`${DEFAULT_LABELS_DIR}/ai-round1-decisions.csv`).map(key);
+    const regenerated = csvRows(`${dir}/lab/ai-round1-decisions.csv`).map(key);
+    expect(committed).toHaveLength(23);
+    expect(regenerated.filter((k) => !committed.includes(k))).toEqual([
+      "p1-ru-003:closing",
+      "p1-ru-007:guidance",
+    ]);
+    expect(regenerated.filter((k) => committed.includes(k))).toEqual(committed);
+  });
 });
 
 describe("review finalize", () => {
@@ -238,5 +301,55 @@ describe("review finalize", () => {
     expect(lenient.code).toBe(0);
     expect(lenient.text()).toContain("agreed: 1, decided: 1, pending: 2");
     expect(Object.keys(lenient.final()).sort()).toEqual(["opening", "understanding"]);
+  });
+
+  test("a decision on an agreed row overrides it", () => {
+    const s = setup();
+    const r = s.finalize(
+      {
+        "d1:opening": { decision: "no", reviewer: "rev", reason: "no name given" },
+        "d1:understanding": { decision: "yes", reviewer: "rev" },
+        [`d1:${CRITS[2]}`]: { decision: "no", reviewer: "rev" },
+        [`d1:${CRITS[3]}`]: { decision: "na", reviewer: "rev" },
+      },
+      { include: "d1:opening" },
+    );
+    expect(r.code).toBe(0);
+    expect(r.text()).toContain("agreed: 0, decided: 3, pending: 0, overridden: 1");
+    const rows = r.final();
+    // Neither labeler answered "no", so no evidence supports the override.
+    expect(rows.opening).toMatchObject({
+      answer: "no",
+      evidence_turns: "",
+      note: "human override: rev: no name given",
+    });
+    expect(rows.understanding).toMatchObject({ evidence_turns: "2", note: "human: rev: " });
+  });
+
+  test("an override that matches the labelers keeps their evidence", () => {
+    const s = setup();
+    const r = s.finalize({
+      // Added by hand to a sheet made without --include.
+      "d1:opening": { decision: "yes", reviewer: "rev", reason: "checked" },
+      "d1:understanding": { decision: "no" },
+      [`d1:${CRITS[2]}`]: { decision: "no" },
+      [`d1:${CRITS[3]}`]: { decision: "na" },
+    });
+    expect(r.code).toBe(0);
+    expect(r.final().opening).toMatchObject({
+      answer: "yes",
+      evidence_turns: "1;2",
+      note: "human override: rev: checked",
+    });
+  });
+
+  test("an included row left empty keeps the agreed answer", () => {
+    const s = setup();
+    const r = s.finalize([{}, { decision: "no" }, { decision: "no" }, { decision: "na" }], {
+      include: "d1:opening",
+    });
+    expect(r.code).toBe(0);
+    expect(r.text()).toContain("agreed: 1, decided: 3, pending: 0");
+    expect(r.final().opening.note).toBe("ai-agreed");
   });
 });

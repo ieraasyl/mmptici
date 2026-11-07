@@ -1,6 +1,7 @@
 // Build a human review sheet from two labelers' disagreements, then merge into final labels.
 //
 //   vp run calibrate:review sheet --labels a.csv b.csv --set chats17 --name <name> [--run <run.json>]
+//       [--include p1-ru-003:closing,p1-ru-007:guidance]
 //   vp run calibrate:review finalize --labels a.csv b.csv --set chats17
 //       --decisions tools/calibrate/labels/<name>-decisions.csv --out <final.csv> [--allow-pending]
 //
@@ -92,9 +93,31 @@ export type Entry = {
   a: LabelRow | undefined;
   b: LabelRow | undefined;
   agreed: boolean;
+  /** Agreed, but listed with --include so a human reviews it anyway. */
+  forced: boolean;
 };
 
 const key = (conv: string, cid: string) => `${conv}:${cid}`;
+
+/**
+ * Parses --include "conv:criterion,conv:criterion". Each row must be in the set and labeled by
+ * at least one labeler.
+ */
+export function parseInclude(spec: string | undefined): Set<string> {
+  const out = new Set<string>();
+  for (const item of (spec ?? "").split(",")) {
+    const text = item.trim();
+    if (!text) continue;
+    const [conv, cid, ...rest] = text.split(":").map((s) => s.trim());
+    if (!conv || !cid || rest.length) {
+      throw new ReviewError(
+        `--include: expected conversation_id:criterion_id, got ${pyRepr(text)}`,
+      );
+    }
+    out.add(key(conv, cid));
+  }
+  return out;
+}
 
 /** One entry per (dialog, criterion) labeled by at least one labeler, in set/checklist order. */
 export function classify(
@@ -103,6 +126,7 @@ export function classify(
   bName: string,
   convs: string[],
   checklist: Checklist,
+  include: Set<string> = new Set(),
 ): Entry[] {
   const by = new Map(rows.map((r) => [`${r.conversation_id}\0${r.labeler}\0${r.criterion_id}`, r]));
   const out: Entry[] = [];
@@ -113,13 +137,18 @@ export function classify(
       if (!a && !b) continue;
       const unsure = [a, b].some((r) => r?.note.toUpperCase().startsWith("UNSURE:"));
       const agreed = Boolean(a && b) && a!.answer === b!.answer && !unsure;
-      out.push({ conv, cid: c.id, a, b, agreed });
+      out.push({ conv, cid: c.id, a, b, agreed, forced: agreed && include.has(key(conv, c.id)) });
     }
+  }
+  const found = new Set(out.map((e) => key(e.conv, e.cid)));
+  const unknown = [...include].filter((k) => !found.has(k));
+  if (unknown.length) {
+    throw new ReviewError(`--include: no labels in this set for ${unknown.join(", ")}`);
   }
   return out;
 }
 
-const needsReview = (e: Entry) => !e.agreed;
+const needsReview = (e: Entry) => !e.agreed || e.forced;
 
 function loadRows(paths: string[], checklist: Checklist, records: ConversationRecord[], io: Io) {
   const rows = paths.flatMap((p) => readLabels(p, io));
@@ -188,7 +217,7 @@ type Common = {
 };
 
 export function sheet(
-  o: Common & { name: string; run?: string; runsDir: string; labelsDir: string },
+  o: Common & { name: string; run?: string; runsDir: string; labelsDir: string; include?: string },
   io: Io,
 ) {
   const {
@@ -206,7 +235,7 @@ export function sheet(
     );
     if (problems.length) throw new ReviewError(problems.join("\n"));
   }
-  const entries = classify(rows, aName, bName, convs, o.checklist);
+  const entries = classify(rows, aName, bName, convs, o.checklist, parseInclude(o.include));
   const review = entries.filter(needsReview);
   mkdirSync(o.runsDir, { recursive: true });
   mkdirSync(o.labelsDir, { recursive: true });
@@ -225,7 +254,11 @@ export function sheet(
   io.out(sheetPath);
   io.out(decisionsPath);
   const agreed = entries.length - review.length;
-  io.out(`total rows: ${entries.length}, agreed: ${agreed}, to review: ${review.length}`);
+  const forced = review.filter((e) => e.forced).length;
+  io.out(
+    `total rows: ${entries.length}, agreed: ${agreed}, to review: ${review.length}` +
+      (forced ? ` (${forced} agreed row(s) included)` : ""),
+  );
   for (const c of o.checklist.criteria) {
     const n = review.filter((e) => e.cid === c.id).length;
     const total = entries.filter((e) => e.cid === c.id).length;
@@ -238,8 +271,9 @@ const union = (...rows: (LabelRow | undefined)[]) =>
   [...new Set(rows.flatMap((r) => (r ? turns(r.evidence_turns) : [])))].sort((x, y) => x - y);
 
 /**
- * Agreed rows keep the shared answer and disagreements take the reviewer's decision.
- * Evidence is the union of the turns cited by the labelers whose answer survives.
+ * Agreed rows keep the shared answer, unless a reviewer filled in a decision for them, which
+ * overrides it. Disagreements take the reviewer's decision. Evidence is the union of the turns
+ * cited by the labelers whose answer survives.
  */
 export function finalize(
   o: Common & { decisions: string; out: string; allowPending: boolean },
@@ -265,9 +299,10 @@ export function finalize(
   const out: CsvValue[][] = [];
   let agreed = 0;
   let decided = 0;
+  let overridden = 0;
   for (const e of classify(rows, aName, bName, convs, o.checklist)) {
     const d = decisions.get(key(e.conv, e.cid));
-    if (e.agreed) {
+    if (e.agreed && !d?.decision) {
       agreed++;
       out.push([e.conv, "final", e.cid, e.a!.answer, union(e.a, e.b).join(";"), "ai-agreed"]);
       continue;
@@ -282,14 +317,16 @@ export function finalize(
       continue;
     }
     const support = [e.a, e.b].filter((r) => r && r.answer === answer);
-    decided++;
+    const label = e.agreed ? "human override" : "human";
+    if (e.agreed) overridden++;
+    else decided++;
     out.push([
       e.conv,
       "final",
       e.cid,
       answer,
       union(...support).join(";"),
-      `human: ${d.reviewer ?? ""}: ${d.reason ?? ""}`,
+      `${label}: ${d.reviewer ?? ""}: ${d.reason ?? ""}`,
     ]);
   }
   if (pending.length && !o.allowPending) {
@@ -301,7 +338,10 @@ export function finalize(
   }
   writeCsv(o.out, LABEL_COLUMNS, out);
   io.out(o.out);
-  io.out(`agreed: ${agreed}, decided: ${decided}, pending: ${pending.length}`);
+  io.out(
+    `agreed: ${agreed}, decided: ${decided}, pending: ${pending.length}` +
+      (overridden ? `, overridden: ${overridden}` : ""),
+  );
   return 0;
 }
 
@@ -320,6 +360,7 @@ export function main(argv: string[], io: Io) {
       ? {
           run: { type: "string" },
           name: { type: "string" },
+          include: { type: "string" },
           "runs-dir": { type: "string", default: DEFAULT_RUNS },
           "labels-dir": { type: "string", default: DEFAULT_LABELS_DIR },
         }
@@ -347,6 +388,7 @@ export function main(argv: string[], io: Io) {
           ...common,
           name: need("name"),
           run: o.run as string | undefined,
+          include: o.include as string | undefined,
           runsDir: o["runs-dir"] as string,
           labelsDir: o["labels-dir"] as string,
         },
