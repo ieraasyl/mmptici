@@ -311,3 +311,25 @@ export async function evaluateDialog(
     run: dialogRun([...previous, pass]),
   };
 }
+
+/**
+ * Checks the prompt fingerprint computed from the current code. A --frozen version must match
+ * it, and a run being resumed must have been made with it.
+ */
+export function checkPromptVersion(
+  current: string,
+  options: { frozen?: string; prior?: { promptVersion: string }; priorPath?: string },
+) {
+  if (options.frozen !== undefined && options.frozen !== current) {
+    throw new Error(
+      `--frozen ${options.frozen} does not match the current prompt version ${current}. ` +
+        "The prompt, validation, evaluator, client, or checklist changed since it was frozen.",
+    );
+  }
+  if (options.prior && options.prior.promptVersion !== current) {
+    throw new Error(
+      `${options.priorPath ?? "The run"} was made with prompt ${options.prior.promptVersion}, ` +
+        `but the current prompt is ${current}. Start a new run instead.`,
+    );
+  }
+}
