@@ -18,7 +18,6 @@ export default defineConfig({
     ignorePatterns: [
       "**/routeTree.gen.ts",
       "**/worker-configuration.d.ts",
-      "packages/db/src/auth-schema.ts",
       "packages/db/migrations/meta/**",
     ],
   },

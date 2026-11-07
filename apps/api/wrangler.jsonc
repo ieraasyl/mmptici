@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "mmptici",
+  "account_id": "15da7213905a1f5b05432a12f9da2a13",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-16",
   "compatibility_flags": ["nodejs_compat"],
@@ -15,13 +16,10 @@
     {
       "binding": "DB",
       "database_name": "mmptici-db",
-      "database_id": "a5aa5b44-c39b-41af-bcb0-f4bbd5b451e5",
+      "database_id": "7e0040a7-5369-44f3-b6b5-64d8645b3f93",
       "migrations_dir": "../../packages/db/migrations",
     },
   ],
-  "vars": {
-    "BETTER_AUTH_URL": "https://mmptici.ieraasyl.workers.dev",
-  },
   "ai": {
     "binding": "AI",
     "remote": true,

@@ -80,6 +80,26 @@ test("imports conversations once and isolates browser workspaces", async () => {
   ).toBe(403);
 });
 
+test("returns JSON errors for malformed and invalid imports", async () => {
+  const headers = await openWorkspace();
+  const malformed = await fetch(`${origin}/api/cqa/conversations`, {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: "{",
+  });
+  expect(malformed.status).toBe(400);
+  expect(await malformed.json()).toMatchObject({ error: { code: "BAD_REQUEST" } });
+
+  const invalid = await cqa.conversations.$post(
+    { json: { group: "CONTROL", records: [] } },
+    { headers },
+  );
+  expect(invalid.status).toBe(400);
+  expect(await invalid.json()).toMatchObject({
+    error: { code: "VALIDATION_ERROR", issues: [{ path: ["records"] }] },
+  });
+});
+
 test("evaluates the selected checklist snapshot and recalculates a resolved appeal", async () => {
   const headers = await openWorkspace();
   const other = await openWorkspace();

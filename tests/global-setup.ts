@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { randomBytes, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { createServer as createNetServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -67,10 +67,6 @@ export default async function setup({ provide }: TestProject) {
             migrations_dir: join(root, "packages/db/migrations"),
           },
         ],
-        vars: {
-          BETTER_AUTH_URL: origin,
-          BETTER_AUTH_SECRET: randomBytes(32).toString("base64"),
-        },
       }),
     );
 

@@ -55,12 +55,12 @@ export async function request<T extends ClientResponse<unknown>>(
     const parsed = apiErrorSchema.safeParse(body);
     const error = parsed.success ? parsed.data.error : undefined;
     throw new ApiRequestError(
-      response.status === 401
-        ? "Your session has expired. Please sign in again."
-        : (error?.message ??
-            (response.status >= 500
-              ? "Something went wrong. Please try again."
-              : "The request failed. Please try again.")),
+      error?.message ??
+        (response.status === 401
+          ? "Reload the page to open your workspace."
+          : response.status >= 500
+            ? "Something went wrong. Please try again."
+            : "The request failed. Please try again."),
       response.status,
       error?.code ?? (response.status === 401 ? "UNAUTHORIZED" : "HTTP_ERROR"),
       error?.issues,

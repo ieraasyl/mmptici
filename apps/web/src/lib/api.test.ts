@@ -17,37 +17,30 @@ test("RPC source types preserve browser globals", () => {
   expectTypeOf<CloudflareBindings>().toBeAny();
 });
 
-test("RPC exposes the application endpoints and validated request inputs", () => {
+test("RPC exposes the CQA endpoints and validated request inputs", () => {
+  const runEvaluation = api.cqa.conversations[":id"].evaluations.$post;
   expectTypeOf(api.health.$get).toBeFunction();
-  expectTypeOf(api.me.$get).toBeFunction();
-  expectTypeOf(api.notes.$get).toBeFunction();
-  expectTypeOf(api.ai.$post).toBeFunction();
-  expectTypeOf<InferRequestType<typeof api.notes.$post>["json"]>().toEqualTypeOf<{
-    title: string;
-  }>();
-  expectTypeOf<InferRequestType<typeof api.ai.$post>["json"]>().toEqualTypeOf<{
-    prompt: string;
+  expectTypeOf(api.cqa.workspace.$get).toBeFunction();
+  expectTypeOf(api.cqa.checklists.$post).toBeFunction();
+  expectTypeOf(api.cqa.appeals[":id"].decision.$put).toBeFunction();
+  expectTypeOf<InferRequestType<typeof runEvaluation>["json"]>().toEqualTypeOf<{
+    id: string;
+    checklistId: string;
   }>();
 
-  // @ts-expect-error The auth handler uses Better Auth's client.
-  void api.auth;
   // @ts-expect-error Unknown endpoints must not appear on the client.
   void api.missing;
-  // @ts-expect-error Validated titles must be strings.
-  const invalid: InferRequestType<typeof api.notes.$post> = { json: { title: 123 } };
+  // @ts-expect-error Validated checklist IDs must be strings.
+  const invalid: InferRequestType<typeof runEvaluation>["json"] = { id: "id", checklistId: 123 };
   void invalid;
 });
 
 test("RPC infers successful JSON bodies and serialized dates", () => {
-  type Notes = InferResponseType<typeof api.notes.$get, 200>;
-  type Created = InferResponseType<typeof api.notes.$post, 201>;
-  type AiOutput = InferResponseType<typeof api.ai.$post, 200>;
-  type Logprobs = NonNullable<AiOutput["choices"][number]["logprobs"]>;
-  const create = () => request((init) => api.notes.$post({ json: { title: "Example" } }, { init }));
+  const endpoint = api.cqa.evaluations[":id"];
+  type Result = InferResponseType<typeof endpoint.$get, 200>;
+  const loadEvaluation = () => request((init) => endpoint.$get({ param: { id: "id" } }, { init }));
 
-  expectTypeOf<Notes["notes"][number]["createdAt"]>().toEqualTypeOf<string>();
-  expectTypeOf<Created["note"]>().toExtend<Notes["notes"][number]>();
-  expectTypeOf<Awaited<ReturnType<typeof create>>>().toEqualTypeOf<Created>();
+  expectTypeOf<Result["evaluation"]["createdAt"]>().toEqualTypeOf<string>();
+  expectTypeOf<Awaited<ReturnType<typeof loadEvaluation>>>().toEqualTypeOf<Result>();
   expectTypeOf<InferResponseType<typeof api.health.$get, 200>>().toEqualTypeOf<{ ok: true }>();
-  expectTypeOf<NonNullable<Logprobs["content"]>[number]["token"]>().toEqualTypeOf<string>();
 });
