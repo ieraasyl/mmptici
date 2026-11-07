@@ -50,5 +50,13 @@
   "prompt-analysis-vs-manual": {
     "verdict": "rejected",
     "note": "analysis object first, lost 7 cells"
+  },
+  "heldout-checks-vs-manual": {
+    "verdict": "info",
+    "note": "one held-out run of the frozen checks prompt"
+  },
+  "heldout-checks-vs-final": {
+    "verdict": "info",
+    "note": "one held-out run of the frozen checks prompt"
   }
 }

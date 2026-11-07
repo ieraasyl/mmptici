@@ -1,0 +1,200 @@
+{
+  "name": "heldout-checks-vs-manual",
+  "createdAt": "2026-11-07T18:14:37+00:00",
+  "mode": "run",
+  "set": "heldout",
+  "labelerA": "manual",
+  "perCriterion": {
+    "opening": {
+      "n": 6,
+      "exact": 5,
+      "exactRate": 0.8333333333333334,
+      "kappa": 0,
+      "confusion": {
+        "yes": {
+          "yes": 5,
+          "no": 1
+        }
+      }
+    },
+    "understanding": {
+      "n": 6,
+      "exact": 5,
+      "exactRate": 0.8333333333333334,
+      "kappa": 0.5714285714285715,
+      "naAgreement": 0.8333333333333334,
+      "confusion": {
+        "na": {
+          "na": 4
+        },
+        "yes": {
+          "yes": 1,
+          "na": 1
+        }
+      }
+    },
+    "verification": {
+      "n": 3,
+      "exact": 3,
+      "exactRate": 1,
+      "kappa": 1,
+      "naAgreement": 1,
+      "confusion": {
+        "na": {
+          "na": 2
+        },
+        "yes": {
+          "yes": 1
+        }
+      }
+    },
+    "guidance": {
+      "n": 6,
+      "exact": 5,
+      "exactRate": 0.8333333333333334,
+      "kappa": 0,
+      "qwk": 0,
+      "naAgreement": 1,
+      "confusion": {
+        "20": {
+          "15": 1,
+          "20": 5
+        }
+      }
+    },
+    "empathy": {
+      "n": 6,
+      "exact": 6,
+      "exactRate": 1,
+      "kappa": null,
+      "confusion": {
+        "yes": {
+          "yes": 6
+        }
+      }
+    },
+    "management": {
+      "n": 6,
+      "exact": 6,
+      "exactRate": 1,
+      "kappa": null,
+      "qwk": null,
+      "confusion": {
+        "10": {
+          "10": 6
+        }
+      }
+    },
+    "closing": {
+      "n": 6,
+      "exact": 6,
+      "exactRate": 1,
+      "kappa": 1,
+      "naAgreement": 1,
+      "confusion": {
+        "no": {
+          "no": 4
+        },
+        "yes": {
+          "yes": 1
+        },
+        "na": {
+          "na": 1
+        }
+      }
+    },
+    "violations": {
+      "n": 6,
+      "exact": 6,
+      "exactRate": 1,
+      "kappa": 1,
+      "confusion": {
+        "no": {
+          "no": 5
+        },
+        "yes": {
+          "yes": 1
+        }
+      }
+    }
+  },
+  "pooled": {
+    "n": 45,
+    "exact": 42,
+    "exactRate": 0.9333333333333333,
+    "ci": [0.8043478260869565, 1]
+  },
+  "totals": {
+    "n": 3,
+    "mae": 6.176666666666667,
+    "maxError": 18.53,
+    "ci": [0, 12.353333333333333],
+    "skipped": 3
+  },
+  "violations": {
+    "tp": 1,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1,
+    "recall": 1
+  },
+  "breakdown": {
+    "language": {
+      "RU": {
+        "n": 16,
+        "exactRate": 0.8125
+      },
+      "KZ": {
+        "n": 14,
+        "exactRate": 1
+      },
+      "EN": {
+        "n": 15,
+        "exactRate": 1
+      }
+    },
+    "channel": {
+      "agent chat": {
+        "n": 37,
+        "exactRate": 1
+      },
+      "voice call": {
+        "n": 8,
+        "exactRate": 0.625
+      }
+    }
+  },
+  "runHealth": {
+    "dialogs": 6,
+    "failedSamples": 0,
+    "meanLatencyMs": 5223.666666666667,
+    "costUsd": 0.06840343,
+    "responsesWithoutUsage": 0,
+    "missingFromRun": []
+  },
+  "mismatches": [
+    {
+      "conversationId": "p4-ru-002",
+      "criterionId": "opening",
+      "a": "yes",
+      "b": "no"
+    },
+    {
+      "conversationId": "p4-ru-002",
+      "criterionId": "understanding",
+      "a": "yes",
+      "b": "na"
+    },
+    {
+      "conversationId": "p4-ru-002",
+      "criterionId": "guidance",
+      "a": 20,
+      "b": 15
+    }
+  ],
+  "run": {
+    "promptVersion": "p-5bd7ddaa",
+    "provider": "hf-router",
+    "model": "Qwen/Qwen3.8-27B:cerebras"
+  }
+}

@@ -17,6 +17,8 @@ One row per run report, oldest first. KZ gap is the KZ agreement minus the mean 
 | prompt-analysis-vs-manual | manual    | p-423d3be6 | hf-router | 59      | 406/446 (91.0%)  | 100.0%  | 85.5%         | 92.3%        | 83.9%    | 94.8%   | 80.0%      | 90.7%   | 100.0%     | 7.57  | +1.3   | rejected | analysis object first, lost 7 cells           |
 | prompt-checks-vs-manual   | manual    | p-ffbe6d0e | hf-router | 59      | 420/454 (92.5%)  | 98.3%   | 85.7%         | 88.7%        | 91.2%    | 96.6%   | 87.5%      | 90.9%   | 100.0%     | 5.17  | +3.7   | accepted | per-criterion checks before each answer       |
 | prompt-main-vs-manual     | manual    | p-a8c3acef | hf-router | 59      | 413/454 (91.0%)  | 98.3%   | 87.5%         | 88.7%        | 87.7%    | 94.9%   | 80.4%      | 89.1%   | 100.0%     | 7.15  | +6.9   | baseline | prompt on main, same-day baseline for round 2 |
+| heldout-checks-vs-manual  | manual    | p-5bd7ddaa | hf-router | 6       | 42/45 (93.3%)    | 83.3%   | 83.3%         | 100.0%       | 83.3%    | 100.0%  | 100.0%     | 100.0%  | 100.0%     | 6.18  | +9.4   | info     | one held-out run of the frozen checks prompt  |
+| heldout-checks-vs-final   | final     | p-5bd7ddaa | hf-router | 6       | 40/40 (100.0%)   | 100.0%  | 100.0%        | 100.0%       | 100.0%   | 100.0%  | 100.0%     | 100.0%  | 100.0%     | 0.00  | +0.0   | info     | one held-out run of the frozen checks prompt  |
 
 ## Kazakh check
 
