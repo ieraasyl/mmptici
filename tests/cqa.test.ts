@@ -100,11 +100,11 @@ test("returns JSON errors for malformed and invalid imports", async () => {
   });
 });
 
-test("evaluates the selected checklist snapshot and recalculates a resolved appeal", async () => {
+test("keeps checklist snapshots and appeals after deleting a custom checklist", async () => {
   const headers = await openWorkspace();
   const other = await openWorkspace();
   const conversationId = await importExample(headers);
-  const { checklists } = await (await cqa.checklists.$get({}, { headers })).json();
+  const { checklists, defaultId } = await (await cqa.checklists.$get({}, { headers })).json();
   const draft = { name: "Custom review", criteria: checklists[0].criteria };
   const created = await cqa.checklists.$post({ json: draft }, { headers });
   if (created.status !== 201) throw new Error(await created.text());
@@ -163,6 +163,24 @@ test("evaluates the selected checklist snapshot and recalculates a resolved appe
     criteria: [{ ...draft.criteria[0], title: "Revised opening" }, ...draft.criteria.slice(1)],
   });
   expect((await evaluationEndpoint.$get(evaluationRequest, { headers: other })).status).toBe(404);
+
+  const remove = cqa.checklists[":id"].$delete;
+  const target = { param: { id: checklist.id } };
+  expect((await remove(target)).status).toBe(401);
+  expect((await remove({ param: { id: defaultId } }, { headers })).status).toBe(404);
+  expect((await remove(target, { headers: other })).status).toBe(200);
+  const afterOtherDelete = await (await cqa.checklists.$get({}, { headers })).json();
+  expect(afterOtherDelete.checklists.map(({ id }) => id)).toEqual([defaultId, checklist.id]);
+
+  expect((await remove(target, { headers })).status).toBe(200);
+  expect((await remove(target, { headers })).status).toBe(200);
+  const afterDelete = await (await cqa.checklists.$get({}, { headers })).json();
+  expect(afterDelete.checklists.map(({ id }) => id)).toEqual([defaultId]);
+  expect((await endpoint.$post(run, { headers })).status).toBe(200);
+  expect(
+    (await endpoint.$post({ ...run, json: { ...run.json, id: crypto.randomUUID() } }, { headers }))
+      .status,
+  ).toBe(404);
 
   const appeal = {
     ...evaluationRequest,

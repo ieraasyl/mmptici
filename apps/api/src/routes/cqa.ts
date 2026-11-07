@@ -247,6 +247,16 @@ export const cqaRoutes = new Hono<CqaEnv>()
       throw new HTTPException(409, { message: "This checklist changed. Reload it before saving." });
     return c.json({ checklist });
   })
+  .delete("/checklists/:id", async (c) => {
+    const id = c.req.param("id");
+    if (id === defaultChecklist.id)
+      throw new HTTPException(404, { message: "Saved checklist not found." });
+    await c
+      .get("db")
+      .delete(cqaChecklists)
+      .where(and(eq(cqaChecklists.id, id), eq(cqaChecklists.workspaceId, c.get("workspace"))));
+    return c.json({ id });
+  })
   .post(
     "/conversations/:id/evaluations",
     zValidator("json", runEvaluationSchema, validationError),
@@ -259,7 +269,7 @@ export const cqaRoutes = new Hono<CqaEnv>()
         findChecklist(db, workspaceId, checklistId),
         findEvaluation(db, workspaceId, id),
       ]);
-      if (!conversation || !checklist)
+      if (!conversation)
         throw new HTTPException(404, { message: "Conversation or checklist not found." });
       if (existing) {
         if (
@@ -270,6 +280,8 @@ export const cqaRoutes = new Hono<CqaEnv>()
         }
         return c.json({ id }, 200);
       }
+      if (!checklist)
+        throw new HTTPException(404, { message: "Conversation or checklist not found." });
       const llm =
         c.env.LLM ??
         (c.env.HF_TOKEN

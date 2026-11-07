@@ -5,6 +5,16 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Card,
   CardAction,
   CardContent,
@@ -143,6 +153,10 @@ export function ChecklistEditor() {
                 select(saved.id);
                 setNotice(`Saved ${saved.name}, version ${saved.revision}.`);
               }}
+              onDeleted={(deleted) => {
+                select(undefined);
+                setNotice(`Deleted ${deleted.name}.`);
+              }}
               onRefresh={() => {
                 setNotice("Checklist saved. Reload the list if it hasn’t appeared.");
               }}
@@ -158,11 +172,13 @@ function ChecklistForm({
   checklist,
   starter,
   onSaved,
+  onDeleted,
   onRefresh,
 }: {
   checklist?: Checklist;
   starter: boolean;
   onSaved: (saved: Checklist) => void;
+  onDeleted: (deleted: Checklist) => void;
   onRefresh: () => void;
 }) {
   const queryClient = useQueryClient();
@@ -180,6 +196,7 @@ function ChecklistForm({
   );
   const [expanded, setExpanded] = useState(() => [criteria[0].id]);
   const [inputError, setInputError] = useState<Error>();
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const save = useMutation({
     mutationFn: async (draft: ChecklistDraft) => {
       try {
@@ -218,6 +235,28 @@ function ChecklistForm({
       void queryClient.invalidateQueries(checklistsQuery);
     },
   });
+  const remove = useMutation({
+    mutationFn: async ({ id }: Checklist) => {
+      try {
+        await request((init) => cqa.checklists[":id"].$delete({ param: { id } }, { init }));
+      } catch (error) {
+        if (!(error instanceof ApiRequestError && error.code === "INVALID_RESPONSE")) throw error;
+      }
+    },
+    onSuccess: async (_data, deleted) => {
+      await queryClient.cancelQueries(checklistsQuery);
+      queryClient.setQueryData(
+        checklistsQuery.queryKey,
+        (current) =>
+          current && {
+            ...current,
+            checklists: current.checklists.filter(({ id }) => id !== deleted.id),
+          },
+      );
+      onDeleted(deleted);
+      void queryClient.invalidateQueries(checklistsQuery);
+    },
+  });
 
   function update(id: string, changes: Partial<CriterionFields>) {
     setCriteria((items) => items.map((item) => (item.id === id ? { ...item, ...changes } : item)));
@@ -225,6 +264,7 @@ function ChecklistForm({
 
   function submit(event: FormEvent) {
     event.preventDefault();
+    if (confirmDelete || save.isPending) return;
     setInputError(undefined);
     const parsed = checklistSchema.safeParse({
       name,
@@ -340,9 +380,51 @@ function ChecklistForm({
           </div>
         </CardContent>
         <CardFooter className="justify-end">
-          <Button type="submit" size="lg" disabled={save.isPending}>
-            {save.isPending ? "Saving…" : "Save checklist"}
-          </Button>
+          <div className="flex flex-wrap justify-end gap-2">
+            {checklist && !starter && (
+              <AlertDialog
+                open={confirmDelete}
+                onOpenChange={(open) => {
+                  if (remove.isPending) return;
+                  if (open) remove.reset();
+                  setConfirmDelete(open);
+                }}
+              >
+                <AlertDialogTrigger
+                  render={<Button type="button" size="lg" variant="destructive" />}
+                  disabled={save.isPending}
+                >
+                  Delete checklist
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete checklist?</AlertDialogTitle>
+                    <AlertDialogDescription className="wrap-anywhere">
+                      This removes {checklist.name} from the evaluation picker. Past evaluations
+                      keep the version they used.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  {remove.error && <ErrorMessage error={remove.error} />}
+                  <AlertDialogFooter>
+                    <AlertDialogCancel type="button" disabled={remove.isPending}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      disabled={remove.isPending}
+                      onClick={() => remove.mutate(checklist)}
+                    >
+                      {remove.isPending ? "Deleting…" : "Delete checklist"}
+                    </Button>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+            <Button type="submit" size="lg" disabled={save.isPending || confirmDelete}>
+              {save.isPending ? "Saving…" : "Save checklist"}
+            </Button>
+          </div>
         </CardFooter>
       </form>
     </Card>
