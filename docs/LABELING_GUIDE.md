@@ -20,6 +20,7 @@ For the four labelers of the 20 DEV dialogs. Budget: about an hour each.
    ```
 
    `--set` also takes `tuning`, `heldout` or `all20`. Each dialog becomes a Markdown file in `tools/calibrate/print/`, turns numbered `[n] speaker timestamp: text`.
+
 3. Write your CSV template:
 
    ```
@@ -27,6 +28,7 @@ For the four labelers of the 20 DEV dialogs. Budget: about an hour each.
    ```
 
    This writes `tools/calibrate/print/labels-<labeler>.csv` with one row per assigned dialog and criterion. It covers `primary` and `second`. For an `unassigned` dialog, add the eight rows yourself.
+
 4. Fill the columns `conversation_id,labeler,criterion_id,answer,evidence_turns,note`:
    - `answer`: `yes`, `no`, `na`, or a scale number (`guidance`: 0, 5, 10, 15, 20; `management`: 0, 4, 7, 10).
    - `evidence_turns`: the turn numbers as printed. They are 1-based. Separate them with `;`, for example `10;12`. Cite the turns that decide the answer. For a missing action, cite where it should have happened.
@@ -66,6 +68,7 @@ Contrast: `p1-kz-008` turn 10, «Сәлем. Қай сайтқа кірдіңі�
 Answers: `yes`, `no`, `na`.
 
 Rule (provisional, organizer question 5):
+
 - N/A when the client's messages before the operator's first reply, including those to the bot, already contain enough to answer.
 - Yes when the operator used the known details and asked only for what was missing.
 - No when the operator answered without a needed clarification, or asked again for something already stated.
@@ -81,6 +84,7 @@ Contrast: `p1-en-009` is **na**. Turn 1 already holds the full question (how to 
 Answers: `yes`, `no`, `na`.
 
 Rule (provisional, organizer question 6):
+
 - N/A for general information, such as where a menu item is.
 - Required for account-specific data or a protected action.
 - Yes only when a check is visibly confirmed before the disclosure, either by a system event or by an explicit operator statement.
@@ -94,17 +98,18 @@ Contrast: `p1-kz-003` is **yes**. The operator asks for identification in turn 1
 
 > «Оцените ответ или следующий шаг по шкале. N/A — чат закончился до того, как клиент сформулировал запрос.»
 
-| Score | Wording |
-| --- | --- |
-| 20 | «Все существенные вопросы закрыты или дан корректный следующий шаг.» |
-| 15 | «Основной вопрос решён, пропущена второстепенная деталь.» |
-| 10 | «Часть запроса закрыта, существенный вопрос остался открытым.» |
-| 5 | «Есть общая подсказка, но клиенту всё ещё непонятно, как действовать.» |
-| 0 | «Ответа по существу нет или ключевая рекомендация ошибочна.» |
+| Score | Wording                                                                |
+| ----- | ---------------------------------------------------------------------- |
+| 20    | «Все существенные вопросы закрыты или дан корректный следующий шаг.»   |
+| 15    | «Основной вопрос решён, пропущена второстепенная деталь.»              |
+| 10    | «Часть запроса закрыта, существенный вопрос остался открытым.»         |
+| 5     | «Есть общая подсказка, но клиенту всё ещё непонятно, как действовать.» |
+| 0     | «Ответа по существу нет или ключевая рекомендация ошибочна.»           |
 
 Answers: `20`, `15`, `10`, `5`, `0`, `na`.
 
 Rule (provisional, organizer question 7):
+
 - First list every distinct client question, including those asked to the bot. Then score with the scale.
 - A correct escalation or next step earns 20.
 - Bot information is correct context unless the operator contradicts it.
@@ -130,16 +135,17 @@ Contrast: `p1-kz-003` is **yes**. In turn 11 the operator acknowledges the clien
 
 > «Оцените ясность, порядок ответов и предупреждение об ожидании по шкале.»
 
-| Score | Wording |
-| --- | --- |
-| 10 | «Ответы ясные и связные. Если было явное ожидание, оператор предупредил.» |
-| 7 | «Один заметный сбой, но клиент может понять ответ и продолжить.» |
-| 4 | «Клиенту приходится переспрашивать из-за формулировок или порядка ответов.» |
-| 0 | «Из-за бессвязных или противоречивых реплик ход диалога непонятен.» |
+| Score | Wording                                                                     |
+| ----- | --------------------------------------------------------------------------- |
+| 10    | «Ответы ясные и связные. Если было явное ожидание, оператор предупредил.»   |
+| 7     | «Один заметный сбой, но клиент может понять ответ и продолжить.»            |
+| 4     | «Клиенту приходится переспрашивать из-за формулировок или порядка ответов.» |
+| 0     | «Из-за бессвязных или противоречивых реплик ход диалога непонятен.»         |
 
 Answers: `10`, `7`, `4`, `0`.
 
 Rule (provisional, organizer questions 9 and 11):
+
 - Start at 10. Drop to the step that matches the worst lapse.
 - A visible delay after "let me check" without a wait warning is a lapse.
 - The three-minute first-response rule does not apply.
@@ -156,6 +162,7 @@ The tuning set has no clean chat example of a partial score (7 or 4). Use the sc
 Answers: `yes`, `no`, `na`.
 
 Rule (provisional, organizer question 10, the least certain rule in this guide):
+
 - Yes needs a goodbye plus either a summary or an offer of further help.
 - A goodbye alone is No.
 - N/A when the chat or call was cut off before the operator could close.
