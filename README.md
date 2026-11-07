@@ -40,7 +40,7 @@ Open <http://127.0.0.1:5173>. Development uses local bindings by default through
 
 For real Workers AI, set `CLOUDFLARE_VITE_FORCE_LOCAL=false` in `apps/web/.env.development.local`, run `vp -C apps/api exec wrangler login`, and restart the dev server. AI calls use your account's allowance or billing.
 
-The local DEV dataset is at `data/invoke.json`. See [Datasets and API](CQA_HACKATHON.md#datasets-and-api) for the response format and how to get a copy if the file is missing.
+The DEV dataset is in [data/invoke.json](data/invoke.json). See [Datasets and API](CQA_HACKATHON.md#datasets-and-api) for the response format and API link.
 
 ## Checks and tools
 

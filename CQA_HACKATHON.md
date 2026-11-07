@@ -42,7 +42,7 @@ In a separate check, organizers will ask the team to replace one criterion. Save
 
 The `DEV` set contains 65 conversations, including 60 synthetic chats and 5 real calls. It includes 35 Russian (`RU`), 15 Kazakh (`KZ`), and 15 English (`EN`) conversations. Call records include a transcript and a link to the recording.
 
-The full DEV API response is available locally at `data/invoke.json`. Git ignores this file. If it is missing from your checkout, ask the organizers for the JSON response or signed DEV URL, then place the JSON at that path.
+The full DEV API response is in [data/invoke.json](data/invoke.json). You can also [fetch the DEV dataset from the API](https://ec88f21f1accecf38e20095a9fe175.a5.environment.api.powerplatform.com/powerautomate/automations/direct/cu/11/workflows/b3d2a68006a24662be2b721454cb4e00/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=5Sog2MThgCRTlk3HObv70LRmRk6u7IOwzlwMpe804qo&group_id=DEV).
 
 The temporary API returns a dataset in response to a GET request with a `group_id` parameter. Organizers will provide a different `group_id` for the control set. If the browser blocks the request because of CORS, make it from the backend or use a local adapter.
 

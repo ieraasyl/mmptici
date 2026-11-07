@@ -14,9 +14,6 @@ dist-ssr
 .wrangler/
 *.sqlite*
 
-# Local CQA dataset
-/data/invoke.json
-
 # dotenv environment variable files
 .env
 .env.*
