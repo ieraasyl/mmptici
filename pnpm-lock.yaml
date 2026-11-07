@@ -234,7 +234,7 @@ catalogs:
       specifier: ^0.4.0
       version: 0.4.0
     csv-parse:
-      specifier: ^7.0.3
+      specifier: 7.0.3
       version: 7.0.3
     dotenv:
       specifier: ^17.2.3
