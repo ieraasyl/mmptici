@@ -43,3 +43,6 @@ dist-ssr
 # Calibration raw outputs and printed dialogs
 tools/calibrate/runs/
 tools/calibrate/print/
+
+# Submission run checkpoints
+tools/submission/runs/
