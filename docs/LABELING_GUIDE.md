@@ -10,7 +10,7 @@ The organizers' control set is 10 chats, and they compare answers per criterion.
 - Label what the transcript shows. Do not guess what happened off screen. When the transcript does not show something, do not assume it happened. Organizers expect logical, evidence-based ratings without invented details, and they accept that experts disagree (Q&A message 2981).
 - Judge only the operator. Bot and system turns are context: they tell you what the client already said and what was already checked, but they never earn or lose credit.
 - Six dialogs are held out: `p1-ru-012`, `p1-kz-012`, `p1-kz-013`, `p1-en-001`, `p1-en-004`, `p4-ru-002`. Never discuss them with ML A, who tunes the prompt.
-- The decision rules below are provisional. Each depends on an open organizer question. If an answer changes a rule, we relabel that criterion.
+- Most decision rules below are provisional. Each depends on an open organizer question. If an answer changes a rule, we relabel that criterion. Organizers confirmed `understanding` (Q&A message 2814). For `closing`, organizers pointed back to the checklist wording.
 
 ## 2. How to label
 
@@ -94,7 +94,7 @@ Rule (provisional, organizer question 6):
 - Required for account-specific data or a protected action.
 - Yes only when a check is visibly confirmed before the disclosure, either by a system event or by an explicit operator statement.
 - A confirmed bot check before the handoff counts.
-- Team ruling: organizers left the overlap between failed identity verification and a confidentiality violation to teams. If the operator discloses the client's own account status or restriction to an unverified client, `verification` is No. That alone is not a gross violation, so see `violations` (4.8) for when it is also flagged.
+- Team ruling (organizers left the overlap between failed identity verification and a confidentiality violation to teams): disclosing the client's own account data, including their own balance or account restriction, to a client whose identity was not verified makes `verification` No, but it is not a gross violation. Flag `violations` Yes for confidentiality only when the operator discloses another person's data, or discloses any account data to someone other than the account holder.
 
 Example: `p1-en-014`, **no**, turns `11;12;13`. The operator discloses a withdrawal restriction on the account in turn 11 with no check. The client objects in turn 12, and the operator answers "We can skip that" in turn 13.
 
@@ -187,7 +187,7 @@ Answers: `yes`, `no`.
 
 Rule: as worded. The offer alone is enough. Note that `yes` here is the bad outcome.
 
-Team ruling on confidentiality (organizers left the overlap with failed verification to teams): disclosing the client's own account status or restriction to an unverified client makes `verification` No but is not by itself a gross violation. Flag `violations` Yes for confidentiality only when the operator discloses another person's data, or sensitive personal or financial details such as balances, document numbers or contact data, to someone whose identity was not verified.
+Team ruling (organizers left the overlap between failed identity verification and a confidentiality violation to teams): disclosing the client's own account data, including their own balance or account restriction, to a client whose identity was not verified makes `verification` No, but it is not a gross violation. Flag `violations` Yes for confidentiality only when the operator discloses another person's data, or discloses any account data to someone other than the account holder.
 
 Example: `p1-ru-022`, **yes**, turns `10;12`. The operator asks the client to send money to his card so he can invest it (turn 10), and confirms in turn 12 that this bypasses the company. The client refuses in turn 13. That does not matter.
 
