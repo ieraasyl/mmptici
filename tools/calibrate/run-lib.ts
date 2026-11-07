@@ -5,6 +5,7 @@
 import { createHash } from "node:crypto";
 import { scoreEvaluation } from "../../apps/api/src/evaluation.ts";
 import {
+  EmptyReplyError,
   evaluateConversation,
   EvaluationError,
   type ConversationInput,
@@ -185,17 +186,30 @@ export function sumAccounting(items: Accounting[]): Accounting {
  */
 export function meteredClient(llm: LlmClient): { client: LlmClient; accounting: Accounting } {
   const accounting = emptyAccounting();
+  const count = (usage: ModelUsage | undefined) => {
+    accounting.responses++;
+    if (usage) {
+      accounting.usage.promptTokens += usage.promptTokens;
+      accounting.usage.completionTokens += usage.completionTokens;
+    } else accounting.responsesWithoutUsage++;
+    accounting.costUsd = costUsd(accounting.usage);
+  };
   const client: LlmClient = {
     model: llm.model,
-    async complete(messages, signal) {
+    // The evaluator grows the token budget after a cut-off reply only when the client
+    // reports one, so the wrapper must pass it through.
+    maxTokens: llm.maxTokens,
+    async complete(messages, options) {
       accounting.requests++;
-      const reply = await llm.complete(messages, signal);
-      accounting.responses++;
-      if (reply.usage) {
-        accounting.usage.promptTokens += reply.usage.promptTokens;
-        accounting.usage.completionTokens += reply.usage.completionTokens;
-      } else accounting.responsesWithoutUsage++;
-      accounting.costUsd = costUsd(accounting.usage);
+      let reply;
+      try {
+        reply = await llm.complete(messages, options);
+      } catch (error) {
+        // A cut-off or empty reply was still a paid response.
+        if (error instanceof EmptyReplyError) count(error.usage);
+        throw error;
+      }
+      count(reply.usage);
       return reply;
     },
   };
