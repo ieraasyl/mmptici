@@ -22,7 +22,12 @@ import { defaultChecklist } from "../checklist.ts";
 import type { Bindings } from "../env.ts";
 import { validationError } from "../errors.ts";
 import { scoreEvaluation } from "../evaluation.ts";
-import { createHfClient, evaluateConversation, EvaluationError } from "../inference/index.ts";
+import {
+  createHfClient,
+  evaluateConversation,
+  EvaluationError,
+  InferenceApiError,
+} from "../inference/index.ts";
 import { resolveRecordingUrl } from "../recording.ts";
 
 type Db = ReturnType<typeof createDb>;
@@ -324,6 +329,19 @@ export const cqaRoutes = new Hono<CqaEnv>()
       try {
         run = await evaluateConversation(llm, conversation, checklist);
       } catch (cause) {
+        if (cause instanceof InferenceApiError && cause.isAuthError) {
+          console.warn("CQA evaluation rejected by the model provider", cause.status);
+          return c.json(
+            {
+              error: {
+                code: "AI_UNAVAILABLE",
+                message:
+                  "The model provider rejected HF_TOKEN. Check the token and its permissions.",
+              },
+            },
+            503,
+          );
+        }
         if (cause instanceof EvaluationError) {
           console.warn("CQA evaluation rejected", cause.attempts.at(-1)?.errors);
         } else {

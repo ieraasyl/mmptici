@@ -40,6 +40,17 @@ export function extractJson(text: string): unknown {
   return JSON.parse(cleaned.slice(start, end + 1));
 }
 
+/**
+ * A turn number is an integer, or a string of digits such as "3" (models sometimes quote
+ * numbers). Booleans, arrays, objects, and fractions are rejected rather than coerced, so
+ * `true` or `[2]` can never turn into a citation.
+ */
+function toTurnNumber(value: unknown): number | undefined {
+  if (typeof value === "number") return Number.isInteger(value) ? value : undefined;
+  if (typeof value === "string" && /^\s*\d+\s*$/.test(value)) return Number(value);
+  return undefined;
+}
+
 function normalizeAnswer(criterion: Criterion, raw: unknown): Answer | undefined {
   if (typeof raw !== "string" && typeof raw !== "number") return undefined;
   const text = String(raw).trim().toLowerCase();
@@ -86,8 +97,12 @@ export function validateRatings(
     if (answer === undefined || !allowed.includes(answer)) {
       const why =
         answer === "na" ? "N/A is not allowed for this criterion" : "not an allowed answer";
+      const hint =
+        criterion.kind === "numeric"
+          ? ` This is a scale criterion: answer with a scale value, and use the lowest value (${Math.min(...criterion.scale)}) when the required action is missing entirely.`
+          : "";
       errors.push(
-        `${id}: answer "${String(item.answer)}" is ${why}. Allowed: ${allowed.join(", ")}.`,
+        `${id}: answer "${String(item.answer)}" is ${why}. Allowed: ${allowed.join(", ")}.${hint}`,
       );
       continue;
     }
@@ -102,9 +117,14 @@ export function validateRatings(
       warnings.push(`${id}: explanation shortened.`);
     }
 
-    const cited = Array.isArray(item.evidence) ? item.evidence.map(Number) : [];
-    const valid = cited.filter((turn) => Number.isInteger(turn) && turn >= 1 && turn <= turnCount);
-    if (valid.length < cited.length)
+    const cited: unknown[] = Array.isArray(item.evidence) ? item.evidence : [];
+    const turns = cited.map(toTurnNumber);
+    const malformed = turns.filter((turn) => turn === undefined).length;
+    if (malformed)
+      warnings.push(`${id}: ignored ${malformed} evidence value(s) that are not turn numbers.`);
+    const numbers = turns.filter((turn): turn is number => turn !== undefined);
+    const valid = numbers.filter((turn) => turn >= 1 && turn <= turnCount);
+    if (valid.length < numbers.length)
       warnings.push(`${id}: dropped turn numbers outside 1–${turnCount}.`);
     let evidence = [...new Set(valid)].sort((a, b) => a - b);
     if (evidence.length > MAX_EVIDENCE) {
