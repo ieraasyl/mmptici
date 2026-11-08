@@ -7,7 +7,7 @@ import { scoreEvaluation } from "./evaluation.ts";
 
 /** The header the team submits with every results.json. */
 export const RESULTS_HEADER = {
-  teamName: "ММ.. Птицы",
+  teamName: "ММ..ПТИЦЫ",
   mode: "local",
   modelName: "Qwen/Qwen3.8-27B",
 } as const;

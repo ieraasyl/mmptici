@@ -3,7 +3,7 @@ import type { Answer, Rating } from "@app/contracts";
 import { defaultChecklist } from "./checklist.ts";
 import { buildResultsFile, RESULT_CODES } from "./results-export.ts";
 
-const meta = { teamName: "ММ.. Птицы", mode: "local" as const, modelName: "Qwen/Qwen3.8-27B" };
+const meta = { teamName: "ММ..ПТИЦЫ", mode: "local" as const, modelName: "Qwen/Qwen3.8-27B" };
 
 function ratings(answers: Record<string, Answer>): Rating[] {
   return Object.entries(answers).map(([criterionId, answer]) => ({
@@ -40,7 +40,7 @@ test("maps an evaluation onto the appendix format", () => {
   expect(models).toEqual({ qwen: 1 });
   expect(file).toMatchObject({
     schema_version: "1.0",
-    team_name: "ММ.. Птицы",
+    team_name: "ММ..ПТИЦЫ",
     model: { mode: "local", name: "Qwen/Qwen3.8-27B" },
   });
   const [entry] = file.results;
