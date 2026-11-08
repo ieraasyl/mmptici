@@ -681,3 +681,41 @@ test("exports selected conversations as results.json in the organizers' format",
     404,
   );
 });
+
+test("loading bundled scores skips conversations that already hold a non-live score for the model", async () => {
+  const headers = await openWorkspace();
+  expect((await cqa.conversations["import-dev"].$post({}, { headers })).status).toBe(201);
+  const { conversations } = await (await cqa.conversations.$get({}, { headers })).json();
+  const target = conversations.find(({ sourceId }) => sourceId === "p1-ru-002")!;
+  // Saved before this version: random ID, origin left at its default of "unknown".
+  const seeded = await fetch(`${origin}/api/cqa/test-legacy-evaluation`, {
+    method: "POST",
+    body: JSON.stringify({ conversationId: target.id, model: "Qwen/Qwen3.8-27B:cerebras" }),
+  });
+  expect(seeded.status).toBe(204);
+
+  const result = await (await cqa.evaluations["import-dev"].$post({}, { headers })).json();
+  expect(result.imported).toBe(64);
+  const detail = await (
+    await cqa.conversations[":id"].$get({ param: { id: target.id } }, { headers })
+  ).json();
+  expect(detail.evaluations).toHaveLength(1);
+  expect(detail.evaluations[0].origin).toBe("unknown");
+});
+
+test("a provider 402 becomes 503 AI_UNAVAILABLE with a credits message", async () => {
+  const headers = await openWorkspace();
+  const conversationId = await importExample(headers);
+  const { defaultId } = await (await cqa.checklists.$get({}, { headers })).json();
+  const response = await cqa.conversations[":id"].evaluations.$post(
+    {
+      param: { id: conversationId },
+      json: { id: crypto.randomUUID(), checklistId: defaultId },
+    },
+    { headers: { ...headers, "X-CQA-Test-Model": "no-credits" } },
+  );
+  expect(response.status).toBe(503);
+  expect(await response.json()).toMatchObject({
+    error: { code: "AI_UNAVAILABLE", message: expect.stringContaining("credits") },
+  });
+});
