@@ -382,6 +382,7 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
     comment: appeal.json.comment,
     original: { answer: "no" },
     decision: null,
+    score: { original: 75, final: 75 },
     evidence: [{ number: 2, ...example.records[0].transcript[1] }],
   });
 
@@ -414,6 +415,8 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
     finalAnswer: "yes",
     finalPoints: 10,
   });
+  const decided = await (await cqa.appeals.$get({}, { headers })).json();
+  expect(decided.appeals[0]).toMatchObject({ score: { original: 75, final: 100 } });
 
   // A decision on an older evaluation clears its appeal without changing the latest score.
   expect(await (await cqa.dashboard.$get({}, { headers })).json()).toMatchObject({

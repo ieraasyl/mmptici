@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { SparklesIcon, StopIcon } from "@hugeicons/core-free-icons";
 import {
@@ -24,15 +24,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
-import {
-  checklistsQuery,
-  conversationQuery,
-  conversationsQuery,
-  cqa,
-  dashboardQuery,
-} from "@/lib/cqa";
+import { conversationQuery, conversationsQuery, cqa, dashboardQuery } from "@/lib/cqa";
 import { ApiRequestError, request } from "@/lib/request";
-import { selectChecklist, useSelectedChecklist } from "@/lib/selected-checklist";
+import { selectChecklist, useActiveChecklist } from "@/lib/selected-checklist";
 
 // Calls the model once per conversation, so keep a few runs in flight rather than all at once.
 const CONCURRENCY = 3;
@@ -49,8 +43,7 @@ export function BatchEvaluate({
   children: (checklist: ReactNode, actions: ReactNode) => ReactNode;
 }) {
   const queryClient = useQueryClient();
-  const checklists = useQuery(checklistsQuery);
-  const selected = useSelectedChecklist();
+  const { items, id: checklistId, label: checklistLabel } = useActiveChecklist();
   const [confirmation, setConfirmation] = useState<{
     targets: Target[];
     checklistId: string;
@@ -60,15 +53,6 @@ export function BatchEvaluate({
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const stop = useRef(false);
 
-  const items =
-    checklists.data?.checklists.map(({ id, name, revision }) => ({
-      value: id,
-      label: `${name} · v${revision}`,
-    })) ?? [];
-  const checklistId = items.some(({ value }) => value === selected)
-    ? selected
-    : (checklists.data?.defaultId ?? "");
-  const checklistLabel = items.find(({ value }) => value === checklistId)?.label ?? "";
   const pending = confirmation?.targets.filter(({ evaluated }) => !evaluated) ?? [];
   const running = progress !== null;
 

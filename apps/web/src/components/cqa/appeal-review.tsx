@@ -29,6 +29,7 @@ import {
   dashboardQuery,
   dateLabel,
   evaluationQuery,
+  scoreLabel,
   speakerName,
   type Appeal,
 } from "@/lib/cqa";
@@ -104,6 +105,14 @@ export function AppealReview({
                 ? "Original rating confirmed"
                 : "Rating changed"}
               {appeal.decidedAt && ` · ${dateLabel(appeal.decidedAt)}`}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Conversation score {scoreLabel(appeal.score.original)} →{" "}
+              {scoreLabel(appeal.score.final)}
+              {appeal.score.violationOriginal !== appeal.score.violationFinal &&
+                (appeal.score.violationFinal
+                  ? " · serious violation added"
+                  : " · serious violation removed")}
             </p>
             <p className="wrap-anywhere whitespace-pre-wrap">{decision.reason}</p>
           </section>
