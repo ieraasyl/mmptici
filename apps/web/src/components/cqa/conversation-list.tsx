@@ -105,6 +105,10 @@ export function ConversationList() {
       void queryClient.invalidateQueries(conversationsQuery);
       void queryClient.invalidateQueries(dashboardQuery);
     },
+    onSettled: () => {
+      void queryClient.invalidateQueries(conversationsQuery);
+      void queryClient.invalidateQueries(dashboardQuery);
+    },
     onError: (error) => {
       toast.add({
         id: "conversation-import",

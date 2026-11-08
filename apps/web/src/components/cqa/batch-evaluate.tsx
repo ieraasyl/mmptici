@@ -28,10 +28,10 @@ import { conversationQuery, conversationsQuery, cqa, dashboardQuery } from "@/li
 import { ApiRequestError, request } from "@/lib/request";
 import { selectChecklist, useActiveChecklist } from "@/lib/selected-checklist";
 
-// Calls the model once per conversation, so keep a few runs in flight rather than all at once.
+// Each run calls the model (plus any repair or retry), so keep a few runs in flight rather than all at once.
 const CONCURRENCY = 3;
 
-type Target = { id: string; evaluated: boolean };
+type Target = { id: string; sourceId: string; evaluated: boolean };
 
 export function BatchEvaluate({
   conversations,
@@ -59,9 +59,10 @@ export function BatchEvaluate({
   async function run(targets: Target[], checklistId: string) {
     setConfirmation(null);
     stop.current = false;
-    const tally: { done: number; failed: number; fatal: Error | null } = {
+    const tally: { done: number; failed: number; failedIds: string[]; fatal: Error | null } = {
       done: 0,
       failed: 0,
+      failedIds: [],
       fatal: null,
     };
     setProgress({ done: 0, total: targets.length });
@@ -69,7 +70,7 @@ export function BatchEvaluate({
 
     async function worker() {
       while (queue.length && !stop.current && !tally.fatal) {
-        const { id } = queue.shift()!;
+        const { id, sourceId } = queue.shift()!;
         try {
           await request((init) =>
             cqa.conversations[":id"].evaluations.$post(
@@ -81,6 +82,7 @@ export function BatchEvaluate({
           // A malformed response after a confirmed write still counts as a saved run.
           if (!(error instanceof ApiRequestError && error.code === "INVALID_RESPONSE")) {
             tally.failed += 1;
+            tally.failedIds.push(sourceId);
             // A missing or rejected token fails every run the same way, so stop early.
             if (error instanceof ApiRequestError && error.code === "AI_UNAVAILABLE")
               tally.fatal = error;
@@ -99,7 +101,7 @@ export function BatchEvaluate({
       void queryClient.invalidateQueries(conversationQuery(id));
     }
 
-    const { done, failed, fatal } = tally;
+    const { done, failed, failedIds, fatal } = tally;
     const saved = done - failed;
     const skipped = targets.length - done;
     toast.add({
@@ -110,7 +112,8 @@ export function BatchEvaluate({
       description:
         fatal?.message ??
         ([
-          failed > 0 && `${failed} failed; try them again.`,
+          failed > 0 &&
+            `${failed} failed: ${failedIds.slice(0, 10).join(", ")}${failedIds.length > 10 ? ", …" : ""}. Try them again.`,
           skipped > 0 && `${skipped} not started after you stopped.`,
         ]
           .filter(Boolean)
@@ -183,10 +186,11 @@ export function BatchEvaluate({
           <AlertDialogHeader>
             <AlertDialogTitle>Run evaluations?</AlertDialogTitle>
             <AlertDialogDescription className="wrap-anywhere">
-              Run {confirmation.checklistLabel} on {confirmation.targets.length}{" "}
+              Run checklist {confirmation.checklistLabel} on {confirmation.targets.length}{" "}
               {confirmation.selected ? "selected" : "matching"}{" "}
-              {confirmation.targets.length === 1 ? "conversation" : "conversations"}. Each run calls
-              the model once and saves a new evaluation.
+              {confirmation.targets.length === 1 ? "conversation" : "conversations"}. A run may make
+              repair or retry calls to the model. Each run is saved as a new live evaluation, and
+              earlier evaluations stay in the history.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -197,7 +201,7 @@ export function BatchEvaluate({
               disabled={pending.length === 0}
               onClick={() => void run(pending, confirmation.checklistId)}
             >
-              Only not evaluated ({pending.length})
+              Without any saved evaluation ({pending.length})
             </AlertDialogAction>
             <AlertDialogAction
               type="button"
