@@ -68,7 +68,7 @@ test("repeated exhaustion stops at the retry limit with a useful message", async
     maxRetries: 2,
   }).catch((e: unknown) => e);
   expect(calls).toHaveLength(3);
-  expect(calls.map((c) => c.maxTokens)).toEqual([8000, 12_000, 16_000]);
+  expect(calls.map((c) => c.maxTokens)).toEqual([8000, 12_000, 18_000]);
   expect(error).toBeInstanceOf(EvaluationError);
   expect((error as EvaluationError).message).toContain("no answer in 3 attempt(s)");
   expect((error as EvaluationError).message).toContain("token limit");
@@ -79,7 +79,7 @@ test("the token budget never grows past the ceiling", async () => {
   await evaluateConversation(llm, conversation, defaultChecklist, { maxRetries: 4 }).catch(
     () => {},
   );
-  expect(calls.map((c) => c.maxTokens)).toEqual([8000, 12_000, 16_000, 16_000, 16_000]);
+  expect(calls.map((c) => c.maxTokens)).toEqual([8000, 12_000, 18_000, 27_000, 32_000]);
 });
 
 test("an authentication failure is not retried", async () => {
