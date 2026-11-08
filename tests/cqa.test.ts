@@ -503,7 +503,7 @@ test("exports all FBroker chats using only saved main checklist ratings", async 
   expect(file).toMatchObject({
     schema_version: "1.0",
     team_name: "ММ.. Птицы",
-    model: { mode: "external_api", name: "test-model" },
+    model: { mode: "local", name: "Qwen/Qwen3.8-27B" },
   });
   const [entry] = file.results;
   if (entry.status !== "ok") throw new Error("expected ok");
