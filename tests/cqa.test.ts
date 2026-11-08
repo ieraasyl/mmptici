@@ -435,3 +435,76 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
     conversations: [{ pendingAppeals: 0, evaluation: { id: newId, total: 100, revision: 2 } }],
   });
 });
+
+test("exports selected conversations as results.json in the organizers' format", async () => {
+  const headers = await openWorkspace();
+  const other = await openWorkspace();
+  const conversationId = await importExample(headers);
+  const { checklists, defaultId } = await (await cqa.checklists.$get({}, { headers })).json();
+  const exportRun = (json: Parameters<typeof cqa.results.export.$post>[0]["json"], h = headers) =>
+    cqa.results.export.$post({ json }, { headers: h });
+
+  // Not evaluated yet: an error entry, never a zero score.
+  const before = await exportRun({ ids: [conversationId], checklistId: defaultId });
+  expect(before.status).toBe(200);
+  expect(await before.json()).toMatchObject({
+    file: { results: [{ conversation_id: "example-kz", status: "error", score: null }] },
+    summary: { ok: 0, errors: 1 },
+  });
+
+  const evaluated = await cqa.conversations[":id"].evaluations.$post(
+    { param: { id: conversationId }, json: { id: crypto.randomUUID(), checklistId: defaultId } },
+    { headers: { ...headers, "X-CQA-Test-Model": "valid" } },
+  );
+  expect(evaluated.status).toBe(201);
+
+  const response = await exportRun({ ids: [conversationId], checklistId: defaultId });
+  if (response.status !== 200) throw new Error(await response.text());
+  const { file, summary } = await response.json();
+  expect(summary).toEqual({ ok: 1, errors: 0, models: { "test-model": 1 } });
+  expect(file).toMatchObject({
+    schema_version: "1.0",
+    team_name: "ММ.. Птицы",
+    model: { mode: "local", name: "Qwen/Qwen3.8-27B" },
+  });
+  const [entry] = file.results;
+  expect(entry).toMatchObject({ conversation_id: "example-kz", status: "ok" });
+  if (entry.status !== "ok") throw new Error("expected ok");
+  expect(entry.criteria.map(({ criterion_id }) => criterion_id)).toEqual([
+    "contact",
+    "discovery",
+    "identification",
+    "consultation",
+    "empathy",
+    "dialogue",
+    "closure",
+    "critical",
+  ]);
+  // The test model answers opening "no", violations "no", N/A where allowed, else the top answer.
+  expect(entry.criteria.map(({ value }) => value)).toEqual([
+    false,
+    null,
+    null,
+    null,
+    true,
+    10,
+    null,
+    false,
+  ]);
+  expect(entry.score).toEqual({ final_score: 75, critical_flag: false });
+
+  // Any checklist exports; this one was never used on the conversation, so it is an error entry.
+  const custom = await cqa.checklists.$post(
+    { json: { name: "Custom", criteria: checklists[0].criteria.slice(1) } },
+    { headers },
+  );
+  if (custom.status !== 201) throw new Error(await custom.text());
+  const { checklist } = await custom.json();
+  const customExport = await exportRun({ ids: [conversationId], checklistId: checklist.id });
+  if (customExport.status !== 200) throw new Error(await customExport.text());
+  expect((await customExport.json()).file.results[0]).toMatchObject({ status: "error" });
+  // Another workspace cannot export these conversations.
+  expect((await exportRun({ ids: [conversationId], checklistId: defaultId }, other)).status).toBe(
+    404,
+  );
+});

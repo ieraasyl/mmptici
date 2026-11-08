@@ -29,6 +29,7 @@ import {
 import { toast } from "@/components/ui/toast";
 import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
 import { BatchEvaluate } from "./batch-evaluate";
+import { ResultsExport } from "./results-export";
 import { conversationColumns } from "./conversation-columns";
 
 export function ConversationList() {
@@ -246,7 +247,7 @@ export function ConversationList() {
           conversations={hasSelection ? selectedConversations : filtered}
           onClearSelection={hasSelection ? clearSelection : undefined}
         >
-          {(checklist, actions) => (
+          {(checklistControl, actions) => (
             <DataTable
               table={table}
               label="Conversations"
@@ -297,7 +298,7 @@ export function ConversationList() {
                         </Field>
                       );
                     })}
-                  {checklist}
+                  {checklistControl}
                 </div>
               }
               toolbarActions={
@@ -309,6 +310,11 @@ export function ConversationList() {
                   )}
                   {importMenu}
                   {actions}
+                  <ResultsExport
+                    conversations={hasSelection ? selectedConversations : filtered}
+                    selected={hasSelection}
+                    checklistId={checklist.id}
+                  />
                 </div>
               }
             />

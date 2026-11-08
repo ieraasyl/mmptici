@@ -11,6 +11,7 @@ import {
   datasetFileSchema,
   datasetSchema,
   decideAppealSchema,
+  exportResultsSchema,
   precomputedEvaluationsSchema,
   runEvaluationSchema,
   saveChecklistSchema,
@@ -33,6 +34,7 @@ import {
 import { resolveRecordingUrl } from "../recording.ts";
 import { readDashboard } from "../dashboard.ts";
 import { importPrecomputed } from "../precomputed.ts";
+import { buildResultsFile } from "../results-export.ts";
 
 type Db = ReturnType<typeof createDb>;
 type CqaEnv = { Bindings: Bindings; Variables: { workspace: string; db: Db } };
@@ -515,4 +517,72 @@ export const cqaRoutes = new Hono<CqaEnv>()
         throw new HTTPException(409, { message: "This appeal has already been decided." });
       return c.json({ decision, decidedAt });
     },
-  );
+  )
+  .post("/results/export", zValidator("json", exportResultsSchema, validationError), async (c) => {
+    const db = c.get("db");
+    const workspaceId = c.get("workspace");
+    const { ids: requested, checklistId } = c.req.valid("json");
+    const ids = [...new Set(requested)];
+    const checklist = await findChecklist(db, workspaceId, checklistId);
+    if (!checklist) throw new HTTPException(404, { message: "Checklist not found." });
+
+    const conversations = await db
+      .select({
+        id: cqaConversations.id,
+        sourceId: cqaConversations.sourceId,
+        transcript: cqaConversations.transcript,
+      })
+      .from(cqaConversations)
+      .where(eq(cqaConversations.workspaceId, workspaceId));
+    const byId = new Map(conversations.map((row) => [row.id, row]));
+    if (ids.some((id) => !byId.has(id))) {
+      throw new HTTPException(404, {
+        message: "Some selected conversations were not found. Reload the page.",
+      });
+    }
+
+    // The newest evaluation per conversation made with the chosen checklist.
+    const evaluations = await db
+      .select({
+        conversationId: cqaEvaluations.conversationId,
+        checklist: cqaEvaluations.checklist,
+        ratings: cqaEvaluations.ratings,
+        model: cqaEvaluations.model,
+      })
+      .from(cqaEvaluations)
+      .innerJoin(cqaConversations, eq(cqaEvaluations.conversationId, cqaConversations.id))
+      .where(eq(cqaConversations.workspaceId, workspaceId))
+      .orderBy(desc(cqaEvaluations.createdAt), desc(cqaEvaluations.id));
+    const latest = new Map<string, (typeof evaluations)[number]>();
+    for (const row of evaluations) {
+      if (row.checklist.id === checklistId && !latest.has(row.conversationId)) {
+        latest.set(row.conversationId, row);
+      }
+    }
+
+    const { file, problems, models } = buildResultsFile(
+      ids.map((id) => {
+        const conversation = byId.get(id)!;
+        const evaluation = latest.get(id);
+        return {
+          sourceId: conversation.sourceId,
+          turnCount: conversation.transcript.length,
+          evaluation: evaluation
+            ? {
+                checklist: evaluation.checklist,
+                ratings: evaluation.ratings,
+                model: evaluation.model,
+              }
+            : null,
+        };
+      }),
+    );
+    if (problems.length) {
+      return c.json(
+        { error: { code: "EXPORT_INVALID", message: problems.slice(0, 3).join(" ") } },
+        422,
+      );
+    }
+    const ok = file.results.filter(({ status }) => status === "ok").length;
+    return c.json({ file, summary: { ok, errors: file.results.length - ok, models } });
+  });
