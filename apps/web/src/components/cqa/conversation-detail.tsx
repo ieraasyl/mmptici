@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { Message, MessageContent, MessageHeader } from "@/components/ui/message";
 import { Badge } from "@/components/ui/badge";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -47,7 +47,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
-import { EvaluationResult } from "./evaluation-result";
+import { EvaluationResult, type Citation } from "./evaluation-result";
 import { RecordingPlayer } from "./recording-player";
 
 export function ConversationDetail({
@@ -103,6 +103,9 @@ function Detail({
   onSelectEvaluation: (id: string) => void;
 }) {
   const selectedChecklist = useSelectedChecklist();
+  // The evidence chip last pressed, so the matching transcript message can be highlighted. It belongs
+  // to one evaluation, so switching evaluations drops it.
+  const [citation, setCitation] = useState<{ evaluationId?: string; cited: Citation } | null>(null);
   const pendingRun = useRef<{ id: string; checklistId: string } | null>(null);
   const queryClient = useQueryClient();
   const checklists = useQuery(checklistsQuery);
@@ -115,6 +118,7 @@ function Detail({
     ? selectedChecklist
     : (checklists.data?.defaultId ?? "");
   const evaluationId = selectedEvaluation || history[0]?.id || "";
+  const cited = citation?.evaluationId === evaluationId ? citation.cited : null;
   const historyItems = history.map(({ id, model, checklistName, revision, createdAt }) => ({
     value: id,
     label: `${model} · ${checklistName} · v${revision} · ${dateLabel(createdAt)}`,
@@ -261,7 +265,7 @@ function Detail({
       </Card>
 
       <div className="grid items-start gap-5 xl:grid-cols-5">
-        <Transcript conversation={conversation} />
+        <Transcript conversation={conversation} cited={cited} />
         <div className="min-w-0 space-y-4 xl:col-span-3">
           {history.length > 0 && (
             <Field>
@@ -309,6 +313,8 @@ function Detail({
               key={result.data.evaluation.id}
               evaluation={result.data.evaluation}
               transcript={conversation.transcript}
+              cited={cited}
+              onCite={(next) => setCitation({ evaluationId, cited: next })}
             />
           )}
           {result.data && result.data.evaluation.conversationId !== conversation.id && (
@@ -322,15 +328,30 @@ function Detail({
   );
 }
 
-function Transcript({ conversation }: { conversation: Conversation }) {
+function Transcript({
+  conversation,
+  cited,
+}: {
+  conversation: Conversation;
+  cited: Citation | null;
+}) {
   const hash = useLocation({ select: (location) => location.hash });
+  const hashTurn = /^#turn-(\d+)$/.exec(hash)?.[1];
+  const activeTurn = cited?.turn ?? (hashTurn ? Number(hashTurn) : undefined);
   useEffect(() => {
-    const id = hash.replace(/^#/, "");
-    if (!/^turn-\d+$/.test(id)) return;
-    const target = document.getElementById(id);
-    target?.focus({ preventScroll: true });
-    target?.scrollIntoView({ block: "center" });
-  }, [hash]);
+    if (!activeTurn) return;
+    const target = document.getElementById(`turn-${activeTurn}`);
+    const viewport = target?.closest("[data-slot=scroll-area-viewport]");
+    if (!target || !(viewport instanceof HTMLElement)) return;
+    // Centre the message inside the transcript only; scrolling the page would make the layout jump.
+    const message = target.getBoundingClientRect();
+    const area = viewport.getBoundingClientRect();
+    viewport.scrollTo({
+      top: viewport.scrollTop + message.top - area.top - (area.height - message.height) / 2,
+    });
+    // On narrow screens the transcript sits above the results; bring it into view only if needed.
+    target.scrollIntoView({ block: "nearest" });
+  }, [cited, activeTurn]);
 
   return (
     <Card className="xl:sticky xl:top-5 xl:col-span-2">
@@ -350,7 +371,8 @@ function Transcript({ conversation }: { conversation: Conversation }) {
                 id={`turn-${index + 1}`}
                 tabIndex={-1}
                 key={index}
-                className="scroll-m-5 rounded-lg p-1 target:bg-accent target:ring-1 target:ring-ring"
+                aria-current={activeTurn === index + 1 ? "true" : undefined}
+                className="scroll-m-5 rounded-lg p-1 aria-current:bg-accent aria-current:ring-2 aria-current:ring-primary"
               >
                 <Message align={turn.speaker === "operator" ? "end" : "start"}>
                   <MessageContent>
@@ -358,6 +380,11 @@ function Transcript({ conversation }: { conversation: Conversation }) {
                       <span className="wrap-anywhere tabular-nums">
                         #{index + 1} · {speakerName[turn.speaker]} · {turn.timestamp}
                       </span>
+                      {cited?.turn === index + 1 && (
+                        <Badge variant="secondary" className="wrap-anywhere">
+                          Evidence for: {cited.title}
+                        </Badge>
+                      )}
                     </MessageHeader>
                     <Bubble variant={turn.speaker === "operator" ? "default" : "secondary"}>
                       <BubbleContent
