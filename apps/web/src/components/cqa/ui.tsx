@@ -6,6 +6,7 @@ import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -15,19 +16,27 @@ import { Spinner } from "@/components/ui/spinner";
 
 export function PageHeading({
   title,
+  hideTitle = false,
   children,
   actions,
   actionsClassName,
 }: {
   title: string;
+  hideTitle?: boolean;
   children?: ReactNode;
   actions?: ReactNode;
   actionsClassName?: string;
 }) {
+  if (hideTitle && !children && !actions) return <h1 className="sr-only">{title}</h1>;
+
   return (
     <header className="flex flex-wrap items-end justify-between gap-4">
       <div className="space-y-2">
-        <h1 className="font-heading text-3xl font-semibold tracking-tight">{title}</h1>
+        <h1
+          className={hideTitle ? "sr-only" : "font-heading text-3xl font-semibold tracking-tight"}
+        >
+          {title}
+        </h1>
         {children && <p className="text-sm text-muted-foreground">{children}</p>}
       </div>
       {actions && (
@@ -62,7 +71,15 @@ export function StatusMessage({ children }: { children: ReactNode }) {
   );
 }
 
-export function EmptyState({ title, children }: { title: string; children: ReactNode }) {
+export function EmptyState({
+  title,
+  children,
+  actions,
+}: {
+  title: string;
+  children: ReactNode;
+  actions?: ReactNode;
+}) {
   return (
     <Empty>
       <EmptyHeader>
@@ -74,6 +91,7 @@ export function EmptyState({ title, children }: { title: string; children: React
         </EmptyTitle>
         <EmptyDescription>{children}</EmptyDescription>
       </EmptyHeader>
+      {actions && <EmptyContent>{actions}</EmptyContent>}
     </Empty>
   );
 }

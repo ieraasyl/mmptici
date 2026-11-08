@@ -94,17 +94,7 @@ export function ChecklistEditor() {
 
   return (
     <>
-      <PageHeading
-        title="Checklists"
-        actions={
-          <Button size="lg" onClick={() => choose("new")}>
-            <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" aria-hidden="true" /> New
-            checklist
-          </Button>
-        }
-      >
-        Define what the evaluator should look for and how much each criterion counts.
-      </PageHeading>
+      <PageHeading title="Checklists" hideTitle />
       {query.error && (
         <ErrorMessage
           error={query.error}
@@ -158,6 +148,12 @@ export function ChecklistEditor() {
                 ))}
               </ul>
             </CardContent>
+            <CardFooter>
+              <Button type="button" size="lg" className="w-full" onClick={() => choose("new")}>
+                <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" aria-hidden="true" /> New
+                checklist
+              </Button>
+            </CardFooter>
           </Card>
           {(checklist || active === "new") && (
             <ChecklistForm

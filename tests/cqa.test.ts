@@ -59,6 +59,7 @@ test("imports conversations once and isolates browser workspaces", async () => {
   });
   expect(await (await cqa.dashboard.$get({}, { headers: other })).json()).toEqual({
     conversations: [],
+    checklistResults: [],
   });
 
   const duplicate = await cqa.conversations.$post({ json: example }, { headers });
@@ -129,7 +130,7 @@ test("attaches bundled evaluations once, only to matching DEV transcripts", asyn
   expect([one.status, two.status]).toEqual([201, 201]);
   const results = [await one.json(), await two.json()];
   const total = results.reduce((sum, { imported }) => sum + imported, 0);
-  const models = 3;
+  const models = 1; // data/evaluations-dev.json holds one model (Qwen) since main regenerated it
   expect(total).toBe(64 * models);
   for (const result of results) {
     expect(result.mismatched).toHaveLength(models);
@@ -179,7 +180,10 @@ test("loads the bundled DEV dataset once per workspace", async () => {
 
 test("dashboard handles empty workspaces and evaluations with only violation flags", async () => {
   const headers = await openWorkspace();
-  expect(await (await cqa.dashboard.$get({}, { headers })).json()).toEqual({ conversations: [] });
+  expect(await (await cqa.dashboard.$get({}, { headers })).json()).toEqual({
+    conversations: [],
+    checklistResults: [],
+  });
   const conversationId = await importExample(headers);
   const { checklists } = await (await cqa.checklists.$get({}, { headers })).json();
   const created = await cqa.checklists.$post(
@@ -213,6 +217,108 @@ test("dashboard handles empty workspaces and evaluations with only violation fla
     ],
   });
   expect(dashboard.conversations[0]).not.toHaveProperty("transcript");
+});
+
+test("dashboard keeps the latest result per checklist revision after deletion and appeal decisions", async () => {
+  const headers = await openWorkspace();
+  const other = await openWorkspace();
+  const conversationId = await importExample(headers);
+  const { checklists, defaultId } = await (await cqa.checklists.$get({}, { headers })).json();
+  const draft = { name: "Historical checklist", criteria: checklists[0].criteria };
+  const created = await cqa.checklists.$post({ json: draft }, { headers });
+  if (created.status !== 201) throw new Error(await created.text());
+  const { checklist } = await created.json();
+
+  async function run(checklistId: string) {
+    const id = crypto.randomUUID();
+    const response = await cqa.conversations[":id"].evaluations.$post(
+      { param: { id: conversationId }, json: { id, checklistId } },
+      { headers: { ...headers, "X-CQA-Test-Model": "valid" } },
+    );
+    expect(response.status).toBe(201);
+    // Give consecutive runs distinct timestamps, regardless of UUID ordering.
+    await new Promise((resolve) => setTimeout(resolve, 2));
+    return id;
+  }
+
+  const first = await run(checklist.id);
+  const updated = await cqa.checklists[":id"].$put(
+    {
+      param: { id: checklist.id },
+      json: {
+        ...draft,
+        revision: 1,
+        criteria: draft.criteria.map((criterion, index) =>
+          index === 0 ? { ...criterion, weight: 1 } : criterion,
+        ),
+      },
+    },
+    { headers },
+  );
+  expect(updated.status).toBe(200);
+  const second = await run(checklist.id);
+  const third = await run(checklist.id);
+  const latest = await run(defaultId);
+  expect(
+    (await cqa.checklists[":id"].$delete({ param: { id: checklist.id } }, { headers })).status,
+  ).toBe(200);
+
+  const appeal = await cqa.evaluations[":id"].appeals.$post(
+    { param: { id: first }, json: { criterionId: "opening", comment: "Review the greeting." } },
+    { headers },
+  );
+  if (appeal.status !== 201) throw new Error(await appeal.text());
+  const appealId = (await appeal.json()).appeal.id;
+  const before = await (await cqa.dashboard.$get({}, { headers })).json();
+  expect(before.conversations).toMatchObject([{ pendingAppeals: 1, evaluation: { id: latest } }]);
+  expect(
+    before.checklistResults.find(({ evaluation }) => evaluation.id === first)?.pendingAppeals,
+  ).toBe(1);
+  expect(
+    before.checklistResults
+      .filter(({ evaluation }) => evaluation.id !== first)
+      .every((row) => row.pendingAppeals === 0),
+  ).toBe(true);
+
+  expect(
+    (
+      await cqa.appeals[":id"].decision.$put(
+        { param: { id: appealId }, json: { answer: "yes", reason: "The greeting is confirmed." } },
+        { headers },
+      )
+    ).status,
+  ).toBe(200);
+  const after = await (await cqa.dashboard.$get({}, { headers })).json();
+  expect(after.conversations).toMatchObject([
+    { pendingAppeals: 0, evaluation: { id: latest, total: 75 } },
+  ]);
+  expect(after.checklistResults.map(({ evaluation }) => evaluation.id)).toEqual([
+    latest,
+    third,
+    first,
+  ]);
+  const historical = after.checklistResults.find(({ evaluation }) => evaluation.id === first)!;
+  expect(historical.evaluation).toMatchObject({
+    checklistId: checklist.id,
+    revision: 1,
+    total: 100,
+  });
+  expect(historical.evaluation.criteria[0]).toMatchObject({ weight: 10, answer: "yes" });
+  expect(historical.evaluation.failures.some(({ criterionId }) => criterionId === "opening")).toBe(
+    false,
+  );
+  const revised = after.checklistResults.find(({ evaluation }) => evaluation.id === third)!;
+  expect(revised.evaluation).toMatchObject({ checklistId: checklist.id, revision: 2 });
+  expect(revised.evaluation.criteria[0]).toMatchObject({ weight: 1, answer: "no" });
+  expect(after.checklistResults.every((row) => !Object.hasOwn(row, "transcript"))).toBe(true);
+  const detail = await (
+    await cqa.conversations[":id"].$get({ param: { id: conversationId } }, { headers })
+  ).json();
+  expect(detail.evaluations.map(({ id }) => id)).toEqual([latest, third, second, first]);
+  expect(await (await cqa.dashboard.$get({}, { headers: other })).json()).toEqual({
+    conversations: [],
+    checklistResults: [],
+  });
 });
 
 test("returns JSON errors for malformed and invalid imports", async () => {
@@ -339,6 +445,7 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
     comment: appeal.json.comment,
     original: { answer: "no" },
     decision: null,
+    score: { original: 75, final: 75 },
     evidence: [{ number: 2, ...example.records[0].transcript[1] }],
   });
 
@@ -371,6 +478,8 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
     finalAnswer: "yes",
     finalPoints: 10,
   });
+  const decided = await (await cqa.appeals.$get({}, { headers })).json();
+  expect(decided.appeals[0]).toMatchObject({ score: { original: 75, final: 100 } });
 
   // A decision on an older evaluation clears its appeal without changing the latest score.
   expect(await (await cqa.dashboard.$get({}, { headers })).json()).toMatchObject({
@@ -469,4 +578,77 @@ test("dashboard failures follow reviewer decisions and keep the model's explanat
   });
   // The same state is served again after a reload.
   expect(await failures()).toEqual(after);
+});
+
+test("exports selected conversations as results.json in the organizers' format", async () => {
+  const headers = await openWorkspace();
+  const other = await openWorkspace();
+  const conversationId = await importExample(headers);
+  const { checklists, defaultId } = await (await cqa.checklists.$get({}, { headers })).json();
+  const exportRun = (json: Parameters<typeof cqa.results.export.$post>[0]["json"], h = headers) =>
+    cqa.results.export.$post({ json }, { headers: h });
+
+  // Not evaluated yet: an error entry, never a zero score.
+  const before = await exportRun({ ids: [conversationId], checklistId: defaultId });
+  expect(before.status).toBe(200);
+  expect(await before.json()).toMatchObject({
+    file: { results: [{ conversation_id: "example-kz", status: "error", score: null }] },
+    summary: { ok: 0, errors: 1 },
+  });
+
+  const evaluated = await cqa.conversations[":id"].evaluations.$post(
+    { param: { id: conversationId }, json: { id: crypto.randomUUID(), checklistId: defaultId } },
+    { headers: { ...headers, "X-CQA-Test-Model": "valid" } },
+  );
+  expect(evaluated.status).toBe(201);
+
+  const response = await exportRun({ ids: [conversationId], checklistId: defaultId });
+  if (response.status !== 200) throw new Error(await response.text());
+  const { file, summary } = await response.json();
+  expect(summary).toEqual({ ok: 1, errors: 0, models: { "test-model": 1 } });
+  expect(file).toMatchObject({
+    schema_version: "1.0",
+    team_name: "ММ.. Птицы",
+    model: { mode: "local", name: "Qwen/Qwen3.8-27B" },
+  });
+  const [entry] = file.results;
+  expect(entry).toMatchObject({ conversation_id: "example-kz", status: "ok" });
+  if (entry.status !== "ok") throw new Error("expected ok");
+  expect(entry.criteria.map(({ criterion_id }) => criterion_id)).toEqual([
+    "contact",
+    "discovery",
+    "identification",
+    "consultation",
+    "empathy",
+    "dialogue",
+    "closure",
+    "critical",
+  ]);
+  // The test model answers opening "no", violations "no", N/A where allowed, else the top answer.
+  expect(entry.criteria.map(({ value }) => value)).toEqual([
+    false,
+    null,
+    null,
+    null,
+    true,
+    10,
+    null,
+    false,
+  ]);
+  expect(entry.score).toEqual({ final_score: 75, critical_flag: false });
+
+  // Any checklist exports; this one was never used on the conversation, so it is an error entry.
+  const custom = await cqa.checklists.$post(
+    { json: { name: "Custom", criteria: checklists[0].criteria.slice(1) } },
+    { headers },
+  );
+  if (custom.status !== 201) throw new Error(await custom.text());
+  const { checklist } = await custom.json();
+  const customExport = await exportRun({ ids: [conversationId], checklistId: checklist.id });
+  if (customExport.status !== 200) throw new Error(await customExport.text());
+  expect((await customExport.json()).file.results[0]).toMatchObject({ status: "error" });
+  // Another workspace cannot export these conversations.
+  expect((await exportRun({ ids: [conversationId], checklistId: defaultId }, other)).status).toBe(
+    404,
+  );
 });

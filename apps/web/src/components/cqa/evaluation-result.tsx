@@ -21,12 +21,18 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { ErrorMessage } from "./ui";
 
+export type Citation = { turn: number; criterionId: string; title: string };
+
 export function EvaluationResult({
   evaluation,
   transcript,
+  cited,
+  onCite,
 }: {
   evaluation: Evaluation;
   transcript: Turn[];
+  cited: Citation | null;
+  onCite: (citation: Citation) => void;
 }) {
   const [appealFor, setAppealFor] = useState("");
   const [submitted, setSubmitted] = useState<string[]>([]);
@@ -126,26 +132,28 @@ export function EvaluationResult({
                     <p className="text-sm/relaxed wrap-anywhere">{original.explanation}</p>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-xs font-medium text-muted-foreground">Evidence</span>
-                      {original.evidence.map((turn) => (
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          nativeButton={false}
-                          render={<a href={`#turn-${turn}`} />}
-                          key={turn}
-                          aria-label={`Jump to transcript turn ${turn}`}
-                          onClick={() =>
-                            document.getElementById(`turn-${turn}`)?.focus({ preventScroll: true })
-                          }
-                        >
-                          #{turn} · {transcript[turn - 1]?.timestamp}
-                          <HugeiconsIcon
-                            icon={ArrowUpRight01Icon}
-                            data-icon="inline-end"
-                            aria-hidden="true"
-                          />
-                        </Button>
-                      ))}
+                      {original.evidence.map((turn) => {
+                        const active = cited?.turn === turn && cited.criterionId === criterion.id;
+                        return (
+                          <Button
+                            variant={active ? "default" : "outline"}
+                            size="xs"
+                            key={turn}
+                            aria-pressed={active}
+                            aria-label={`Show transcript turn ${turn}`}
+                            onClick={() =>
+                              onCite({ turn, criterionId: criterion.id, title: criterion.title })
+                            }
+                          >
+                            #{turn} · {transcript[turn - 1]?.timestamp}
+                            <HugeiconsIcon
+                              icon={ArrowUpRight01Icon}
+                              data-icon="inline-end"
+                              aria-hidden="true"
+                            />
+                          </Button>
+                        );
+                      })}
                     </div>
                     {appeal ? (
                       <div className="space-y-2 text-sm">
@@ -155,9 +163,10 @@ export function EvaluationResult({
                           </Badge>
                           <Link
                             to="/appeals"
+                            search={{ appeal: appeal.id }}
                             className="text-xs font-medium text-primary hover:underline"
                           >
-                            Review appeals
+                            View appeal
                           </Link>
                         </div>
                         <p className="wrap-anywhere">

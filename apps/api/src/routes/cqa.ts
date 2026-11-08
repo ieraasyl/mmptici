@@ -11,6 +11,7 @@ import {
   datasetFileSchema,
   datasetSchema,
   decideAppealSchema,
+  exportResultsSchema,
   precomputedEvaluationsSchema,
   runEvaluationSchema,
   saveChecklistSchema,
@@ -33,6 +34,7 @@ import {
 import { resolveRecordingUrl } from "../recording.ts";
 import { readDashboard } from "../dashboard.ts";
 import { importPrecomputed } from "../precomputed.ts";
+import { buildResultsFile } from "../results-export.ts";
 
 type Db = ReturnType<typeof createDb>;
 type CqaEnv = { Bindings: Bindings; Variables: { workspace: string; db: Db } };
@@ -109,12 +111,18 @@ function findEvaluation(db: Db, workspaceId: string, id: string) {
     .get();
 }
 
-function summarizeAppeal(row: {
-  appeal: typeof cqaAppeals.$inferSelect;
-  evaluation: typeof cqaEvaluations.$inferSelect;
-  conversation: typeof cqaConversations.$inferSelect;
-}) {
+function summarizeAppeal(
+  row: {
+    appeal: typeof cqaAppeals.$inferSelect;
+    evaluation: typeof cqaEvaluations.$inferSelect;
+    conversation: typeof cqaConversations.$inferSelect;
+  },
+  evaluationAppeals: (typeof cqaAppeals.$inferSelect)[],
+) {
   const { appeal, evaluation, conversation } = row;
+  // The evaluation's score before any appeal and after every decision made on it so far.
+  const before = scoreEvaluation(evaluation.checklist, evaluation.ratings, []);
+  const after = scoreEvaluation(evaluation.checklist, evaluation.ratings, evaluationAppeals);
   const criterion = evaluation.checklist.criteria.find(({ id }) => id === appeal.criterionId)!;
   const original = evaluation.ratings.find(
     ({ criterionId }) => criterionId === appeal.criterionId,
@@ -128,6 +136,12 @@ function summarizeAppeal(row: {
     },
     criterion,
     original,
+    score: {
+      original: before.total,
+      final: after.total,
+      violationOriginal: before.seriousViolation,
+      violationFinal: after.seriousViolation,
+    },
     evidence: original.evidence.map((number) => ({
       number,
       ...conversation.transcript[number - 1],
@@ -154,8 +168,8 @@ export const cqaRoutes = new Hono<CqaEnv>()
   })
   .use("*", workspace)
   .get("/dashboard", async (c) => {
-    const conversations = await readDashboard(c.get("db"), c.get("workspace"));
-    return c.json({ conversations });
+    const dashboard = await readDashboard(c.get("db"), c.get("workspace"));
+    return c.json(dashboard);
   })
   .get("/conversations", async (c) => {
     const db = c.get("db");
@@ -487,7 +501,18 @@ export const cqaRoutes = new Hono<CqaEnv>()
       .innerJoin(cqaConversations, eq(cqaEvaluations.conversationId, cqaConversations.id))
       .where(eq(cqaConversations.workspaceId, c.get("workspace")))
       .orderBy(asc(cqaAppeals.decidedAt), desc(cqaAppeals.createdAt));
-    return c.json({ appeals: appeals.map(summarizeAppeal) });
+    const byEvaluation = new Map<string, (typeof cqaAppeals.$inferSelect)[]>();
+    for (const { appeal } of appeals) {
+      byEvaluation.set(appeal.evaluationId, [
+        ...(byEvaluation.get(appeal.evaluationId) ?? []),
+        appeal,
+      ]);
+    }
+    return c.json({
+      appeals: appeals.map((row) =>
+        summarizeAppeal(row, byEvaluation.get(row.appeal.evaluationId)!),
+      ),
+    });
   })
   .put(
     "/appeals/:id/decision",
@@ -520,4 +545,72 @@ export const cqaRoutes = new Hono<CqaEnv>()
         throw new HTTPException(409, { message: "This appeal has already been decided." });
       return c.json({ decision, decidedAt });
     },
-  );
+  )
+  .post("/results/export", zValidator("json", exportResultsSchema, validationError), async (c) => {
+    const db = c.get("db");
+    const workspaceId = c.get("workspace");
+    const { ids: requested, checklistId } = c.req.valid("json");
+    const ids = [...new Set(requested)];
+    const checklist = await findChecklist(db, workspaceId, checklistId);
+    if (!checklist) throw new HTTPException(404, { message: "Checklist not found." });
+
+    const conversations = await db
+      .select({
+        id: cqaConversations.id,
+        sourceId: cqaConversations.sourceId,
+        transcript: cqaConversations.transcript,
+      })
+      .from(cqaConversations)
+      .where(eq(cqaConversations.workspaceId, workspaceId));
+    const byId = new Map(conversations.map((row) => [row.id, row]));
+    if (ids.some((id) => !byId.has(id))) {
+      throw new HTTPException(404, {
+        message: "Some selected conversations were not found. Reload the page.",
+      });
+    }
+
+    // The newest evaluation per conversation made with the chosen checklist.
+    const evaluations = await db
+      .select({
+        conversationId: cqaEvaluations.conversationId,
+        checklist: cqaEvaluations.checklist,
+        ratings: cqaEvaluations.ratings,
+        model: cqaEvaluations.model,
+      })
+      .from(cqaEvaluations)
+      .innerJoin(cqaConversations, eq(cqaEvaluations.conversationId, cqaConversations.id))
+      .where(eq(cqaConversations.workspaceId, workspaceId))
+      .orderBy(desc(cqaEvaluations.createdAt), desc(cqaEvaluations.id));
+    const latest = new Map<string, (typeof evaluations)[number]>();
+    for (const row of evaluations) {
+      if (row.checklist.id === checklistId && !latest.has(row.conversationId)) {
+        latest.set(row.conversationId, row);
+      }
+    }
+
+    const { file, problems, models } = buildResultsFile(
+      ids.map((id) => {
+        const conversation = byId.get(id)!;
+        const evaluation = latest.get(id);
+        return {
+          sourceId: conversation.sourceId,
+          turnCount: conversation.transcript.length,
+          evaluation: evaluation
+            ? {
+                checklist: evaluation.checklist,
+                ratings: evaluation.ratings,
+                model: evaluation.model,
+              }
+            : null,
+        };
+      }),
+    );
+    if (problems.length) {
+      return c.json(
+        { error: { code: "EXPORT_INVALID", message: problems.slice(0, 3).join(" ") } },
+        422,
+      );
+    }
+    const ok = file.results.filter(({ status }) => status === "ok").length;
+    return c.json({ file, summary: { ok, errors: file.results.length - ok, models } });
+  });

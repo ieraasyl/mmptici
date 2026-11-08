@@ -1,59 +1,23 @@
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Fragment, useRef, useState } from "react";
+import { DataTable } from "@/components/ui/data-table";
+import { dataTableFeatures } from "@/components/ui/data-table-features";
+import { useTable, type RowSelectionState } from "@tanstack/react-table";
+import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  ArrowUpRight01Icon,
-  Chat01Icon,
-  Database01Icon,
-  FileImportIcon,
-  JusticeScale01Icon,
-  Mic01Icon,
-  Task01Icon,
-} from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, Database01Icon, FileImportIcon } from "@hugeicons/core-free-icons";
 import { datasetFileSchema } from "@app/contracts";
-import {
-  cqa,
-  appealsQuery,
-  channelName,
-  conversationsQuery,
-  dashboardQuery,
-  type DashboardConversation,
-  languageName,
-  modelLabel,
-  originLabel,
-  scoreLabel,
-} from "@/lib/cqa";
+import { cqa, channelName, conversationsQuery, dashboardQuery, languageName } from "@/lib/cqa";
+import { useActiveChecklist } from "@/lib/selected-checklist";
 import { request } from "@/lib/request";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -65,28 +29,24 @@ import {
 import { toast } from "@/components/ui/toast";
 import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
 import { BatchEvaluate } from "./batch-evaluate";
-
-const PAGE_SIZE = 12;
-
-const sortOptions = [
-  { value: "", label: "Sort by ID" },
-  { value: "asc", label: "Lowest score first" },
-  { value: "desc", label: "Highest score first" },
-];
+import { ResultsExport } from "./results-export";
+import { conversationColumns } from "./conversation-columns";
 
 export function ConversationList() {
   const list = useQuery(conversationsQuery);
-  // Latest evaluation per conversation (score, violation, model) comes from the dashboard summary.
+  // Scores and review status come from the same conversation summary used by the dashboard.
   const summary = useQuery(dashboardQuery);
-  const appeals = useQuery(appealsQuery);
+  const checklist = useActiveChecklist();
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [search, setSearch] = useState("");
   const [language, setLanguage] = useState("");
   const [channel, setChannel] = useState("");
   const [group, setGroup] = useState("");
-  const [sort, setSort] = useState("");
-  const [page, setPage] = useState(1);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+  function clearSelection() {
+    setRowSelection({});
+  }
 
   const importDataset = useMutation({
     onMutate: () => {
@@ -137,11 +97,11 @@ export function ConversationList() {
         type: imported > 0 ? "success" : "info",
         timeout: 5_000,
       });
-      setSearch("");
+      table.resetColumnFilters();
       setLanguage("");
       setChannel("");
       setGroup("");
-      setPage(1);
+      clearSelection();
       void queryClient.invalidateQueries(conversationsQuery);
       void queryClient.invalidateQueries(dashboardQuery);
     },
@@ -154,17 +114,13 @@ export function ConversationList() {
         timeout: 8_000,
       });
     },
-    // The conversations may have been saved even when the bundled scores failed to load.
-    onSettled: () => {
-      void queryClient.invalidateQueries(conversationsQuery);
-      void queryClient.invalidateQueries(dashboardQuery);
-    },
   });
 
   const conversations = list.data?.conversations ?? [];
   const groups = [...new Set(conversations.map((item) => item.group))];
   const filters = [
     {
+      id: "conversation-language",
       label: "Language",
       all: "All languages",
       value: language,
@@ -172,6 +128,7 @@ export function ConversationList() {
       options: Object.entries(languageName),
     },
     {
+      id: "conversation-channel",
       label: "Channel",
       all: "All channels",
       value: channel,
@@ -179,6 +136,7 @@ export function ConversationList() {
       options: Object.entries(channelName),
     },
     {
+      id: "conversation-dataset",
       label: "Dataset",
       all: "All datasets",
       value: group,
@@ -186,103 +144,88 @@ export function ConversationList() {
       options: groups.map((name) => [name, name] as const),
     },
   ];
-  const latest = new Map(
-    (summary.data?.conversations ?? []).map((item) => [item.id, item.evaluation] as const),
+  const tableData = useMemo(() => {
+    // Show the latest result of the checklist picked above, not whichever run happened last.
+    const results = new Map(
+      summary.data?.checklistResults
+        .filter(
+          ({ evaluation }) =>
+            evaluation.checklistId === checklist.id && evaluation.revision === checklist.revision,
+        )
+        .map((item) => [item.id, item]),
+    );
+    return (list.data?.conversations ?? [])
+      .filter(
+        (item) =>
+          (!language || item.language === language) &&
+          (!channel || item.channel === channel) &&
+          (!group || item.group === group),
+      )
+      .map((item) => {
+        const latest = results.get(item.id);
+        return { ...item, evaluated: !!latest, summary: latest };
+      });
+  }, [list.data, summary.data, checklist.id, checklist.revision, language, channel, group]);
+  const table = useTable({
+    features: dataTableFeatures,
+    columns: conversationColumns,
+    data: tableData,
+    getRowId: (item) => item.id,
+    sortDescFirst: false,
+    state: { rowSelection },
+    onRowSelectionChange: setRowSelection,
+  });
+  const filtered = table.getSortedRowModel().rows.map((row) => row.original);
+  const hasFilters = Boolean(
+    language || channel || group || table.getColumn("conversation")?.getFilterValue(),
   );
-  const term = search.trim().toLowerCase();
-  const matching = conversations.filter(
-    (item) =>
-      item.sourceId.toLowerCase().includes(term) &&
-      (!language || item.language === language) &&
-      (!channel || item.channel === channel) &&
-      (!group || item.group === group),
+  const hasSelection = Object.keys(rowSelection).length > 0;
+  const selectedConversations = filtered.filter(({ id }) => rowSelection[id]);
+  const evaluatedCount = summary.data
+    ? conversations.filter(({ id }) =>
+        summary.data.checklistResults.some(
+          ({ id: resultId, evaluation }) =>
+            resultId === id &&
+            evaluation.checklistId === checklist.id &&
+            evaluation.revision === checklist.revision,
+        ),
+      ).length
+    : 0;
+  const importMenu = (
+    <DropdownMenu>
+      <DropdownMenuTrigger render={<Button variant="outline" />} disabled={importDataset.isPending}>
+        Import
+        <HugeiconsIcon icon={ArrowDown01Icon} data-icon="inline-end" aria-hidden="true" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-auto">
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => fileInput.current?.click()}>
+            <HugeiconsIcon icon={FileImportIcon} aria-hidden="true" />
+            Import JSON
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => importDataset.mutate("dev")}>
+            <HugeiconsIcon icon={Database01Icon} aria-hidden="true" />
+            Load DEV dataset
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
-  // Unscored conversations (not evaluated or N/A) stay at the end in both directions.
-  const filtered = sort
-    ? matching.toSorted((a, b) => {
-        const left = latest.get(a.id)?.total ?? null;
-        const right = latest.get(b.id)?.total ?? null;
-        if (left === null || right === null)
-          return (left === null ? 1 : 0) - (right === null ? 1 : 0);
-        return sort === "asc" ? left - right : right - left;
-      })
-    : matching;
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pageCount);
-  const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-  const pageNumbers =
-    pageCount <= 7
-      ? Array.from({ length: pageCount }, (_, index) => index + 1)
-      : [...new Set([1, currentPage - 1, currentPage, currentPage + 1, pageCount])].filter(
-          (number) => number >= 1 && number <= pageCount,
-        );
-  const stats = [
-    { label: "Conversations", value: list.data && conversations.length, icon: Chat01Icon },
-    {
-      label: "Evaluated",
-      value: list.data && conversations.filter((item) => item.evaluated).length,
-      icon: Task01Icon,
-    },
-    {
-      label: "Pending appeals",
-      value: appeals.data?.appeals.filter((item) => !item.decision).length,
-      icon: JusticeScale01Icon,
-    },
-  ];
 
   return (
     <>
-      <PageHeading
-        title="Conversations"
-        actions={
-          <>
-            <Button
-              variant="outline"
-              size="lg"
-              disabled={importDataset.isPending}
-              onClick={() => importDataset.mutate("dev")}
-            >
-              <HugeiconsIcon icon={Database01Icon} data-icon="inline-start" aria-hidden="true" />{" "}
-              Load DEV dataset
-            </Button>
-            <Button
-              size="lg"
-              disabled={importDataset.isPending}
-              onClick={() => fileInput.current?.click()}
-            >
-              <HugeiconsIcon icon={FileImportIcon} data-icon="inline-start" aria-hidden="true" />{" "}
-              Import JSON
-            </Button>
-            <input
-              type="file"
-              accept=".json,application/json"
-              hidden
-              ref={fileInput}
-              onChange={(event) => {
-                const file = event.currentTarget.files?.[0];
-                event.currentTarget.value = "";
-                if (file) importDataset.mutate(file);
-              }}
-            />
-          </>
-        }
-      >
-        Review chats and calls, run checklist evaluations, and inspect the evidence.
-      </PageHeading>
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {stats.map(({ label, value, icon }) => (
-          <Card key={label} size="sm">
-            <CardHeader>
-              <CardDescription>{label}</CardDescription>
-              <CardTitle>{value ?? "…"}</CardTitle>
-              <CardAction>
-                <HugeiconsIcon icon={icon} size={19} aria-hidden="true" />
-              </CardAction>
-            </CardHeader>
-          </Card>
-        ))}
-      </div>
+      <PageHeading title="Conversations" hideTitle />
+      <input
+        type="file"
+        accept=".json,application/json"
+        hidden
+        ref={fileInput}
+        onChange={(event) => {
+          const file = event.currentTarget.files?.[0];
+          event.currentTarget.value = "";
+          if (file) importDataset.mutate(file);
+        }}
+      />
 
       {list.error && (
         <ErrorMessage
@@ -292,256 +235,92 @@ export function ConversationList() {
           }}
         />
       )}
-      {appeals.error && (
-        <ErrorMessage
-          error={appeals.error}
-          retry={() => {
-            void appeals.refetch();
-          }}
-        />
+
+      {list.isPending && <Loading>Loading conversations…</Loading>}
+      {list.data && conversations.length === 0 && (
+        <EmptyState title="No conversations yet" actions={importMenu}>
+          Import the organizer’s JSON file to add transcripts to this workspace.
+        </EmptyState>
       )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <h2>Conversation library</h2>
-          </CardTitle>
-          <CardDescription>
-            {list.data
-              ? `${filtered.length} of ${conversations.length} conversations`
-              : "Imported transcripts"}
-          </CardDescription>
-          {conversations.length > 0 && (
-            <CardAction>
-              <BatchEvaluate conversations={filtered} />
-            </CardAction>
-          )}
-        </CardHeader>
-        {conversations.length > 0 && (
-          <CardContent>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative w-full sm:w-48">
-                <Input
-                  aria-label="Search conversation IDs"
-                  placeholder="Search by ID"
-                  value={search}
-                  onChange={(event) => {
-                    setSearch(event.target.value);
-                    setPage(1);
-                  }}
-                />
-              </div>
-              {filters
-                .filter(({ options }) => options.length > 1)
-                .map((filter) => {
-                  const items = [
-                    { value: "", label: filter.all },
-                    ...filter.options.map(([value, label]) => ({ value, label })),
-                  ];
-                  return (
-                    <Select
-                      key={filter.label}
-                      items={items}
-                      value={filter.value}
-                      onValueChange={(value) => {
-                        filter.onChange(value ?? "");
-                        setPage(1);
-                      }}
-                    >
-                      <SelectTrigger aria-label={filter.label} className="w-36 max-w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {items.map(({ value, label }) => (
-                            <SelectItem key={value} value={value}>
-                              <span className="wrap-anywhere whitespace-normal">{label}</span>
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  );
-                })}
-              <Select
-                items={sortOptions}
-                value={sort}
-                onValueChange={(value) => {
-                  setSort(value ?? "");
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger aria-label="Sort" className="w-44 max-w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {sortOptions.map(({ value, label }) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        )}
-        {list.isPending && <Loading>Loading conversations…</Loading>}
-        {list.data && conversations.length === 0 && (
-          <EmptyState title="No conversations yet">
-            Import the organizer’s JSON file to add transcripts to this workspace.
-          </EmptyState>
-        )}
-        {conversations.length > 0 && filtered.length === 0 && (
-          <EmptyState title="No matching conversations">
-            Try another ID or change the filters.
-          </EmptyState>
-        )}
-        {visible.length > 0 && (
-          <>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead scope="col">Conversation</TableHead>
-                    <TableHead scope="col">Language</TableHead>
-                    <TableHead scope="col">Channel</TableHead>
-                    <TableHead scope="col">Score</TableHead>
-                    <TableHead scope="col">Model</TableHead>
-                    <TableHead scope="col">Review</TableHead>
-                    <TableHead scope="col">
-                      <span className="sr-only">Open</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {visible.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <Link
-                          className="font-semibold wrap-anywhere hover:text-primary hover:underline"
-                          to="/conversations/$id"
-                          params={{ id: item.id }}
-                        >
-                          {item.sourceId}
-                        </Link>
-                        <div className="mt-0.5 text-xs text-muted-foreground">{item.group}</div>
-                      </TableCell>
-                      <TableCell>{languageName[item.language]}</TableCell>
-                      <TableCell>
-                        <span className="flex items-center gap-1.5 whitespace-nowrap text-muted-foreground">
-                          <HugeiconsIcon
-                            icon={item.channel === "voice call" ? Mic01Icon : Chat01Icon}
-                            size={15}
-                            aria-hidden="true"
-                          />
-                          {channelName[item.channel]}
-                        </span>
-                      </TableCell>
-                      <LatestCells evaluated={item.evaluated} evaluation={latest.get(item.id)} />
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          nativeButton={false}
-                          aria-label={`Open ${item.sourceId}`}
-                          render={<Link to="/conversations/$id" params={{ id: item.id }} />}
-                        >
-                          <HugeiconsIcon icon={ArrowUpRight01Icon} aria-hidden="true" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-            {pageCount > 1 && (
-              <CardFooter>
-                <p className="sr-only" role="status">
-                  Page {currentPage} of {pageCount}
-                </p>
-                <Pagination aria-label="Conversation pages">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        nativeButton
-                        disabled={currentPage === 1}
-                        onClick={() => setPage(currentPage - 1)}
-                      />
-                    </PaginationItem>
-                    {pageNumbers.map((number, index) => (
-                      <Fragment key={number}>
-                        {number - (pageNumbers[index - 1] ?? number) > 1 && (
-                          <PaginationItem className="hidden sm:list-item">
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                        )}
-                        <PaginationItem
-                          className={number === currentPage ? undefined : "hidden sm:list-item"}
-                        >
-                          <PaginationLink
-                            nativeButton
-                            isActive={number === currentPage}
-                            aria-label={`Page ${number}`}
-                            onClick={() => setPage(number)}
+      {conversations.length > 0 && (
+        <BatchEvaluate
+          conversations={hasSelection ? selectedConversations : filtered}
+          onClearSelection={hasSelection ? clearSelection : undefined}
+        >
+          {(checklistControl, actions) => (
+            <DataTable
+              table={table}
+              label="Conversations"
+              tableClassName="min-w-236 table-fixed"
+              filter={{
+                column: "conversation",
+                label: "Search by ID",
+                onChange: clearSelection,
+              }}
+              selectable
+              unselectedStatus={`${evaluatedCount} of ${conversations.length} evaluated`}
+              toolbarControls={
+                <div className="grid w-full grid-cols-2 items-end gap-2 max-sm:*:odd:last:col-span-2 sm:contents">
+                  {filters
+                    .filter(({ options }) => options.length > 1)
+                    .map((filter) => {
+                      const items = [
+                        { value: "", label: filter.all },
+                        ...filter.options.map(([value, label]) => ({ value, label })),
+                      ];
+                      return (
+                        <Field key={filter.id} className="min-w-0 max-w-full sm:w-auto">
+                          <FieldLabel htmlFor={filter.id}>{filter.label}</FieldLabel>
+                          <Select
+                            items={items}
+                            value={filter.value}
+                            onValueChange={(value) => {
+                              filter.onChange(value ?? "");
+                              clearSelection();
+                            }}
                           >
-                            {number}
-                          </PaginationLink>
-                        </PaginationItem>
-                      </Fragment>
-                    ))}
-                    <PaginationItem>
-                      <PaginationNext
-                        nativeButton
-                        disabled={currentPage === pageCount}
-                        onClick={() => setPage(currentPage + 1)}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </CardFooter>
-            )}
-          </>
-        )}
-      </Card>
-    </>
-  );
-}
-
-function LatestCells({
-  evaluated,
-  evaluation,
-}: {
-  evaluated: boolean;
-  evaluation: DashboardConversation["evaluation"] | undefined;
-}) {
-  if (!evaluation)
-    return (
-      <TableCell colSpan={3}>
-        <Badge variant="secondary">{evaluated ? "Evaluated" : "Not evaluated"}</Badge>
-      </TableCell>
-    );
-  return (
-    <>
-      <TableCell>
-        <span className="font-semibold tabular-nums">{scoreLabel(evaluation.total)}</span>
-      </TableCell>
-      <TableCell>
-        <span className="text-sm whitespace-nowrap text-muted-foreground" title={evaluation.model}>
-          {modelLabel(evaluation.model)}
-        </span>
-        <Badge variant={evaluation.origin === "live" ? "secondary" : "outline"} className="ml-1">
-          {originLabel[evaluation.origin]}
-        </Badge>
-      </TableCell>
-      <TableCell>
-        {evaluation.seriousViolation ? (
-          <Badge variant="destructive">Serious violation</Badge>
-        ) : (
-          <span className="text-sm text-muted-foreground">No flags</span>
-        )}
-      </TableCell>
+                            <SelectTrigger
+                              id={filter.id}
+                              title={items.find(({ value }) => value === filter.value)?.label}
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                {items.map(({ value, label }) => (
+                                  <SelectItem key={value} value={value}>
+                                    {label}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </Field>
+                      );
+                    })}
+                  {checklistControl}
+                </div>
+              }
+              toolbarActions={
+                <div className="flex w-full flex-wrap items-center gap-2 max-sm:*:grow sm:contents">
+                  {hasFilters && (
+                    <p className="text-sm text-muted-foreground max-sm:basis-full sm:py-1.5">
+                      {filtered.length} {filtered.length === 1 ? "match" : "matches"}
+                    </p>
+                  )}
+                  {importMenu}
+                  {actions}
+                  <ResultsExport
+                    conversations={hasSelection ? selectedConversations : filtered}
+                    selected={hasSelection}
+                    checklistId={checklist.id}
+                  />
+                </div>
+              }
+            />
+          )}
+        </BatchEvaluate>
+      )}
     </>
   );
 }

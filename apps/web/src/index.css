@@ -6,6 +6,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --default-transition-duration: var(--motion-fast);
+  --default-transition-timing-function: var(--motion-ease);
+  --transition-duration-panel: var(--motion-panel);
   --font-heading: var(--font-sans);
   --font-sans: "Inter Variable", sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -49,6 +52,11 @@
 }
 
 :root {
+  --workspace-nav-bottom: calc(--spacing(3) + env(safe-area-inset-bottom));
+  --workspace-nav-clearance: calc(var(--workspace-nav-bottom) + --spacing(18));
+  --motion-fast: 150ms;
+  --motion-panel: 220ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -115,6 +123,116 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-panel: 0ms;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:active-view-transition-type(workspace-mobile) {
+    view-transition-name: none;
+
+    #main-content {
+      view-transition-name: workspace-page-outgoing;
+    }
+
+    &:active-view-transition-type(workspace-incoming) #main-content {
+      view-transition-name: workspace-page-incoming;
+    }
+
+    [data-slot="navigation-menu"] {
+      view-transition-name: workspace-navigation;
+    }
+  }
+
+  :is(:root, #main-content):active-view-transition-type(slide-from-left, slide-from-right) {
+    --workspace-page-rise: 0px;
+    --workspace-page-edge-opacity: 1;
+    --workspace-slide-duration: 380ms;
+  }
+
+  :is(:root, #main-content):active-view-transition-type(slide-from-left) {
+    --workspace-page-offset: -100%;
+  }
+
+  :is(:root, #main-content):active-view-transition-type(slide-from-right) {
+    --workspace-page-offset: 100%;
+  }
+
+  #main-content::view-transition,
+  ::view-transition {
+    pointer-events: none;
+  }
+
+  #main-content::view-transition-group(root),
+  ::view-transition-group(workspace-page-outgoing),
+  ::view-transition-group(workspace-page-incoming),
+  ::view-transition-new(workspace-navigation) {
+    animation: none;
+  }
+
+  #main-content::view-transition-group(root) {
+    /* The scope is already positioned at main. Ignore Chromium's browser toolbar offset. */
+    transform: none;
+  }
+
+  ::view-transition-group(workspace-navigation) {
+    z-index: 1;
+    animation: none;
+  }
+
+  ::view-transition-old(workspace-navigation) {
+    display: none;
+  }
+
+  #main-content::view-transition-image-pair(root),
+  ::view-transition-image-pair(workspace-page-outgoing),
+  ::view-transition-image-pair(workspace-page-incoming) {
+    overflow-x: clip;
+  }
+
+  #main-content::view-transition-old(root),
+  ::view-transition-old(workspace-page-outgoing) {
+    animation: workspace-page-exit var(--workspace-slide-duration, var(--motion-fast))
+      var(--motion-ease) both;
+  }
+
+  #main-content::view-transition-new(root),
+  ::view-transition-new(workspace-page-incoming) {
+    animation: workspace-page-enter var(--workspace-slide-duration, 300ms) var(--motion-ease) both;
+  }
+}
+
+@keyframes workspace-page-exit {
+  to {
+    opacity: var(--workspace-page-edge-opacity, 0);
+    translate: calc(-1 * var(--workspace-page-offset, 0px)) 0;
+  }
+}
+
+@keyframes workspace-page-enter {
+  from {
+    opacity: var(--workspace-page-edge-opacity, 0);
+    translate: var(--workspace-page-offset, 0px)
+      var(--workspace-page-rise, calc(var(--spacing) * 3));
+  }
+}
+
+@utility transition-popup {
+  @apply transition-[opacity,scale];
+
+  &:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    scale: 0.95;
+  }
+
+  &[data-instant] {
+    transition-duration: 0ms;
+  }
 }
 
 @layer base {

@@ -6,10 +6,10 @@ import { extractJson, validateRatings } from "./validate.ts";
 /** After a reply is cut off at the token limit, the next attempt gets this much more room. */
 const TOKEN_BUDGET_GROWTH = 1.5;
 /**
- * Above the client's default of 16,000 so a cut-off retry really sends a larger budget; at the
- * same value the retry would repeat the identical request at T=0 and be cut off again.
+ * Must stay above the client's default (32,000) so a cut-off retry really sends a larger budget;
+ * at the same value the retry would repeat the identical request at T=0 and be cut off again.
  */
-const MAX_TOKEN_BUDGET = 24_000;
+const MAX_TOKEN_BUDGET = 48_000;
 
 export type Attempt = {
   raw: string;
