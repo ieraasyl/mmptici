@@ -36,7 +36,7 @@ import {
 import { resolveRecordingUrl } from "../recording.ts";
 import { readDashboard } from "../dashboard.ts";
 import { importPrecomputed } from "../precomputed.ts";
-import { buildResultsFile } from "../results-export.ts";
+import { buildResultsFile, describeResultsIssues } from "../results-export.ts";
 
 type Db = ReturnType<typeof createDb>;
 type CqaEnv = { Bindings: Bindings; Variables: { workspace: string; db: Db } };
@@ -631,10 +631,7 @@ export const cqaRoutes = new Hono<CqaEnv>()
     }
     const valid = submissionFileSchema.safeParse(file);
     if (!valid.success) {
-      const message = valid.error.issues
-        .slice(0, 3)
-        .map(({ path, message }) => `${path.join(".")}: ${message}`)
-        .join("; ");
+      const message = describeResultsIssues(file, valid.error.issues);
       return c.json({ error: { code: "RESULTS_INVALID", message } }, 422);
     }
     const ok = file.results.filter(({ status }) => status === "ok").length;

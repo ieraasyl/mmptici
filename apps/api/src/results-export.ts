@@ -158,3 +158,17 @@ export function buildResultsFile(
     models,
   };
 }
+
+/** The first issues of a schema check as one message, each naming the conversation it concerns. */
+export function describeResultsIssues(
+  file: Pick<ResultsFile, "results">,
+  issues: readonly { path: readonly PropertyKey[]; message: string }[],
+): string {
+  return issues
+    .slice(0, 3)
+    .map(({ path, message }) => {
+      const row = path[0] === "results" ? file.results[Number(path[1])] : undefined;
+      return `${row ? `${row.conversation_id}: ` : ""}${path.map(String).join(".")}: ${message}`;
+    })
+    .join("; ");
+}

@@ -1,7 +1,12 @@
 import { expect, test } from "vite-plus/test";
 import type { Answer, Rating } from "@app/contracts";
 import { defaultChecklist } from "./checklist.ts";
-import { buildResultsFile, deriveModelHeader, RESULT_CODES } from "./results-export.ts";
+import {
+  buildResultsFile,
+  deriveModelHeader,
+  describeResultsIssues,
+  RESULT_CODES,
+} from "./results-export.ts";
 
 const meta = "ММ.. Птицы";
 
@@ -166,4 +171,17 @@ test("derives the header from the stored models", () => {
     mode: "hybrid",
     modelName: "a:cerebras, z-local",
   });
+});
+
+test("names the conversation of each invalid result", () => {
+  const results = [
+    { conversation_id: "p1-ru-001" },
+    { conversation_id: "p1-kz-002" },
+  ] as Parameters<typeof describeResultsIssues>[0]["results"];
+  expect(
+    describeResultsIssues({ results }, [
+      { path: ["results", 1, "score"], message: "Expected string" },
+      { path: ["model"], message: "Required" },
+    ]),
+  ).toBe("p1-kz-002: results.1.score: Expected string; model: Required");
 });
