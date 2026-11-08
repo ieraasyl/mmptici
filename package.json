@@ -17,7 +17,7 @@
     "db:studio:remote": "vp -C packages/db run db:studio:remote",
     "db:migrate:remote": "vp -C apps/api run db:migrate:remote",
     "deploy:dry": "vp run build && vp -C apps/web exec wrangler deploy --dry-run",
-    "deploy": "vp run build && vp -C apps/web exec wrangler deploy",
+    "deploy": "vp run db:migrate:remote && vp run build && vp -C apps/web exec wrangler deploy",
     "test": "vp test run",
     "calibrate:run": "node tools/calibrate/run.ts",
     "calibrate:compare": "node tools/calibrate/compare.ts",
