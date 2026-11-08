@@ -374,17 +374,17 @@ function Transcript({
                 aria-current={activeTurn === index + 1 ? "true" : undefined}
                 className="scroll-m-5 rounded-lg p-1 aria-current:bg-accent aria-current:ring-2 aria-current:ring-primary"
               >
+                {cited?.turn === index + 1 && (
+                  <p className="mb-1 text-xs font-medium wrap-anywhere text-primary">
+                    Evidence for: {cited.title}
+                  </p>
+                )}
                 <Message align={turn.speaker === "operator" ? "end" : "start"}>
                   <MessageContent>
                     <MessageHeader>
                       <span className="wrap-anywhere tabular-nums">
                         #{index + 1} · {speakerName[turn.speaker]} · {turn.timestamp}
                       </span>
-                      {cited?.turn === index + 1 && (
-                        <Badge variant="secondary" className="wrap-anywhere">
-                          Evidence for: {cited.title}
-                        </Badge>
-                      )}
                     </MessageHeader>
                     <Bubble variant={turn.speaker === "operator" ? "default" : "secondary"}>
                       <BubbleContent
