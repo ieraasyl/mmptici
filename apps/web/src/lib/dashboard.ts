@@ -158,3 +158,32 @@ export function dashboardView(
     results: filterDashboardResults(conversations, filters),
   };
 }
+
+type DashboardFailure = NonNullable<DashboardConversation["evaluation"]>["failures"][number];
+
+export function failureExplanation(failure: DashboardFailure) {
+  if (!failure.reviewed) {
+    return { label: "Model's explanation", text: failure.explanation, original: null };
+  }
+  return {
+    label: "Reviewer decision",
+    text: failure.explanation,
+    original: { answer: failure.model.answer, explanation: failure.model.explanation },
+  };
+}
+
+// Failure explanations to list for the filtered results: the selected criterion's
+// failures, or each serious-violation conversation's flag failures. Null when neither applies.
+export function dashboardExplanations(
+  conversations: DashboardConversation[],
+  { criterion, seriousViolations }: { criterion: string; seriousViolations: boolean },
+) {
+  if (!criterion && !seriousViolations) return null;
+  return conversations.flatMap((conversation) => {
+    if (!criterion && !conversation.evaluation?.seriousViolation) return [];
+    const failures = dashboardFailures(conversation, criterion).filter(
+      ({ kind }) => criterion || kind === "flag",
+    );
+    return failures.length ? [{ conversation, failures }] : [];
+  });
+}

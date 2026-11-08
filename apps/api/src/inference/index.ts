@@ -2,6 +2,7 @@ export {
   createHfClient,
   DEFAULT_MAX_TOKENS,
   DEFAULT_MODEL,
+  DEFAULT_RETRY_DELAYS_MS,
   EmptyReplyError,
   HF_ROUTER_URL,
   InferenceApiError,

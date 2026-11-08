@@ -101,6 +101,64 @@ test("imports conversations once and isolates browser workspaces", async () => {
   ).toBe(403);
 });
 
+test("attaches bundled evaluations once, only to matching DEV transcripts", async () => {
+  const headers = await openWorkspace();
+  const other = await openWorkspace();
+  const loadScores = cqa.evaluations["import-dev"].$post;
+  expect((await loadScores()).status).toBe(401);
+
+  // A conversation with a DEV source ID but another transcript, in DEV and in another group.
+  const shared = {
+    ...example.records[0],
+    conversation_id: "p1-ru-001",
+    channel: "agent chat" as const,
+    language: "RU" as const,
+    audio_url: null,
+  };
+  for (const group of ["CONTROL", "DEV"]) {
+    const imported = await cqa.conversations.$post(
+      { json: { group, records: [shared] } },
+      { headers },
+    );
+    expect(imported.status, await imported.clone().text()).toBe(201);
+  }
+  expect((await cqa.conversations["import-dev"].$post({}, { headers })).status).toBe(201);
+  expect((await cqa.conversations["import-dev"].$post({}, { headers: other })).status).toBe(201);
+
+  // Two imports at once insert each bundled evaluation only once.
+  const [one, two] = await Promise.all([loadScores({}, { headers }), loadScores({}, { headers })]);
+  expect([one.status, two.status]).toEqual([201, 201]);
+  const results = [await one.json(), await two.json()];
+  const total = results.reduce((sum, { imported }) => sum + imported, 0);
+  const models = 1; // data/evaluations-dev.json holds one model (Qwen) since main regenerated it
+  expect(total).toBe(64 * models);
+  for (const result of results) {
+    expect(result.mismatched).toHaveLength(models);
+    expect(result.mismatched[0]).toMatchObject({ conversation_id: "p1-ru-001" });
+  }
+  // A repeated import adds nothing.
+  const again = await (await loadScores({}, { headers })).json();
+  expect(again).toMatchObject({ imported: 0, skipped: 64 * models });
+
+  const { conversations } = await (await cqa.conversations.$get({}, { headers })).json();
+  expect(conversations).toHaveLength(66);
+  const modified = conversations.filter(({ sourceId }) => sourceId === "p1-ru-001");
+  expect(modified).toHaveLength(2);
+  expect(modified.every(({ evaluated }) => !evaluated)).toBe(true);
+  expect(conversations.filter(({ evaluated }) => evaluated)).toHaveLength(64);
+  const dashboard = await (await cqa.dashboard.$get({}, { headers })).json();
+  const latest = dashboard.conversations.find(({ sourceId }) => sourceId === "p1-ru-002");
+  expect(latest?.evaluation).toMatchObject({
+    model: "Qwen/Qwen3.8-27B:cerebras",
+    origin: "imported",
+  });
+
+  // The other workspace holds the same DEV conversations and received nothing.
+  const elsewhere = await (await cqa.conversations.$get({}, { headers: other })).json();
+  expect(elsewhere.conversations).toHaveLength(65);
+  expect(elsewhere.conversations.some(({ evaluated }) => evaluated)).toBe(false);
+});
+
 test("loads the bundled DEV dataset once per workspace", async () => {
   const load = cqa.conversations["import-dev"].$post;
   expect((await load()).status).toBe(401);
@@ -327,9 +385,14 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
   const evaluationRequest = { param: { id: evaluationId } };
   const before = await evaluationEndpoint.$get(evaluationRequest, { headers });
   expect(before.status).toBe(200);
+  const history = await (
+    await cqa.conversations[":id"].$get({ param: { id: conversationId } }, { headers })
+  ).json();
+  expect(history.evaluations.map(({ origin }) => origin)).toEqual(["live", "live"]);
   expect(await before.json()).toMatchObject({
     evaluation: {
       total: 75,
+      origin: "live",
       checklist: { revision: 1 },
       criteria: [
         {
@@ -436,6 +499,87 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
   });
 });
 
+test("dashboard failures follow reviewer decisions and keep the model's explanation", async () => {
+  const headers = await openWorkspace();
+  const conversationId = await importExample(headers);
+  const { defaultId } = await (await cqa.checklists.$get({}, { headers })).json();
+  const evaluationId = crypto.randomUUID();
+  const run = await cqa.conversations[":id"].evaluations.$post(
+    { param: { id: conversationId }, json: { id: evaluationId, checklistId: defaultId } },
+    { headers: { ...headers, "X-CQA-Test-Model": "valid" } },
+  );
+  expect(run.status).toBe(201);
+  const failures = async () => {
+    const { conversations } = await (await cqa.dashboard.$get({}, { headers })).json();
+    return conversations[0].evaluation!;
+  };
+  // The test model answers No for opening, 10 for management, Yes for empathy, No for violations.
+  const before = await failures();
+  expect(before.total).toBe(75);
+  expect(before.failures.map(({ criterionId }) => criterionId)).toEqual(["opening"]);
+  expect(before.failures[0]).toMatchObject({ reviewed: false, model: { answer: "no" } });
+  expect(before.failures[0].explanation).toBe(before.failures[0].model.explanation);
+
+  const appeal = async (criterionId: string) => {
+    const response = await cqa.evaluations[":id"].appeals.$post(
+      {
+        param: { id: evaluationId },
+        json: { criterionId, comment: `Please review ${criterionId}.` },
+      },
+      { headers },
+    );
+    expect(response.status, await response.clone().text()).toBe(201);
+    const body = await response.json();
+    if (!("appeal" in body)) throw new Error(body.error.message);
+    return body.appeal.id;
+  };
+  const decide = async (id: string, answer: "yes" | "no" | "na" | number, reason: string) => {
+    const response = await cqa.appeals[":id"].decision.$put(
+      { param: { id }, json: { answer, reason } },
+      { headers },
+    );
+    expect(response.status, await response.clone().text()).toBe(200);
+  };
+
+  // A pending appeal changes nothing yet.
+  const closingAppeal = await appeal("closing");
+  const pending = await failures();
+  expect(pending.total).toBe(75);
+  expect(pending.failures.map(({ criterionId }) => criterionId)).toEqual(["opening"]);
+
+  await decide(await appeal("empathy"), "no", "The customer's complaint was ignored.");
+  await decide(await appeal("opening"), "yes", "The greeting and name are in turn 2.");
+  await decide(await appeal("management"), 4, "The customer had to ask twice.");
+  await decide(await appeal("violations"), "yes", "The operator shared another client's balance.");
+  await decide(closingAppeal, "na", "The chat was cut off.");
+
+  const after = await failures();
+  // opening 10 + empathy 0 + management 6 of 40 applicable points.
+  expect(after.total).toBe(40);
+  expect(after.seriousViolation).toBe(true);
+  const byId = new Map(after.failures.map((failure) => [failure.criterionId, failure]));
+  expect([...byId.keys()].sort()).toEqual(["empathy", "management", "violations"]);
+  expect(byId.get("empathy")).toMatchObject({
+    answer: "no",
+    lost: 15,
+    reviewed: true,
+    explanation: "The customer's complaint was ignored.",
+    model: { answer: "yes" },
+    evidence: [{ number: 2 }],
+  });
+  expect(byId.get("empathy")!.model.explanation).toContain("Checked");
+  expect(byId.get("management")).toMatchObject({ answer: 4, lost: 9, reviewed: true });
+  expect(byId.get("violations")).toMatchObject({
+    kind: "flag",
+    answer: "yes",
+    lost: null,
+    reviewed: true,
+    explanation: "The operator shared another client's balance.",
+  });
+  // The same state is served again after a reload.
+  expect(await failures()).toEqual(after);
+});
+
 test("exports selected conversations as results.json in the organizers' format", async () => {
   const headers = await openWorkspace();
   const other = await openWorkspace();
@@ -465,7 +609,7 @@ test("exports selected conversations as results.json in the organizers' format",
   expect(file).toMatchObject({
     schema_version: "1.0",
     team_name: "ММ.. Птицы",
-    model: { mode: "local", name: "Qwen/Qwen3.8-27B" },
+    model: { mode: "local", name: "test-model" },
   });
   const [entry] = file.results;
   expect(entry).toMatchObject({ conversation_id: "example-kz", status: "ok" });
@@ -493,7 +637,7 @@ test("exports selected conversations as results.json in the organizers' format",
   ]);
   expect(entry.score).toEqual({ final_score: 75, critical_flag: false });
 
-  // Any checklist exports; this one was never used on the conversation, so it is an error entry.
+  // A checklist that is not the default eight criteria cannot be exported.
   const custom = await cqa.checklists.$post(
     { json: { name: "Custom", criteria: checklists[0].criteria.slice(1) } },
     { headers },
@@ -501,10 +645,77 @@ test("exports selected conversations as results.json in the organizers' format",
   if (custom.status !== 201) throw new Error(await custom.text());
   const { checklist } = await custom.json();
   const customExport = await exportRun({ ids: [conversationId], checklistId: checklist.id });
-  if (customExport.status !== 200) throw new Error(await customExport.text());
-  expect((await customExport.json()).file.results[0]).toMatchObject({ status: "error" });
+  expect(customExport.status).toBe(422);
+  expect(await customExport.json()).toMatchObject({ error: { code: "CHECKLIST_NOT_EXPORTABLE" } });
+
+  // A saved copy of the default criteria exports, but only evaluations of its current revision.
+  const copy = await cqa.checklists.$post(
+    { json: { name: "Copy", criteria: checklists[0].criteria } },
+    { headers },
+  );
+  if (copy.status !== 201) throw new Error(await copy.text());
+  const saved = (await copy.json()).checklist;
+  const evaluate = (checklistId: string) =>
+    cqa.conversations[":id"].evaluations.$post(
+      { param: { id: conversationId }, json: { id: crypto.randomUUID(), checklistId } },
+      { headers: { ...headers, "X-CQA-Test-Model": "valid" } },
+    );
+  expect((await evaluate(saved.id)).status).toBe(201);
+  const revised = await cqa.checklists[":id"].$put(
+    {
+      param: { id: saved.id },
+      json: { name: "Copy", revision: saved.revision, criteria: saved.criteria },
+    },
+    { headers },
+  );
+  expect(revised.status).toBe(200);
+  const stale = await exportRun({ ids: [conversationId], checklistId: saved.id });
+  expect(stale.status).toBe(200);
+  expect(await stale.json()).toMatchObject({ file: { results: [{ status: "error" }] } });
+  expect((await evaluate(saved.id)).status).toBe(201);
+  const fresh = await exportRun({ ids: [conversationId], checklistId: saved.id });
+  expect(fresh.status).toBe(200);
+  expect(await fresh.json()).toMatchObject({ file: { results: [{ status: "ok" }] } });
   // Another workspace cannot export these conversations.
   expect((await exportRun({ ids: [conversationId], checklistId: defaultId }, other)).status).toBe(
     404,
   );
+});
+
+test("loading bundled scores skips conversations that already hold a non-live score for the model", async () => {
+  const headers = await openWorkspace();
+  expect((await cqa.conversations["import-dev"].$post({}, { headers })).status).toBe(201);
+  const { conversations } = await (await cqa.conversations.$get({}, { headers })).json();
+  const target = conversations.find(({ sourceId }) => sourceId === "p1-ru-002")!;
+  // Saved before this version: random ID, origin left at its default of "unknown".
+  const seeded = await fetch(`${origin}/api/cqa/test-legacy-evaluation`, {
+    method: "POST",
+    body: JSON.stringify({ conversationId: target.id, model: "Qwen/Qwen3.8-27B:cerebras" }),
+  });
+  expect(seeded.status).toBe(204);
+
+  const result = await (await cqa.evaluations["import-dev"].$post({}, { headers })).json();
+  expect(result.imported).toBe(64);
+  const detail = await (
+    await cqa.conversations[":id"].$get({ param: { id: target.id } }, { headers })
+  ).json();
+  expect(detail.evaluations).toHaveLength(1);
+  expect(detail.evaluations[0].origin).toBe("unknown");
+});
+
+test("a provider 402 becomes 503 AI_UNAVAILABLE with a credits message", async () => {
+  const headers = await openWorkspace();
+  const conversationId = await importExample(headers);
+  const { defaultId } = await (await cqa.checklists.$get({}, { headers })).json();
+  const response = await cqa.conversations[":id"].evaluations.$post(
+    {
+      param: { id: conversationId },
+      json: { id: crypto.randomUUID(), checklistId: defaultId },
+    },
+    { headers: { ...headers, "X-CQA-Test-Model": "no-credits" } },
+  );
+  expect(response.status).toBe(503);
+  expect(await response.json()).toMatchObject({
+    error: { code: "AI_UNAVAILABLE", message: expect.stringContaining("credits") },
+  });
 });

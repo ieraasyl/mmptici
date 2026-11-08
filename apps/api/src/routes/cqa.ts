@@ -15,6 +15,8 @@ import {
   precomputedEvaluationsSchema,
   runEvaluationSchema,
   saveChecklistSchema,
+  submissionChecklistIssues,
+  submissionFileSchema,
   type Dataset,
 } from "@app/contracts";
 import { and, asc, createDb, desc, eq, exists, isNull } from "@app/db";
@@ -34,7 +36,7 @@ import {
 import { resolveRecordingUrl } from "../recording.ts";
 import { readDashboard } from "../dashboard.ts";
 import { importPrecomputed } from "../precomputed.ts";
-import { buildResultsFile } from "../results-export.ts";
+import { buildResultsFile, describeResultsIssues } from "../results-export.ts";
 
 type Db = ReturnType<typeof createDb>;
 type CqaEnv = { Bindings: Bindings; Variables: { workspace: string; db: Db } };
@@ -216,7 +218,18 @@ export const cqaRoutes = new Hono<CqaEnv>()
   })
   .post("/evaluations/import-dev", async (c) => {
     const data = precomputedEvaluationsSchema.parse(devEvaluations);
-    const result = await importPrecomputed(c.get("db"), c.get("workspace"), defaultChecklist, data);
+    const sources = new Map(
+      datasetFileSchema
+        .parse(devDataset)
+        .records.map((record) => [record.conversation_id, record.transcript]),
+    );
+    const result = await importPrecomputed(
+      c.get("db"),
+      c.get("workspace"),
+      defaultChecklist,
+      data,
+      sources,
+    );
     return c.json(result, 201);
   })
   .get("/conversations/:id/recording", async (c) => {
@@ -235,6 +248,7 @@ export const cqaRoutes = new Hono<CqaEnv>()
         id: cqaEvaluations.id,
         checklist: cqaEvaluations.checklist,
         model: cqaEvaluations.model,
+        origin: cqaEvaluations.origin,
         createdAt: cqaEvaluations.createdAt,
       })
       .from(cqaEvaluations)
@@ -243,9 +257,10 @@ export const cqaRoutes = new Hono<CqaEnv>()
     const { id, sourceId, group, channel, language, transcript, audioUrl } = conversation;
     return c.json({
       conversation: { id, sourceId, group, channel, language, transcript, audioUrl },
-      evaluations: evaluations.map(({ id, checklist, model, createdAt }) => ({
+      evaluations: evaluations.map(({ id, checklist, model, origin, createdAt }) => ({
         id,
         model,
+        origin,
         checklistName: checklist.name,
         revision: checklist.revision,
         createdAt,
@@ -371,6 +386,19 @@ export const cqaRoutes = new Hono<CqaEnv>()
             503,
           );
         }
+        if (cause instanceof InferenceApiError && cause.isBillingError) {
+          console.warn("CQA evaluation refused by the model provider for billing", cause.status);
+          return c.json(
+            {
+              error: {
+                code: "AI_UNAVAILABLE",
+                message:
+                  "The model provider has no remaining credits for HF_TOKEN. Top up the account, then run the evaluation again.",
+              },
+            },
+            503,
+          );
+        }
         if (cause instanceof EvaluationError) {
           console.warn("CQA evaluation rejected", cause.attempts.at(-1)?.errors);
         } else {
@@ -396,6 +424,7 @@ export const cqaRoutes = new Hono<CqaEnv>()
           checklist,
           ratings,
           model: run.model,
+          origin: "live",
           createdAt: new Date(),
         })
         .onConflictDoNothing()
@@ -428,6 +457,7 @@ export const cqaRoutes = new Hono<CqaEnv>()
         conversationId: evaluation.conversationId,
         checklist: evaluation.checklist,
         model: evaluation.model,
+        origin: evaluation.origin,
         createdAt: evaluation.createdAt,
         appeals,
         originalTotal: scoreEvaluation(evaluation.checklist, evaluation.ratings, []).total,
@@ -525,6 +555,18 @@ export const cqaRoutes = new Hono<CqaEnv>()
     const ids = [...new Set(requested)];
     const checklist = await findChecklist(db, workspaceId, checklistId);
     if (!checklist) throw new HTTPException(404, { message: "Checklist not found." });
+    const issues = submissionChecklistIssues(checklist);
+    if (issues.length) {
+      return c.json(
+        {
+          error: {
+            code: "CHECKLIST_NOT_EXPORTABLE",
+            message: `This checklist cannot be exported in the results format: ${issues.slice(0, 3).join("; ")}.`,
+          },
+        },
+        422,
+      );
+    }
 
     const conversations = await db
       .select({
@@ -555,7 +597,11 @@ export const cqaRoutes = new Hono<CqaEnv>()
       .orderBy(desc(cqaEvaluations.createdAt), desc(cqaEvaluations.id));
     const latest = new Map<string, (typeof evaluations)[number]>();
     for (const row of evaluations) {
-      if (row.checklist.id === checklistId && !latest.has(row.conversationId)) {
+      if (
+        row.checklist.id === checklistId &&
+        row.checklist.revision === checklist.revision &&
+        !latest.has(row.conversationId)
+      ) {
         latest.set(row.conversationId, row);
       }
     }
@@ -582,6 +628,11 @@ export const cqaRoutes = new Hono<CqaEnv>()
         { error: { code: "EXPORT_INVALID", message: problems.slice(0, 3).join(" ") } },
         422,
       );
+    }
+    const valid = submissionFileSchema.safeParse(file);
+    if (!valid.success) {
+      const message = describeResultsIssues(file, valid.error.issues);
+      return c.json({ error: { code: "RESULTS_INVALID", message } }, 422);
     }
     const ok = file.results.filter(({ status }) => status === "ok").length;
     return c.json({ file, summary: { ok, errors: file.results.length - ok, models } });

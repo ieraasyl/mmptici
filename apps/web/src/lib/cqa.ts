@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
+import type { EvaluationOrigin } from "@app/contracts";
 import type { InferResponseType } from "hono/client";
 import { api } from "./api";
 import { request } from "./request";
@@ -77,5 +78,10 @@ export const dateLabel = (date: string) =>
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(date));
+export const originLabel: Record<EvaluationOrigin, string> = {
+  live: "Live",
+  imported: "Imported",
+  unknown: "Unknown origin",
+};
 /** "Qwen/Qwen3.8-27B:cerebras" -> "Qwen3.8-27B"; names without an org or provider stay as they are. */
 export const modelLabel = (model: string) => model.split("/").at(-1)!.split(":")[0];

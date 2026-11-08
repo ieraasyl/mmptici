@@ -17,14 +17,18 @@
     "db:studio:remote": "vp -C packages/db run db:studio:remote",
     "db:migrate:remote": "vp -C apps/api run db:migrate:remote",
     "deploy:dry": "vp run build && vp -C apps/web exec wrangler deploy --dry-run",
-    "deploy": "vp run build && vp -C apps/web exec wrangler deploy",
+    "deploy": "vp run db:migrate:remote && vp run build && vp -C apps/web exec wrangler deploy",
     "test": "vp test run",
     "calibrate:run": "node tools/calibrate/run.ts",
     "calibrate:compare": "node tools/calibrate/compare.ts",
     "calibrate:print": "node tools/calibrate/print-dialogs.ts",
     "calibrate:summarize": "node tools/calibrate/summarize-run.ts",
     "calibrate:review": "node tools/calibrate/review.ts",
-    "calibrate:index": "node tools/calibrate/index.ts"
+    "calibrate:index": "node tools/calibrate/index.ts",
+    "submission:validate": "node tools/submission/validate.ts",
+    "submission:run": "node tools/submission/run.ts",
+    "submission:export": "node tools/submission/export.ts",
+    "submission:from-run": "node tools/submission/from-calibration-run.ts"
   },
   "devDependencies": {
     "@app/api": "workspace:*",
@@ -34,7 +38,8 @@
     "eslint-plugin-better-tailwindcss": "catalog:",
     "hono": "catalog:",
     "typescript": "catalog:",
-    "vite-plus": "catalog:"
+    "vite-plus": "catalog:",
+    "zod": "catalog:"
   },
   "devEngines": {
     "packageManager": {

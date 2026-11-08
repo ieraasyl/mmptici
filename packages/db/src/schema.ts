@@ -3,6 +3,7 @@ import type {
   Checklist,
   ChecklistDraft,
   ConversationRecord,
+  EvaluationOrigin,
   Rating,
   Turn,
 } from "@app/contracts";
@@ -47,6 +48,8 @@ export const cqaEvaluations = sqliteTable(
     checklist: text({ mode: "json" }).$type<Checklist>().notNull(),
     ratings: text({ mode: "json" }).$type<Rating[]>().notNull(),
     model: text().notNull(),
+    /** Rows saved before this column existed keep the default, since their origin cannot be proven. */
+    origin: text().$type<EvaluationOrigin>().notNull().default("unknown"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   },
   (table) => [index("cqa_evaluations_conversation").on(table.conversationId, table.createdAt)],

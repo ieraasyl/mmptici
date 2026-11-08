@@ -76,10 +76,12 @@ test("repeated exhaustion stops at the retry limit with a useful message", async
 
 test("the token budget never grows past the ceiling", async () => {
   const { llm, calls } = scriptedLlm([exhausted]);
-  await evaluateConversation(llm, conversation, defaultChecklist, { maxRetries: 4 }).catch(
+  await evaluateConversation(llm, conversation, defaultChecklist, { maxRetries: 6 }).catch(
     () => {},
   );
-  expect(calls.map((c) => c.maxTokens)).toEqual([8000, 12_000, 18_000, 27_000, 32_000]);
+  expect(calls.map((c) => c.maxTokens)).toEqual([
+    8000, 12_000, 18_000, 27_000, 40_500, 48_000, 48_000,
+  ]);
 });
 
 test("an authentication failure is not retried", async () => {

@@ -3,7 +3,7 @@ import { answerLabel } from "@app/contracts";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { pointLabel, scoreLabel, speakerName, type DashboardConversation } from "@/lib/cqa";
-import { dashboardFailures } from "@/lib/dashboard";
+import { dashboardFailures, failureExplanation } from "@/lib/dashboard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,83 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+
+type DashboardFailure = NonNullable<DashboardConversation["evaluation"]>["failures"][number];
+
+export function FailureDetails({
+  conversation,
+  failure,
+  headingLevel = 3,
+}: {
+  conversation: DashboardConversation;
+  failure: DashboardFailure;
+  headingLevel?: 3 | 4;
+}) {
+  const { evaluation } = conversation;
+  if (!evaluation) return null;
+  const explanation = failureExplanation(failure);
+  const Heading = headingLevel === 3 ? "h3" : "h4";
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-2">
+        <Heading className="font-medium wrap-anywhere">{failure.title}</Heading>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant={failure.kind === "flag" ? "destructive" : "outline"}>
+            {failure.kind === "flag"
+              ? "Serious violation"
+              : `Final answer: ${answerLabel(failure.answer)}`}
+          </Badge>
+          {failure.lost !== null && (
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {pointLabel(failure.lost)} of {failure.weight} points lost
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="space-y-1">
+        <p className="text-xs text-muted-foreground">{explanation.label}</p>
+        <p className="text-sm/relaxed wrap-anywhere">{explanation.text}</p>
+      </div>
+      {explanation.original && (
+        <div className="space-y-1 border-l-2 pl-3">
+          <p className="text-xs text-muted-foreground">
+            Model's original answer: {answerLabel(explanation.original.answer)}
+          </p>
+          <p className="text-sm/relaxed text-muted-foreground wrap-anywhere">
+            {explanation.original.explanation}
+          </p>
+        </div>
+      )}
+      {failure.evidence.length ? (
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground">Cited by the model</p>
+          <ul className="space-y-3">
+            {failure.evidence.map(({ number, speaker, text }) => (
+              <li key={number} className="space-y-1 border-l-2 pl-3">
+                <Link
+                  to="/conversations/$id"
+                  params={{ id: conversation.id }}
+                  search={{ evaluation: evaluation.id }}
+                  hash={`turn-${number}`}
+                  className="text-xs font-medium underline underline-offset-4"
+                  aria-label={`Open transcript turn ${number}: ${speakerName[speaker]}`}
+                >
+                  #{number} · {speakerName[speaker]}
+                </Link>
+                <blockquote className="text-sm text-muted-foreground wrap-anywhere whitespace-pre-wrap">
+                  {text}
+                </blockquote>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">The model cited no transcript turns.</p>
+      )}
+    </div>
+  );
+}
 
 export function DashboardEvidence({
   conversation,
@@ -48,49 +125,8 @@ export function DashboardEvidence({
           {failures.length ? (
             <ul className="divide-y">
               {failures.map((failure) => (
-                <li key={failure.criterionId} className="space-y-3 py-4 first:pt-0">
-                  <div className="space-y-2">
-                    <h3 className="font-medium wrap-anywhere">{failure.title}</h3>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant={failure.kind === "flag" ? "destructive" : "outline"}>
-                        {failure.kind === "flag"
-                          ? "Serious violation"
-                          : answerLabel(failure.answer)}
-                      </Badge>
-                      {failure.lost !== null && (
-                        <span className="text-xs text-muted-foreground tabular-nums">
-                          {pointLabel(failure.lost)} of {failure.weight} points lost
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Model's explanation</p>
-                    <p className="text-sm/relaxed wrap-anywhere">{failure.explanation}</p>
-                  </div>
-                  {failure.evidence.length ? (
-                    <ul className="space-y-3">
-                      {failure.evidence.map(({ number, speaker, text }) => (
-                        <li key={number} className="space-y-1 border-l-2 pl-3">
-                          <Link
-                            to="/conversations/$id"
-                            params={{ id: conversation.id }}
-                            search={{ evaluation: evaluation.id }}
-                            hash={`turn-${number}`}
-                            className="text-xs font-medium underline underline-offset-4"
-                            aria-label={`Open transcript turn ${number}: ${speakerName[speaker]}`}
-                          >
-                            #{number} · {speakerName[speaker]}
-                          </Link>
-                          <blockquote className="text-sm text-muted-foreground wrap-anywhere whitespace-pre-wrap">
-                            {text}
-                          </blockquote>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No transcript turns were cited.</p>
-                  )}
+                <li key={failure.criterionId} className="py-4 first:pt-0">
+                  <FailureDetails conversation={conversation} failure={failure} />
                 </li>
               ))}
             </ul>

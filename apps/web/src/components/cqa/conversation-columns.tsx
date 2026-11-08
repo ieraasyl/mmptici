@@ -10,6 +10,7 @@ import {
   channelName,
   languageName,
   modelLabel,
+  originLabel,
   scoreLabel,
   type ConversationSummary,
   type DashboardConversation,
@@ -88,10 +89,15 @@ export const conversationColumns: ColumnDef<typeof dataTableFeatures, Conversati
     sortUndefined: "last",
     meta: { align: "center", cellClassName: "wrap-anywhere whitespace-normal" },
     cell: ({ row }) => {
-      const model = row.original.summary?.evaluation?.model;
-      return model ? (
-        <span className="text-sm text-muted-foreground" title={model}>
-          {modelLabel(model)}
+      const evaluation = row.original.summary?.evaluation;
+      return evaluation?.model ? (
+        <span className="inline-flex flex-wrap items-center justify-center gap-1.5">
+          <span className="text-sm text-muted-foreground" title={evaluation.model}>
+            {modelLabel(evaluation.model)}
+          </span>
+          <Badge variant={evaluation.origin === "live" ? "default" : "outline"}>
+            {originLabel[evaluation.origin]}
+          </Badge>
         </span>
       ) : null;
     },

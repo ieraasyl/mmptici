@@ -8,6 +8,7 @@ import { dashboardQuery, languageName, scoreLabel } from "@/lib/cqa";
 import {
   checklistOptions,
   checklistVersionKey,
+  dashboardExplanations,
   dashboardView,
   selectDashboardRows,
   sortDashboardConversations,
@@ -26,6 +27,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState, ErrorMessage, PageHeading } from "./ui";
 import { DashboardCriteria } from "./dashboard-criteria";
+import { DashboardExplanations } from "./dashboard-explanations";
 import { DashboardResultsTable } from "./dashboard-results-table";
 import { ScoreDistribution } from "./score-distribution";
 
@@ -95,6 +97,10 @@ export function Dashboard() {
     appealOnly: review === "appeals",
   });
   const selectedCriterion = breakdown.find((row) => row.key === criterion);
+  const explanations = dashboardExplanations(results, {
+    criterion,
+    seriousViolations: review === "violations",
+  });
   const mostCommonIssue = breakdown
     .filter((row) => row.belowFullScore > 0)
     .toSorted((a, b) => b.belowFullScore - a.belowFullScore)[0];
@@ -352,9 +358,21 @@ export function Dashboard() {
                     }
                     toolbarActions={
                       resultFiltered && (
-                        <Button variant="ghost" onClick={clearResultFilters}>
-                          Clear result filters
-                        </Button>
+                        <>
+                          {explanations && (
+                            <DashboardExplanations
+                              groups={explanations}
+                              scope={
+                                selectedCriterion
+                                  ? `Lost points: ${selectedCriterion.title}`
+                                  : "Serious violations"
+                              }
+                            />
+                          )}
+                          <Button variant="ghost" onClick={clearResultFilters}>
+                            Clear result filters
+                          </Button>
+                        </>
                       )
                     }
                   />

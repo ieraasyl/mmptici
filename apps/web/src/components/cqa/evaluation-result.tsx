@@ -47,11 +47,18 @@ export function EvaluationResult({
             <h2>Evaluation score</h2>
           </CardTitle>
           <CardDescription>
-            {evaluation.checklist.name} · v{evaluation.checklist.revision}
+            {evaluation.checklist.name} · v{evaluation.checklist.revision} · {evaluation.model}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
+            <Badge variant={evaluation.origin === "live" ? "default" : "outline"}>
+              {evaluation.origin === "live"
+                ? "Live model evaluation"
+                : evaluation.origin === "imported"
+                  ? "Imported from bundled results"
+                  : "Origin not recorded"}
+            </Badge>{" "}
             {evaluation.hasViolationCheck && (
               <Badge variant={evaluation.seriousViolation ? "destructive" : "secondary"}>
                 {evaluation.seriousViolation

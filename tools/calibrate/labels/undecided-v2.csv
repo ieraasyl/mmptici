@@ -1,0 +1,22 @@
+conversation_id,criterion_id,qwen,jev,status,note
+p1-en-001,verification,na,no,unresolved,"held-out dialog, left undecided by audit policy (read-only); guide 4.3 reading: general login policy, N/A"
+p1-en-002,closing,yes,no,decided,decided no (turns 12): 'Glad you got in. Have a good day!' is a pleasantry plus goodbye without a summary or an offer of further help; same as p1-ru-004 'Отлично. Хорошего дня!' which is No
+p1-en-006,understanding,yes,na,decided,"decided yes (turns 1;5;10;14;19): the operator used the known facts (transfer sent, bank confirms) and asked only for what was missing: the currency (14) and the time of the transfer (19); twins p1-kz-003 and p1-ru-006 are Yes"
+p1-en-006,verification,yes,na,decided,"decided yes (turns 11;13;16): the operator asked for verification before looking at the account (11), the system confirmed it (13), and only then was the case escalated (16); twins p1-kz-003 and p1-ru-006 are Yes"
+p1-en-013,verification,na,no,decided,decided na (turns 1;10): general navigation question (how to find bonds); the paid-advice offer in 12 is scored under violations; no account data or protected action
+p1-kz-002,understanding,na,yes,decided,"decided na (turns 1;5;10): the whole request was given to the bot (bank transfer details, app already open) and the operator answered at once without asking anything; twins p1-ru-004 and p1-en-005 are N/A"
+p1-kz-004,verification,na,no,decided,decided na (turns 1;10;12): general instruction on where to submit the change-of-details order; the client reported the app message themselves; twin p1-en-007 is N/A by manual decision
+p1-kz-007,verification,na,no,decided,decided na (turns 1;10): general login policy answer; no account data or protected action; twin p1-ru-015 is N/A
+p1-kz-009,verification,na,no,decided,decided na (turns 1;11;13): general question on finding a security by ticker; twins p1-ru-019 and p1-en-008 are N/A
+p1-kz-012,verification,na,no,unresolved,"held-out dialog, left undecided by audit policy (read-only); guide 4.3 reading: the operator asked for the ticker and message and promised to forward, nothing disclosed, N/A"
+p1-kz-013,verification,na,no,unresolved,"held-out dialog, left undecided by audit policy (read-only); guide 4.3 reading: general navigation plus a paid-advice offer, N/A (twin p1-en-013 decided N/A)"
+p1-ru-008,closing,no,yes,decided,decided no (turns 14): 'Пожалуйста. До свидания!' is a goodbye alone; identical closings in p1-ru-019 and p1-ru-028 are No
+p1-ru-010,verification,yes,na,decided,decided yes (turns 13;15;16): identification requested (13) and confirmed by the system event (15) before the position check was escalated (16)
+p1-ru-015,closing,no,yes,decided,"decided yes (turns 12): the closing restates the next step (use another login) and says goodbye; consistent with p1-ru-005, p1-ru-013 and p1-kz-012 which are Yes"
+p1-ru-016,guidance,15,20,decided,decided 20 (turns 14;15): the final answer (14) resolved the only question and the client confirmed (15); the wrong first guesses are scored under understanding No and management 7; the manual reviewer gave the same pattern 20 in p1-en-015
+p1-ru-018,management,4,0,unresolved,judgment call: 'the exchange is definitely cancelling your order' (10) then 'then I don't know' (12) and the operator closed the chat; 0 (contradictory replies) and 4 (client had to ask again) are both defensible; lean 0
+p1-ru-029,management,4,7,unresolved,"judgment call: the rude non-answer (10) made the client ask again (11), then a clear answer (12); rudeness is already scored in empathy and violations; 4 and 7 are both defensible"
+p1-ru-030,understanding,yes,na,decided,"decided yes (turns 5;10;11;12): the client doubted which document was open (5); the operator asked for the document name (10), learned the client was on page 2 (11) and answered accordingly (12)"
+p4-ru-003,guidance,10,20,decided,"decided 20 (turns 66;68;71;76): the operator confirmed the order was accepted and still processing (66, 68) and escalated to the technical department with a callback by an agreed time (71, 76); guide 4.4: a correct escalation earns 20"
+p4-ru-003,management,7,4,unresolved,"judgment call on a call transcript: the operator misunderstood the request (27) and the client re-explained (28-37), and the OTP step needed a repeat (49-54); 4 and 7 are both defensible; lean 4"
+p4-ru-003,closing,na,no,decided,decided na (turns 76;77;78): the client said thanks and ended the call about two seconds after the operator's final message; same treatment as p4-ru-004 and p4-ru-005 (N/A)

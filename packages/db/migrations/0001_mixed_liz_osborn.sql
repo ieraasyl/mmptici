@@ -1,0 +1,1 @@
+ALTER TABLE `cqa_evaluations` ADD `origin` text DEFAULT 'unknown' NOT NULL;

@@ -4,7 +4,9 @@ import {
   checklistOptions,
   checklistVersionKey,
   criterionKey,
+  dashboardExplanations,
   dashboardFailures,
+  failureExplanation,
   dashboardView,
   selectDashboardRows,
   sortDashboardConversations,
@@ -25,6 +27,7 @@ function savedRun(id: string, revision: number, createdAt: string): DashboardChe
       checklistName: `Checklist name at v${revision}`,
       revision,
       model: "test-model",
+      origin: "live",
       total: 75,
       seriousViolation: false,
       criteria: [],
@@ -135,7 +138,9 @@ function scoredConversation(
             answer: item.answer,
             weight: item.weight,
             lost: item.kind === "flag" ? null : item.weight - (item.points ?? 0),
+            reviewed: false,
             explanation: "Supporting evidence.",
+            model: { answer: item.answer, explanation: "Supporting evidence." },
             evidence: [],
           },
         ]
@@ -255,4 +260,42 @@ test("evidence stays with the selected criterion and checklist revision", () => 
   expect(dashboardFailures(revised, key)).toEqual([]);
   expect(dashboardFailures(scored[0])).toHaveLength(3);
   expect(dashboardFailures({ ...scored[0], evaluation: null })).toEqual([]);
+});
+
+test("reviewed failures show the reviewer's reason and keep the model's original verdict", () => {
+  const [failure] = dashboardFailures(scored[0]);
+  expect(failureExplanation(failure)).toEqual({
+    label: "Model's explanation",
+    text: "Supporting evidence.",
+    original: null,
+  });
+  const reviewed = {
+    ...failure,
+    reviewed: true,
+    answer: "no" as const,
+    explanation: "Agent never verified the account.",
+    model: { answer: "yes" as const, explanation: "Agent asked for the account number." },
+  };
+  expect(failureExplanation(reviewed)).toEqual({
+    label: "Reviewer decision",
+    text: "Agent never verified the account.",
+    original: { answer: "yes", explanation: "Agent asked for the account number." },
+  });
+});
+
+test("explanations list serious-violation flags or the selected criterion's failures", () => {
+  const off = { criterion: "", seriousViolations: false };
+  expect(dashboardExplanations(scored, off)).toBeNull();
+
+  const flagged = dashboardExplanations(scored, { ...off, seriousViolations: true });
+  expect(flagged?.map(({ conversation }) => conversation.id)).toEqual([scored[0].id]);
+  expect(flagged?.[0].failures.map(({ criterionId }) => criterionId)).toEqual(["violations"]);
+
+  const key = criterionKey(scored[0].evaluation, "guidance");
+  const byCriterion = dashboardExplanations(scored, { criterion: key, seriousViolations: true });
+  expect(byCriterion?.map(({ conversation }) => conversation.id)).toEqual([scored[0].id]);
+  expect(byCriterion?.[0].failures.map(({ criterionId }) => criterionId)).toEqual(["guidance"]);
+  expect(dashboardExplanations([scored[1]], { criterion: key, seriousViolations: false })).toEqual(
+    [],
+  );
 });

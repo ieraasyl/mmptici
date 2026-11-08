@@ -1,0 +1,515 @@
+conversation_id,labeler,criterion_id,answer,evidence_turns,note
+p1-en-015,manual,opening,no,,Qwen and Jev agreed
+p1-en-015,manual,understanding,no,1;4;5;10;11,"v2 correction: the client said only 'can't get into the account' (1), left the bot's clarifying question unanswered (4-5), and the operator answered without clarifying (10) and was wrong (11); same scenario p1-ru-016 is No; N/A requires enough information from the start, which was not the case; overrides a manual decision of N/A"
+p1-en-015,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-en-015,manual,guidance,20,,manual decision on a Qwen/Jev disagreement
+p1-en-015,manual,empathy,yes,,manual decision on a Qwen/Jev disagreement
+p1-en-015,manual,management,4,,manual decision on a Qwen/Jev disagreement
+p1-en-015,manual,closing,no,,Qwen and Jev agreed
+p1-en-015,manual,violations,no,,Qwen and Jev agreed
+p4-ru-002,manual,opening,yes,,manual decision on a Qwen/Jev disagreement
+p4-ru-002,manual,understanding,yes,,manual decision on a Qwen/Jev disagreement
+p4-ru-002,manual,verification,yes,,manual decision on a Qwen/Jev disagreement
+p4-ru-002,manual,guidance,20,,Qwen and Jev agreed
+p4-ru-002,manual,empathy,yes,,Qwen and Jev agreed
+p4-ru-002,manual,management,10,,manual decision on a Qwen/Jev disagreement
+p4-ru-002,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p4-ru-002,manual,violations,no,,Qwen and Jev agreed
+p1-en-007,manual,opening,yes,,Qwen and Jev agreed
+p1-en-007,manual,understanding,na,,Qwen and Jev agreed
+p1-en-007,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-en-007,manual,guidance,10,,Qwen and Jev agreed
+p1-en-007,manual,empathy,no,,manual decision on a Qwen/Jev disagreement
+p1-en-007,manual,management,10,,manual decision on a Qwen/Jev disagreement
+p1-en-007,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p1-en-007,manual,violations,no,,Qwen and Jev agreed
+p1-ru-003,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-003,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-003,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-003,manual,guidance,10,,Qwen and Jev agreed
+p1-ru-003,manual,empathy,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-003,manual,management,4,,manual decision on a Qwen/Jev disagreement
+p1-ru-003,manual,closing,no,,Qwen and Jev agreed
+p1-ru-003,manual,violations,no,,Qwen and Jev agreed
+p1-ru-007,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-007,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-007,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-007,manual,guidance,10,,Qwen and Jev agreed
+p1-ru-007,manual,empathy,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-007,manual,management,7,,manual decision on a Qwen/Jev disagreement
+p1-ru-007,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p1-ru-007,manual,violations,no,,Qwen and Jev agreed
+p1-ru-009,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-009,manual,understanding,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-009,manual,verification,no,,Qwen and Jev agreed
+p1-ru-009,manual,guidance,10,,Qwen and Jev agreed
+p1-ru-009,manual,empathy,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-009,manual,management,4,,manual decision on a Qwen/Jev disagreement
+p1-ru-009,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p1-ru-009,manual,violations,yes,,Qwen and Jev agreed
+p1-en-014,manual,opening,yes,,Qwen and Jev agreed
+p1-en-014,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-en-014,manual,verification,no,,Qwen and Jev agreed
+p1-en-014,manual,guidance,0,,manual decision on a Qwen/Jev disagreement
+p1-en-014,manual,empathy,no,,Qwen and Jev agreed
+p1-en-014,manual,management,0,,manual decision on a Qwen/Jev disagreement
+p1-en-014,manual,closing,no,,Qwen and Jev agreed
+p1-en-014,manual,violations,yes,,manual decision on a Qwen/Jev disagreement
+p1-kz-015,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-015,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-kz-015,manual,verification,no,,Qwen and Jev agreed
+p1-kz-015,manual,guidance,10,,Qwen and Jev agreed
+p1-kz-015,manual,empathy,no,,manual decision on a Qwen/Jev disagreement
+p1-kz-015,manual,management,7,,Qwen and Jev agreed
+p1-kz-015,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p1-kz-015,manual,violations,yes,10;12,v2 correction: same scenario as p1-ru-009 and p1-en-014: the operator reports a withdrawal restriction on the account (10) and says verification is not needed (12); team ruling in guide 4.3/4.8 makes violations Yes; consensus cell never reviewed by hand
+p4-ru-005,manual,opening,no,,Qwen and Jev agreed
+p4-ru-005,manual,understanding,yes,,Qwen and Jev agreed
+p4-ru-005,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p4-ru-005,manual,guidance,20,,Qwen and Jev agreed
+p4-ru-005,manual,empathy,yes,,Qwen and Jev agreed
+p4-ru-005,manual,management,10,,manual decision on a Qwen/Jev disagreement
+p4-ru-005,manual,closing,na,,manual decision on a Qwen/Jev disagreement
+p4-ru-005,manual,violations,no,,Qwen and Jev agreed
+p4-ru-004,manual,opening,yes,,Qwen and Jev agreed
+p4-ru-004,manual,understanding,yes,,Qwen and Jev agreed
+p4-ru-004,manual,verification,yes,,manual decision on a Qwen/Jev disagreement
+p4-ru-004,manual,guidance,20,,manual decision on a Qwen/Jev disagreement
+p4-ru-004,manual,empathy,yes,,Qwen and Jev agreed
+p4-ru-004,manual,management,4,,Qwen and Jev agreed
+p4-ru-004,manual,closing,na,,manual decision on a Qwen/Jev disagreement
+p4-ru-004,manual,violations,no,,Qwen and Jev agreed
+p4-ru-003,manual,opening,yes,,Qwen and Jev agreed
+p4-ru-003,manual,understanding,yes,,Qwen and Jev agreed
+p4-ru-003,manual,verification,yes,,Qwen and Jev agreed
+p4-ru-003,manual,empathy,yes,,Qwen and Jev agreed
+p4-ru-003,manual,violations,no,,Qwen and Jev agreed
+p4-ru-003,manual,guidance,20,66;68;71;76,"v2 decision on an undecided Qwen/Jev cell: the operator confirmed the order was accepted and still processing (66, 68) and escalated to the technical department with a callback by an agreed time (71, 76); guide 4.4: a correct escalation earns 20"
+p4-ru-003,manual,closing,na,76;77;78,v2 decision on an undecided Qwen/Jev cell: the client said thanks and ended the call about two seconds after the operator's final message; same treatment as p4-ru-004 and p4-ru-005 (N/A)
+p1-ru-025,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-025,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-025,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-025,manual,guidance,na,,Qwen and Jev agreed
+p1-ru-025,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-025,manual,management,10,,Qwen and Jev agreed
+p1-ru-025,manual,closing,na,,Qwen and Jev agreed
+p1-ru-025,manual,violations,no,,Qwen and Jev agreed
+p1-kz-005,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-005,manual,understanding,na,,manual decision on a Qwen/Jev disagreement
+p1-kz-005,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-kz-005,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-005,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-005,manual,management,10,,Qwen and Jev agreed
+p1-kz-005,manual,closing,no,,Qwen and Jev agreed
+p1-kz-005,manual,violations,no,,Qwen and Jev agreed
+p1-ru-017,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-017,manual,understanding,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-017,manual,verification,na,1;11;13,v2 correction: general question (how to find a bond by ticker in the app); no account data or protected action; twins p1-ru-019 and p1-en-008 are N/A; overrides a manual decision of No
+p1-ru-017,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-017,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-017,manual,management,10,,Qwen and Jev agreed
+p1-ru-017,manual,closing,no,,Qwen and Jev agreed
+p1-ru-017,manual,violations,no,,Qwen and Jev agreed
+p1-ru-019,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-019,manual,understanding,yes,,manual decision on a Qwen/Jev disagreement
+p1-ru-019,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-ru-019,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-019,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-019,manual,management,10,,Qwen and Jev agreed
+p1-ru-019,manual,closing,no,,Qwen and Jev agreed
+p1-ru-019,manual,violations,no,,Qwen and Jev agreed
+p1-kz-006,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-006,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-006,manual,verification,na,,manual decision on a Qwen/Jev disagreement
+p1-kz-006,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-006,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-006,manual,management,10,,Qwen and Jev agreed
+p1-kz-006,manual,closing,no,12,"v2 correction: 'Көмегім тигеніне қуаныштымын. Сау болыңыз!' is a pleasantry plus goodbye with no summary or offer of further help; identical phrasing is No in p1-ru-017, p1-en-003 and p1-ru-030; overrides a manual decision of Yes"
+p1-kz-006,manual,violations,no,,Qwen and Jev agreed
+p1-ru-022,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-022,manual,understanding,no,,Qwen and Jev agreed
+p1-ru-022,manual,verification,na,1;10,v2 correction: request for investment advice; no account data was disclosed and no protected action was taken; the personal-card offer (10) is scored under violations; overrides a manual decision of No
+p1-ru-022,manual,guidance,0,,Qwen and Jev agreed
+p1-ru-022,manual,empathy,no,,Qwen and Jev agreed
+p1-ru-022,manual,management,0,,manual decision on a Qwen/Jev disagreement
+p1-ru-022,manual,closing,no,,Qwen and Jev agreed
+p1-ru-022,manual,violations,yes,,Qwen and Jev agreed
+p1-ru-023,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-023,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-023,manual,verification,na,1;10;12,"v2 correction: general navigation question (how to find bonds); the paid-advice offer (12) is scored under violations, not as a disclosure; twin p1-en-013 is N/A; overrides a manual decision of No"
+p1-ru-023,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-023,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-023,manual,management,0,,manual decision on a Qwen/Jev disagreement
+p1-ru-023,manual,closing,no,,Qwen and Jev agreed
+p1-ru-023,manual,violations,yes,,Qwen and Jev agreed
+p1-kz-014,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-014,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-014,manual,verification,na,,Qwen and Jev agreed
+p1-kz-014,manual,guidance,20,,manual decision on a Qwen/Jev disagreement
+p1-kz-014,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-014,manual,management,10,,manual decision on a Qwen/Jev disagreement
+p1-kz-014,manual,closing,no,,Qwen and Jev agreed
+p1-kz-014,manual,violations,no,,Qwen and Jev agreed
+p1-kz-008,manual,opening,no,,Qwen and Jev agreed
+p1-kz-008,manual,understanding,no,5;10;11,"v2 correction: the guide's own worked example (4.2) for No: the client named the site to the bot (5), the operator asked again which site (10), the client answered 'I wrote above' (11); overrides a manual decision of N/A"
+p1-kz-008,manual,verification,na,,Qwen and Jev agreed
+p1-kz-008,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-008,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-008,manual,management,7,,Qwen and Jev agreed
+p1-kz-008,manual,closing,no,,manual decision on a Qwen/Jev disagreement
+p1-kz-008,manual,violations,no,,Qwen and Jev agreed
+p1-ru-026,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-026,manual,understanding,no,,manual decision on a Qwen/Jev disagreement
+p1-ru-026,manual,verification,na,1;10;12,v2 correction: general navigation question (where to download the funding details); no account data was disclosed and no protected action was taken; twins p1-ru-004 and p1-en-005 are N/A; guide 4.3 and organizer 'Applying the criteria'
+p1-ru-026,manual,guidance,0,,manual decision on a Qwen/Jev disagreement
+p1-ru-026,manual,empathy,no,,Qwen and Jev agreed
+p1-ru-026,manual,management,4,,Qwen and Jev agreed
+p1-ru-026,manual,closing,no,,Qwen and Jev agreed
+p1-ru-026,manual,violations,no,,Qwen and Jev agreed
+p1-en-008,manual,opening,yes,,Qwen and Jev agreed
+p1-en-008,manual,understanding,na,,Qwen and Jev agreed
+p1-en-008,manual,verification,na,,Qwen and Jev agreed
+p1-en-008,manual,guidance,15,,manual decision on a Qwen/Jev disagreement
+p1-en-008,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-008,manual,management,7,,manual decision on a Qwen/Jev disagreement
+p1-en-008,manual,closing,no,,Qwen and Jev agreed
+p1-en-008,manual,violations,no,,Qwen and Jev agreed
+p1-kz-003,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-003,manual,understanding,yes,,Qwen and Jev agreed
+p1-kz-003,manual,verification,yes,,manual decision on a Qwen/Jev disagreement
+p1-kz-003,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-003,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-003,manual,management,10,,Qwen and Jev agreed
+p1-kz-003,manual,closing,yes,,manual decision on a Qwen/Jev disagreement
+p1-kz-003,manual,violations,no,,Qwen and Jev agreed
+p1-ru-014,manual,opening,no,,Qwen and Jev agreed
+p1-ru-014,manual,understanding,no,5;10;11,"v2 correction: same re-ask pattern as p1-kz-008: the client named the site (5), the operator asked 'where exactly are you looking' (10), the client replied 'I already wrote' (11); overrides a manual decision of Yes"
+p1-ru-014,manual,verification,na,,Qwen and Jev agreed
+p1-ru-014,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-014,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-014,manual,management,7,,manual decision on a Qwen/Jev disagreement
+p1-ru-014,manual,closing,no,,Qwen and Jev agreed
+p1-ru-014,manual,violations,no,,Qwen and Jev agreed
+p4-ru-001,manual,opening,yes,,Qwen and Jev agreed
+p4-ru-001,manual,understanding,na,,Qwen and Jev agreed
+p4-ru-001,manual,verification,na,,Qwen and Jev agreed
+p4-ru-001,manual,guidance,15,,manual decision on a Qwen/Jev disagreement
+p4-ru-001,manual,empathy,yes,,Qwen and Jev agreed
+p4-ru-001,manual,management,7,,manual decision on a Qwen/Jev disagreement
+p4-ru-001,manual,closing,na,,Qwen and Jev agreed
+p4-ru-001,manual,violations,no,,Qwen and Jev agreed
+p1-en-006,manual,opening,yes,,Qwen and Jev agreed
+p1-en-006,manual,guidance,20,,Qwen and Jev agreed
+p1-en-006,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-006,manual,management,10,,Qwen and Jev agreed
+p1-en-006,manual,closing,yes,,Qwen and Jev agreed
+p1-en-006,manual,violations,no,,Qwen and Jev agreed
+p1-en-006,manual,understanding,yes,1;5;10;14;19,"v2 decision on an undecided Qwen/Jev cell: the operator used the known facts (transfer sent, bank confirms) and asked only for what was missing: the currency (14) and the time of the transfer (19); twins p1-kz-003 and p1-ru-006 are Yes"
+p1-en-006,manual,verification,yes,11;13;16,"v2 decision on an undecided Qwen/Jev cell: the operator asked for verification before looking at the account (11), the system confirmed it (13), and only then was the case escalated (16); twins p1-kz-003 and p1-ru-006 are Yes"
+p1-en-001,manual,opening,yes,,Qwen and Jev agreed
+p1-en-001,manual,understanding,na,,Qwen and Jev agreed
+p1-en-001,manual,guidance,20,,Qwen and Jev agreed
+p1-en-001,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-001,manual,management,10,,Qwen and Jev agreed
+p1-en-001,manual,closing,no,,Qwen and Jev agreed
+p1-en-001,manual,violations,no,,Qwen and Jev agreed
+p1-kz-004,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-004,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-004,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-004,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-004,manual,management,10,,Qwen and Jev agreed
+p1-kz-004,manual,closing,no,,Qwen and Jev agreed
+p1-kz-004,manual,violations,no,,Qwen and Jev agreed
+p1-kz-004,manual,verification,na,1;10;12,v2 decision on an undecided Qwen/Jev cell: general instruction on where to submit the change-of-details order; the client reported the app message themselves; twin p1-en-007 is N/A by manual decision
+p1-kz-007,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-007,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-007,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-007,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-007,manual,management,10,,Qwen and Jev agreed
+p1-kz-007,manual,closing,no,,Qwen and Jev agreed
+p1-kz-007,manual,violations,no,,Qwen and Jev agreed
+p1-kz-007,manual,verification,na,1;10,v2 decision on an undecided Qwen/Jev cell: general login policy answer; no account data or protected action; twin p1-ru-015 is N/A
+p1-kz-009,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-009,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-009,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-009,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-009,manual,management,10,,Qwen and Jev agreed
+p1-kz-009,manual,closing,no,,Qwen and Jev agreed
+p1-kz-009,manual,violations,no,,Qwen and Jev agreed
+p1-kz-009,manual,verification,na,1;11;13,v2 decision on an undecided Qwen/Jev cell: general question on finding a security by ticker; twins p1-ru-019 and p1-en-008 are N/A
+p1-kz-013,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-013,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-013,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-013,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-013,manual,management,10,,Qwen and Jev agreed
+p1-kz-013,manual,closing,no,,Qwen and Jev agreed
+p1-kz-013,manual,violations,yes,,Qwen and Jev agreed
+p1-kz-012,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-012,manual,understanding,yes,,Qwen and Jev agreed
+p1-kz-012,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-012,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-012,manual,management,10,,Qwen and Jev agreed
+p1-kz-012,manual,closing,yes,,Qwen and Jev agreed
+p1-kz-012,manual,violations,no,,Qwen and Jev agreed
+p1-en-013,manual,opening,yes,,Qwen and Jev agreed
+p1-en-013,manual,understanding,na,,Qwen and Jev agreed
+p1-en-013,manual,guidance,20,,Qwen and Jev agreed
+p1-en-013,manual,empathy,no,,Qwen and Jev agreed
+p1-en-013,manual,management,7,,Qwen and Jev agreed
+p1-en-013,manual,closing,no,,Qwen and Jev agreed
+p1-en-013,manual,violations,yes,,Qwen and Jev agreed
+p1-en-013,manual,verification,na,1;10,v2 decision on an undecided Qwen/Jev cell: general navigation question (how to find bonds); the paid-advice offer in 12 is scored under violations; no account data or protected action
+p1-en-002,manual,opening,yes,,Qwen and Jev agreed
+p1-en-002,manual,understanding,na,,Qwen and Jev agreed
+p1-en-002,manual,verification,na,,Qwen and Jev agreed
+p1-en-002,manual,guidance,20,,Qwen and Jev agreed
+p1-en-002,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-002,manual,management,10,,Qwen and Jev agreed
+p1-en-002,manual,violations,no,,Qwen and Jev agreed
+p1-en-002,manual,closing,no,12,v2 decision on an undecided Qwen/Jev cell: 'Glad you got in. Have a good day!' is a pleasantry plus goodbye without a summary or an offer of further help; same as p1-ru-004 'Отлично. Хорошего дня!' which is No
+p1-ru-008,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-008,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-008,manual,verification,na,,Qwen and Jev agreed
+p1-ru-008,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-008,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-008,manual,management,10,,Qwen and Jev agreed
+p1-ru-008,manual,violations,no,,Qwen and Jev agreed
+p1-ru-008,manual,closing,no,14,v2 decision on an undecided Qwen/Jev cell: 'Пожалуйста. До свидания!' is a goodbye alone; identical closings in p1-ru-019 and p1-ru-028 are No
+p1-ru-015,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-015,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-015,manual,verification,na,,Qwen and Jev agreed
+p1-ru-015,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-015,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-015,manual,management,10,,Qwen and Jev agreed
+p1-ru-015,manual,violations,no,,Qwen and Jev agreed
+p1-ru-015,manual,closing,yes,12,"v2 decision on an undecided Qwen/Jev cell: the closing restates the next step (use another login) and says goodbye; consistent with p1-ru-005, p1-ru-013 and p1-kz-012 which are Yes"
+p1-ru-029,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-029,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-029,manual,verification,na,,Qwen and Jev agreed
+p1-ru-029,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-029,manual,empathy,no,,Qwen and Jev agreed
+p1-ru-029,manual,closing,no,,Qwen and Jev agreed
+p1-ru-029,manual,violations,yes,,Qwen and Jev agreed
+p1-ru-016,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-016,manual,understanding,no,,Qwen and Jev agreed
+p1-ru-016,manual,verification,na,,Qwen and Jev agreed
+p1-ru-016,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-016,manual,management,7,,Qwen and Jev agreed
+p1-ru-016,manual,closing,no,,Qwen and Jev agreed
+p1-ru-016,manual,violations,no,,Qwen and Jev agreed
+p1-ru-016,manual,guidance,20,14;15,v2 decision on an undecided Qwen/Jev cell: the final answer (14) resolved the only question and the client confirmed (15); the wrong first guesses are scored under understanding No and management 7; the manual reviewer gave the same pattern 20 in p1-en-015
+p1-ru-018,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-018,manual,understanding,no,,Qwen and Jev agreed
+p1-ru-018,manual,verification,no,,Qwen and Jev agreed
+p1-ru-018,manual,guidance,0,,Qwen and Jev agreed
+p1-ru-018,manual,empathy,no,,Qwen and Jev agreed
+p1-ru-018,manual,closing,no,,Qwen and Jev agreed
+p1-ru-018,manual,violations,no,,Qwen and Jev agreed
+p1-kz-002,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-002,manual,verification,na,,Qwen and Jev agreed
+p1-kz-002,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-002,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-002,manual,management,10,,Qwen and Jev agreed
+p1-kz-002,manual,closing,no,,Qwen and Jev agreed
+p1-kz-002,manual,violations,no,,Qwen and Jev agreed
+p1-kz-002,manual,understanding,na,1;5;10,"v2 decision on an undecided Qwen/Jev cell: the whole request was given to the bot (bank transfer details, app already open) and the operator answered at once without asking anything; twins p1-ru-004 and p1-en-005 are N/A"
+p1-ru-030,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-030,manual,verification,na,,Qwen and Jev agreed
+p1-ru-030,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-030,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-030,manual,management,10,,Qwen and Jev agreed
+p1-ru-030,manual,closing,no,,Qwen and Jev agreed
+p1-ru-030,manual,violations,no,,Qwen and Jev agreed
+p1-ru-030,manual,understanding,yes,5;10;11;12,"v2 decision on an undecided Qwen/Jev cell: the client doubted which document was open (5); the operator asked for the document name (10), learned the client was on page 2 (11) and answered accordingly (12)"
+p1-ru-010,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-010,manual,understanding,yes,,Qwen and Jev agreed
+p1-ru-010,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-010,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-010,manual,management,10,,Qwen and Jev agreed
+p1-ru-010,manual,closing,yes,,Qwen and Jev agreed
+p1-ru-010,manual,violations,no,,Qwen and Jev agreed
+p1-ru-010,manual,verification,yes,13;15;16,v2 decision on an undecided Qwen/Jev cell: identification requested (13) and confirmed by the system event (15) before the position check was escalated (16)
+p1-en-003,manual,opening,yes,,Qwen and Jev agreed
+p1-en-003,manual,understanding,na,,Qwen and Jev agreed
+p1-en-003,manual,verification,na,,Qwen and Jev agreed
+p1-en-003,manual,guidance,20,,Qwen and Jev agreed
+p1-en-003,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-003,manual,management,10,,Qwen and Jev agreed
+p1-en-003,manual,closing,no,,Qwen and Jev agreed
+p1-en-003,manual,violations,no,,Qwen and Jev agreed
+p1-en-004,manual,opening,yes,,Qwen and Jev agreed
+p1-en-004,manual,understanding,na,,Qwen and Jev agreed
+p1-en-004,manual,verification,na,,Qwen and Jev agreed
+p1-en-004,manual,guidance,20,,Qwen and Jev agreed
+p1-en-004,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-004,manual,management,10,,Qwen and Jev agreed
+p1-en-004,manual,closing,no,,Qwen and Jev agreed
+p1-en-004,manual,violations,no,,Qwen and Jev agreed
+p1-en-005,manual,opening,yes,,Qwen and Jev agreed
+p1-en-005,manual,understanding,na,,Qwen and Jev agreed
+p1-en-005,manual,verification,na,,Qwen and Jev agreed
+p1-en-005,manual,guidance,20,,Qwen and Jev agreed
+p1-en-005,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-005,manual,management,10,,Qwen and Jev agreed
+p1-en-005,manual,closing,no,,Qwen and Jev agreed
+p1-en-005,manual,violations,no,,Qwen and Jev agreed
+p1-en-009,manual,opening,yes,,Qwen and Jev agreed
+p1-en-009,manual,understanding,na,,Qwen and Jev agreed
+p1-en-009,manual,verification,na,,Qwen and Jev agreed
+p1-en-009,manual,guidance,20,,Qwen and Jev agreed
+p1-en-009,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-009,manual,management,10,,Qwen and Jev agreed
+p1-en-009,manual,closing,na,,Qwen and Jev agreed
+p1-en-009,manual,violations,no,,Qwen and Jev agreed
+p1-en-010,manual,opening,yes,,Qwen and Jev agreed
+p1-en-010,manual,understanding,na,,Qwen and Jev agreed
+p1-en-010,manual,verification,na,,Qwen and Jev agreed
+p1-en-010,manual,guidance,20,,Qwen and Jev agreed
+p1-en-010,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-010,manual,management,10,,Qwen and Jev agreed
+p1-en-010,manual,closing,no,,Qwen and Jev agreed
+p1-en-010,manual,violations,no,,Qwen and Jev agreed
+p1-en-011,manual,opening,yes,,Qwen and Jev agreed
+p1-en-011,manual,understanding,na,,Qwen and Jev agreed
+p1-en-011,manual,verification,na,,Qwen and Jev agreed
+p1-en-011,manual,guidance,20,,Qwen and Jev agreed
+p1-en-011,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-011,manual,management,10,,Qwen and Jev agreed
+p1-en-011,manual,closing,no,12,"v2 correction: 'Happy to help. Goodbye!' is a pleasantry plus goodbye with no summary or offer of further help; identical phrasing is No in p1-ru-017, p1-en-003 and p1-ru-030; guide 4.7"
+p1-en-011,manual,violations,no,,Qwen and Jev agreed
+p1-en-012,manual,opening,yes,,Qwen and Jev agreed
+p1-en-012,manual,understanding,na,,Qwen and Jev agreed
+p1-en-012,manual,verification,na,,Qwen and Jev agreed
+p1-en-012,manual,guidance,20,,Qwen and Jev agreed
+p1-en-012,manual,empathy,yes,,Qwen and Jev agreed
+p1-en-012,manual,management,10,,Qwen and Jev agreed
+p1-en-012,manual,closing,no,,Qwen and Jev agreed
+p1-en-012,manual,violations,no,,Qwen and Jev agreed
+p1-kz-001,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-001,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-001,manual,verification,na,,Qwen and Jev agreed
+p1-kz-001,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-001,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-001,manual,management,10,,Qwen and Jev agreed
+p1-kz-001,manual,closing,no,,Qwen and Jev agreed
+p1-kz-001,manual,violations,no,,Qwen and Jev agreed
+p1-kz-010,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-010,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-010,manual,verification,na,,Qwen and Jev agreed
+p1-kz-010,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-010,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-010,manual,management,10,,Qwen and Jev agreed
+p1-kz-010,manual,closing,no,,Qwen and Jev agreed
+p1-kz-010,manual,violations,no,,Qwen and Jev agreed
+p1-kz-011,manual,opening,yes,,Qwen and Jev agreed
+p1-kz-011,manual,understanding,na,,Qwen and Jev agreed
+p1-kz-011,manual,verification,na,,Qwen and Jev agreed
+p1-kz-011,manual,guidance,20,,Qwen and Jev agreed
+p1-kz-011,manual,empathy,yes,,Qwen and Jev agreed
+p1-kz-011,manual,management,10,,Qwen and Jev agreed
+p1-kz-011,manual,closing,na,,Qwen and Jev agreed
+p1-kz-011,manual,violations,no,,Qwen and Jev agreed
+p1-ru-001,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-001,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-001,manual,verification,na,,Qwen and Jev agreed
+p1-ru-001,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-001,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-001,manual,management,10,,Qwen and Jev agreed
+p1-ru-001,manual,closing,no,,Qwen and Jev agreed
+p1-ru-001,manual,violations,no,,Qwen and Jev agreed
+p1-ru-002,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-002,manual,understanding,yes,,Qwen and Jev agreed
+p1-ru-002,manual,verification,na,,Qwen and Jev agreed
+p1-ru-002,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-002,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-002,manual,management,10,,Qwen and Jev agreed
+p1-ru-002,manual,closing,yes,,Qwen and Jev agreed
+p1-ru-002,manual,violations,no,,Qwen and Jev agreed
+p1-ru-004,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-004,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-004,manual,verification,na,,Qwen and Jev agreed
+p1-ru-004,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-004,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-004,manual,management,10,,Qwen and Jev agreed
+p1-ru-004,manual,closing,no,,Qwen and Jev agreed
+p1-ru-004,manual,violations,no,,Qwen and Jev agreed
+p1-ru-005,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-005,manual,understanding,na,1;5;10,"v2 correction: organizer rule (Q&A 2814): the client gave the whole request to the bot (who charges the commission; transfer by details from a branch) and the operator asked nothing before answering (10), so nothing was missing and N/A applies; the sheet had Yes"
+p1-ru-005,manual,verification,na,,Qwen and Jev agreed
+p1-ru-005,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-005,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-005,manual,management,4,,Qwen and Jev agreed
+p1-ru-005,manual,closing,yes,,Qwen and Jev agreed
+p1-ru-005,manual,violations,no,,Qwen and Jev agreed
+p1-ru-006,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-006,manual,understanding,yes,,Qwen and Jev agreed
+p1-ru-006,manual,verification,yes,,Qwen and Jev agreed
+p1-ru-006,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-006,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-006,manual,management,10,,Qwen and Jev agreed
+p1-ru-006,manual,closing,yes,,Qwen and Jev agreed
+p1-ru-006,manual,violations,no,,Qwen and Jev agreed
+p1-ru-011,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-011,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-011,manual,verification,na,,Qwen and Jev agreed
+p1-ru-011,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-011,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-011,manual,management,10,,Qwen and Jev agreed
+p1-ru-011,manual,closing,no,,Qwen and Jev agreed
+p1-ru-011,manual,violations,no,,Qwen and Jev agreed
+p1-ru-012,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-012,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-012,manual,verification,na,,Qwen and Jev agreed
+p1-ru-012,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-012,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-012,manual,management,10,,Qwen and Jev agreed
+p1-ru-012,manual,closing,na,,Qwen and Jev agreed
+p1-ru-012,manual,violations,no,,Qwen and Jev agreed
+p1-ru-013,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-013,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-013,manual,verification,na,,Qwen and Jev agreed
+p1-ru-013,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-013,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-013,manual,management,10,,Qwen and Jev agreed
+p1-ru-013,manual,closing,yes,,Qwen and Jev agreed
+p1-ru-013,manual,violations,no,,Qwen and Jev agreed
+p1-ru-020,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-020,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-020,manual,verification,na,,Qwen and Jev agreed
+p1-ru-020,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-020,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-020,manual,management,10,,Qwen and Jev agreed
+p1-ru-020,manual,closing,no,,Qwen and Jev agreed
+p1-ru-020,manual,violations,no,,Qwen and Jev agreed
+p1-ru-021,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-021,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-021,manual,verification,na,,Qwen and Jev agreed
+p1-ru-021,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-021,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-021,manual,management,10,,Qwen and Jev agreed
+p1-ru-021,manual,closing,no,12,"v2 correction: 'Рада помочь. До свидания!' is a pleasantry plus goodbye with no summary or offer of further help; identical phrasing is No in p1-ru-017, p1-en-003 and p1-ru-030; guide 4.7"
+p1-ru-021,manual,violations,no,,Qwen and Jev agreed
+p1-ru-024,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-024,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-024,manual,verification,na,,Qwen and Jev agreed
+p1-ru-024,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-024,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-024,manual,management,10,,Qwen and Jev agreed
+p1-ru-024,manual,closing,no,,Qwen and Jev agreed
+p1-ru-024,manual,violations,no,,Qwen and Jev agreed
+p1-ru-027,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-027,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-027,manual,verification,na,,Qwen and Jev agreed
+p1-ru-027,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-027,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-027,manual,management,10,,Qwen and Jev agreed
+p1-ru-027,manual,closing,no,,Qwen and Jev agreed
+p1-ru-027,manual,violations,no,,Qwen and Jev agreed
+p1-ru-028,manual,opening,yes,,Qwen and Jev agreed
+p1-ru-028,manual,understanding,na,,Qwen and Jev agreed
+p1-ru-028,manual,verification,na,,Qwen and Jev agreed
+p1-ru-028,manual,guidance,20,,Qwen and Jev agreed
+p1-ru-028,manual,empathy,yes,,Qwen and Jev agreed
+p1-ru-028,manual,management,10,,Qwen and Jev agreed
+p1-ru-028,manual,closing,no,,Qwen and Jev agreed
+p1-ru-028,manual,violations,no,,Qwen and Jev agreed
