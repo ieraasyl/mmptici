@@ -16,39 +16,20 @@ function download(file: unknown) {
   URL.revokeObjectURL(url);
 }
 
-/**
- * Downloads results.json in the organizers' format 1.0 from evaluations already saved in the
- * app (no model calls): each conversation's latest evaluation with the active checklist, with
- * the original AI ratings. Conversations without one are listed with status "error".
- */
-export function ResultsExport({
-  conversations,
-  selected,
-  checklistId,
-}: {
-  conversations: { id: string }[];
-  selected: boolean;
-  checklistId: string;
-}) {
+export function ResultsExport() {
   const [pending, setPending] = useState(false);
-  const count = conversations.length;
 
   async function exportResults() {
     setPending(true);
     try {
-      const { file, summary } = await request((init) =>
-        cqa.results.export.$post(
-          { json: { ids: conversations.map(({ id }) => id), checklistId } },
-          { init },
-        ),
-      );
+      const { file, summary } = await request((init) => cqa.results.export.$post({}, { init }));
       download(file);
       toast.add({
-        title: `Downloaded results.json with ${file.results.length} ${file.results.length === 1 ? "conversation" : "conversations"}.`,
+        title: `Downloaded results.json for ${file.results.length} FBroker chats.`,
         description:
           summary.errors > 0
-            ? `${summary.errors} not evaluated with this checklist yet, saved as status "error". Evaluate them and export again.`
-            : "Save it as results/prod/results.json, then commit and push.",
+            ? `Chats without a main checklist evaluation were exported as errors (${summary.errors}).`
+            : "Submission path is results/prod/results.json.",
         type: summary.errors > 0 ? "error" : "success",
         timeout: 10_000,
       });
@@ -64,13 +45,9 @@ export function ResultsExport({
   }
 
   return (
-    <Button
-      variant="outline"
-      disabled={!checklistId || count === 0 || pending}
-      onClick={() => void exportResults()}
-    >
+    <Button variant="outline" disabled={pending} onClick={() => void exportResults()}>
       <HugeiconsIcon icon={FileExportIcon} data-icon="inline-start" aria-hidden="true" />
-      {pending ? "Exporting…" : selected ? `Export selected (${count})` : "Export results.json"}
+      {pending ? "Exporting…" : "Export results.json"}
     </Button>
   );
 }

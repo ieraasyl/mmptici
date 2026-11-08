@@ -20,7 +20,7 @@ import {
 type DataTableProps<TData extends RowData> = {
   table: ReactTable<typeof dataTableFeatures, TData>;
   label: string;
-  filter?: { column: string; label: string; onChange?: () => void };
+  filter?: { column: string; label: string; className?: string; onChange?: () => void };
   selectable?: boolean;
   unselectedStatus?: string;
   tableClassName?: string;
@@ -58,7 +58,7 @@ export function DataTable<TData extends RowData>({
           {(filter || toolbarActions) && (
             <div className="ml-auto flex w-full min-w-0 flex-wrap items-end justify-end gap-2 sm:w-auto">
               {filter && (
-                <Field className="w-full sm:w-44">
+                <Field className={cn("w-full sm:w-44", filter.className)}>
                   <Input
                     aria-label={filter.label}
                     placeholder={filter.label}

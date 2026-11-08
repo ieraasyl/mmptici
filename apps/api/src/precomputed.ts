@@ -29,9 +29,14 @@ export function checkRatings(checklist: Checklist, ratings: Rating[], transcript
 export async function importPrecomputed(
   db: ReturnType<typeof createDb>,
   workspaceId: string,
+  group: string,
   checklist: Checklist,
   data: PrecomputedEvaluations,
 ) {
+  const scope = and(
+    eq(cqaConversations.workspaceId, workspaceId),
+    eq(cqaConversations.group, group),
+  );
   const conversations = await db
     .select({
       id: cqaConversations.id,
@@ -39,12 +44,12 @@ export async function importPrecomputed(
       transcript: cqaConversations.transcript,
     })
     .from(cqaConversations)
-    .where(eq(cqaConversations.workspaceId, workspaceId));
+    .where(scope);
   const existing = await db
     .select({ conversationId: cqaEvaluations.conversationId, model: cqaEvaluations.model })
     .from(cqaEvaluations)
     .innerJoin(cqaConversations, eq(cqaEvaluations.conversationId, cqaConversations.id))
-    .where(and(eq(cqaConversations.workspaceId, workspaceId)));
+    .where(scope);
   const done = new Set(existing.map(({ conversationId, model }) => `${conversationId}\n${model}`));
   const bySource = new Map(
     conversations.map((conversation) => [conversation.sourceId, conversation]),

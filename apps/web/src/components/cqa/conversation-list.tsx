@@ -7,7 +7,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowDown01Icon, Database01Icon, FileImportIcon } from "@hugeicons/core-free-icons";
 import { datasetFileSchema } from "@app/contracts";
 import { cqa, channelName, conversationsQuery, dashboardQuery, languageName } from "@/lib/cqa";
-import { useActiveChecklist } from "@/lib/selected-checklist";
+import { selectChecklist, useActiveChecklist } from "@/lib/selected-checklist";
 import { request } from "@/lib/request";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,13 +58,17 @@ export function ConversationList() {
         timeout: 0,
       });
     },
-    mutationFn: async (file: File | "dev") => {
-      if (file === "dev") {
+    mutationFn: async (file: File | "DEV" | "FBroker" | "Swap") => {
+      if (file === "DEV") {
         const result = await request((init) => cqa.conversations["import-dev"].$post({}, { init }));
         // The DEV data ships with finished evaluations (several models), so nothing has to be re-run.
         await request((init) => cqa.evaluations["import-dev"].$post({}, { init }));
         return result;
       }
+      if (file === "FBroker")
+        return request((init) => cqa.conversations["import-fbroker"].$post({}, { init }));
+      if (file === "Swap")
+        return request((init) => cqa.conversations["import-swap"].$post({}, { init }));
       if (file.size > 5 * 1024 * 1024) throw new Error("Import a JSON file under 5 MB.");
       const text = await file.text();
       let value: unknown;
@@ -83,7 +87,7 @@ export function ConversationList() {
       }
       return request((init) => cqa.conversations.$post({ json: parsed.data }, { init }));
     },
-    onSuccess: ({ imported, skipped }) => {
+    onSuccess: ({ imported, skipped }, source) => {
       const count = imported || skipped;
       const conversations = count === 1 ? "conversation" : "conversations";
       toast.add({
@@ -100,7 +104,8 @@ export function ConversationList() {
       table.resetColumnFilters();
       setLanguage("");
       setChannel("");
-      setGroup("");
+      setGroup(typeof source === "string" ? source : "");
+      if (source === "FBroker") selectChecklist("");
       clearSelection();
       void queryClient.invalidateQueries(conversationsQuery);
       void queryClient.invalidateQueries(dashboardQuery);
@@ -176,21 +181,9 @@ export function ConversationList() {
     onRowSelectionChange: setRowSelection,
   });
   const filtered = table.getSortedRowModel().rows.map((row) => row.original);
-  const hasFilters = Boolean(
-    language || channel || group || table.getColumn("conversation")?.getFilterValue(),
-  );
   const hasSelection = Object.keys(rowSelection).length > 0;
   const selectedConversations = filtered.filter(({ id }) => rowSelection[id]);
-  const evaluatedCount = summary.data
-    ? conversations.filter(({ id }) =>
-        summary.data.checklistResults.some(
-          ({ id: resultId, evaluation }) =>
-            resultId === id &&
-            evaluation.checklistId === checklist.id &&
-            evaluation.revision === checklist.revision,
-        ),
-      ).length
-    : 0;
+  const evaluatedCount = filtered.filter(({ evaluated }) => evaluated).length;
   const importMenu = (
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline" />} disabled={importDataset.isPending}>
@@ -199,13 +192,21 @@ export function ConversationList() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-auto">
         <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => importDataset.mutate("DEV")}>
+            <HugeiconsIcon icon={Database01Icon} aria-hidden="true" />
+            Load DEV dataset
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => importDataset.mutate("FBroker")}>
+            <HugeiconsIcon icon={Database01Icon} aria-hidden="true" />
+            Load FBroker control chats
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => importDataset.mutate("Swap")}>
+            <HugeiconsIcon icon={Database01Icon} aria-hidden="true" />
+            Load SWAP transcripts
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => fileInput.current?.click()}>
             <HugeiconsIcon icon={FileImportIcon} aria-hidden="true" />
             Import JSON
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => importDataset.mutate("dev")}>
-            <HugeiconsIcon icon={Database01Icon} aria-hidden="true" />
-            Load DEV dataset
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
@@ -255,10 +256,11 @@ export function ConversationList() {
               filter={{
                 column: "conversation",
                 label: "Search by ID",
+                className: "sm:w-36",
                 onChange: clearSelection,
               }}
               selectable
-              unselectedStatus={`${evaluatedCount} of ${conversations.length} evaluated`}
+              unselectedStatus={`${evaluatedCount} of ${filtered.length} evaluated`}
               toolbarControls={
                 <div className="grid w-full grid-cols-2 items-end gap-2 max-sm:*:odd:last:col-span-2 sm:contents">
                   {filters
@@ -303,18 +305,9 @@ export function ConversationList() {
               }
               toolbarActions={
                 <div className="flex w-full flex-wrap items-center gap-2 max-sm:*:grow sm:contents">
-                  {hasFilters && (
-                    <p className="text-sm text-muted-foreground max-sm:basis-full sm:py-1.5">
-                      {filtered.length} {filtered.length === 1 ? "match" : "matches"}
-                    </p>
-                  )}
                   {importMenu}
                   {actions}
-                  <ResultsExport
-                    conversations={hasSelection ? selectedConversations : filtered}
-                    selected={hasSelection}
-                    checklistId={checklist.id}
-                  />
+                  {groups.includes("FBroker") && <ResultsExport />}
                 </div>
               }
             />

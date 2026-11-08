@@ -1,6 +1,7 @@
 import { inject, test, expect } from "vite-plus/test";
 import { hc } from "hono/client";
 import type { AppType } from "@app/api/types";
+import controlDataset from "../data/PROD.json";
 
 const origin = inject("origin");
 const cqa = hc<AppType>(origin).api.cqa;
@@ -118,6 +119,21 @@ test("loads the bundled DEV dataset once per workspace", async () => {
   expect(await (await cqa.conversations.$get({}, { headers: other })).json()).toEqual({
     conversations: [],
   });
+});
+
+test("imports SWAP transcripts by GET without saving evaluations", async () => {
+  const headers = await openWorkspace();
+  const load = () =>
+    cqa.conversations["import-swap"].$post(
+      {},
+      { headers: { ...headers, "X-CQA-Test-Dataset": "swap" } },
+    );
+  const response = await load();
+  expect(response.status, await response.clone().text()).toBe(201);
+  expect(await response.json()).toEqual({ imported: 1, skipped: 0 });
+  expect(await (await load()).json()).toEqual({ imported: 0, skipped: 1 });
+  const { conversations } = await (await cqa.conversations.$get({}, { headers })).json();
+  expect(conversations).toMatchObject([{ group: "Swap", evaluated: false }]);
 });
 
 test("dashboard handles empty workspaces and evaluations with only violation flags", async () => {
@@ -436,39 +452,60 @@ test("keeps checklist snapshots and appeals after deleting a custom checklist", 
   });
 });
 
-test("exports selected conversations as results.json in the organizers' format", async () => {
+test("exports all FBroker chats using only saved main checklist ratings", async () => {
   const headers = await openWorkspace();
   const other = await openWorkspace();
-  const conversationId = await importExample(headers);
+  const exportRun = (h = headers) => cqa.results.export.$post({}, { headers: h });
+  expect((await exportRun()).status).toBe(409);
+
+  const load = cqa.conversations["import-fbroker"].$post;
+  const imported = await load({}, { headers });
+  expect(imported.status).toBe(201);
+  expect(await imported.json()).toEqual({ imported: 10, skipped: 0 });
+  expect(await (await load({}, { headers })).json()).toEqual({ imported: 0, skipped: 10 });
+
+  const sourceIds = controlDataset.data.records.map((record) => record.conversation_id);
+  await cqa.conversations.$post({ json: { ...example, group: "Swap" } }, { headers });
+  const { conversations } = await (await cqa.conversations.$get({}, { headers })).json();
+  const control = conversations.filter(({ group }) => group === "FBroker");
+  expect(control).toHaveLength(10);
+  expect(control.every(({ evaluated }) => !evaluated)).toBe(true);
+  const conversationId = control.find(({ sourceId }) => sourceId === sourceIds[0])!.id;
   const { checklists, defaultId } = await (await cqa.checklists.$get({}, { headers })).json();
-  const exportRun = (json: Parameters<typeof cqa.results.export.$post>[0]["json"], h = headers) =>
-    cqa.results.export.$post({ json }, { headers: h });
-
-  // Not evaluated yet: an error entry, never a zero score.
-  const before = await exportRun({ ids: [conversationId], checklistId: defaultId });
-  expect(before.status).toBe(200);
-  expect(await before.json()).toMatchObject({
-    file: { results: [{ conversation_id: "example-kz", status: "error", score: null }] },
-    summary: { ok: 0, errors: 1 },
-  });
-
-  const evaluated = await cqa.conversations[":id"].evaluations.$post(
-    { param: { id: conversationId }, json: { id: crypto.randomUUID(), checklistId: defaultId } },
-    { headers: { ...headers, "X-CQA-Test-Model": "valid" } },
+  const evaluate = (checklistId: string) =>
+    cqa.conversations[":id"].evaluations.$post(
+      { param: { id: conversationId }, json: { id: crypto.randomUUID(), checklistId } },
+      { headers: { ...headers, "X-CQA-Test-Model": "valid" } },
+    );
+  expect((await evaluate(defaultId)).status).toBe(201);
+  const custom = await cqa.checklists.$post(
+    { json: { name: "Custom", criteria: checklists[0].criteria.slice(1) } },
+    { headers },
   );
-  expect(evaluated.status).toBe(201);
+  if (custom.status !== 201) throw new Error(await custom.text());
+  const { checklist } = await custom.json();
+  expect((await evaluate(checklist.id)).status).toBe(201);
 
-  const response = await exportRun({ ids: [conversationId], checklistId: defaultId });
+  const response = await exportRun();
   if (response.status !== 200) throw new Error(await response.text());
   const { file, summary } = await response.json();
-  expect(summary).toEqual({ ok: 1, errors: 0, models: { "test-model": 1 } });
+  expect(summary).toEqual({ ok: 1, errors: 9, models: { "test-model": 1 } });
+  expect(file.results.map(({ conversation_id }) => conversation_id)).toEqual(sourceIds);
+  expect(file.results.slice(1)).toEqual(
+    sourceIds.slice(1).map((conversation_id) => ({
+      conversation_id,
+      status: "error",
+      criteria: [],
+      score: null,
+      error: "Not evaluated with the selected checklist.",
+    })),
+  );
   expect(file).toMatchObject({
     schema_version: "1.0",
     team_name: "ММ.. Птицы",
-    model: { mode: "local", name: "Qwen/Qwen3.8-27B" },
+    model: { mode: "external_api", name: "test-model" },
   });
   const [entry] = file.results;
-  expect(entry).toMatchObject({ conversation_id: "example-kz", status: "ok" });
   if (entry.status !== "ok") throw new Error("expected ok");
   expect(entry.criteria.map(({ criterion_id }) => criterion_id)).toEqual([
     "contact",
@@ -493,18 +530,5 @@ test("exports selected conversations as results.json in the organizers' format",
   ]);
   expect(entry.score).toEqual({ final_score: 75, critical_flag: false });
 
-  // Any checklist exports; this one was never used on the conversation, so it is an error entry.
-  const custom = await cqa.checklists.$post(
-    { json: { name: "Custom", criteria: checklists[0].criteria.slice(1) } },
-    { headers },
-  );
-  if (custom.status !== 201) throw new Error(await custom.text());
-  const { checklist } = await custom.json();
-  const customExport = await exportRun({ ids: [conversationId], checklistId: checklist.id });
-  if (customExport.status !== 200) throw new Error(await customExport.text());
-  expect((await customExport.json()).file.results[0]).toMatchObject({ status: "error" });
-  // Another workspace cannot export these conversations.
-  expect((await exportRun({ ids: [conversationId], checklistId: defaultId }, other)).status).toBe(
-    404,
-  );
+  expect((await exportRun(other)).status).toBe(409);
 });

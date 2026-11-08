@@ -1,16 +1,10 @@
 import type { Answer, Checklist, Rating } from "@app/contracts";
 import { scoreEvaluation } from "./evaluation.ts";
+import { DEFAULT_MODEL } from "./inference/client.ts";
 
 // Builds results.json in the organizers' format 1.0 (CQA_Student_Guide_Appendix_Results.pdf):
 // one entry per conversation, the 8 criterion codes in the appendix order, true/false/null or
 // the raw scale step, and a status "error" entry for anything that cannot be exported.
-
-/** The header the team submits with every results.json. */
-export const RESULTS_HEADER = {
-  teamName: "ММ.. Птицы",
-  mode: "local",
-  modelName: "Qwen/Qwen3.8-27B",
-} as const;
 
 type Header = { teamName: string; mode: "local" | "external_api" | "hybrid"; modelName: string };
 
@@ -128,7 +122,7 @@ function findProblems(results: ResultEntry[], items: ExportItem[]): string[] {
 
 export function buildResultsFile(
   items: ExportItem[],
-  meta: Header = RESULTS_HEADER,
+  meta?: Header,
 ): { file: ResultsFile; problems: string[]; models: Record<string, number> } {
   const results = items.map(toEntry);
   const models: Record<string, number> = {};
@@ -137,11 +131,16 @@ export function buildResultsFile(
       models[item.evaluation.model] = (models[item.evaluation.model] ?? 0) + 1;
     }
   });
+  const header = meta ?? {
+    teamName: "ММ.. Птицы",
+    mode: "external_api",
+    modelName: Object.keys(models).join(", ") || DEFAULT_MODEL,
+  };
   return {
     file: {
       schema_version: "1.0",
-      team_name: meta.teamName,
-      model: { mode: meta.mode, name: meta.modelName },
+      team_name: header.teamName,
+      model: { mode: header.mode, name: header.modelName },
       results,
     },
     problems: findProblems(results, items),

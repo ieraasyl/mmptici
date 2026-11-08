@@ -11,7 +11,6 @@ import {
   datasetFileSchema,
   datasetSchema,
   decideAppealSchema,
-  exportResultsSchema,
   precomputedEvaluationsSchema,
   runEvaluationSchema,
   saveChecklistSchema,
@@ -21,6 +20,7 @@ import { and, asc, createDb, desc, eq, exists, isNull } from "@app/db";
 import { cqaAppeals, cqaChecklists, cqaConversations, cqaEvaluations } from "@app/db/schema";
 import devDataset from "../../../../data/invoke.json";
 import devEvaluations from "../../../../data/evaluations-dev.json";
+import controlDataset from "../../../../data/PROD.json";
 import { defaultChecklist } from "../checklist.ts";
 import type { Bindings } from "../env.ts";
 import { validationError } from "../errors.ts";
@@ -40,6 +40,7 @@ type Db = ReturnType<typeof createDb>;
 type CqaEnv = { Bindings: Bindings; Variables: { workspace: string; db: Db } };
 const workspaceIdPattern = /^[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}$/;
 const cookieName = (url: URL) => (url.protocol === "https:" ? "__Host-cqa" : "cqa");
+const controlGroup = controlDataset.data.dataset_group_id;
 
 const workspace = createMiddleware<CqaEnv>(async (c, next) => {
   const url = new URL(c.req.url);
@@ -214,9 +215,57 @@ export const cqaRoutes = new Hono<CqaEnv>()
     const result = await importConversations(c.get("db"), c.get("workspace"), dataset);
     return c.json(result, 201);
   })
+  .post("/conversations/import-fbroker", async (c) => {
+    const dataset = datasetFileSchema.parse(controlDataset);
+    const result = await importConversations(c.get("db"), c.get("workspace"), dataset);
+    return c.json(result, 201);
+  })
+  .post("/conversations/import-swap", async (c) => {
+    const url = c.env.CQA_SWAP_DATASET_URL;
+    if (!url) {
+      return c.json(
+        {
+          error: {
+            code: "SWAP_UNAVAILABLE",
+            message:
+              "The SWAP link is missing. Download SWAP from the organizer and use Import JSON.",
+          },
+        },
+        503,
+      );
+    }
+
+    const payload: unknown = await fetch(url, {
+      method: "GET",
+      redirect: "manual",
+      signal: AbortSignal.timeout(10_000),
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .catch(() => null);
+    const dataset = datasetFileSchema.safeParse(payload);
+    if (!dataset.success || dataset.data.group !== "Swap") {
+      return c.json(
+        {
+          error: {
+            code: "SWAP_UNAVAILABLE",
+            message: "Could not load SWAP from the organizer. Check the link or use Import JSON.",
+          },
+        },
+        502,
+      );
+    }
+    const result = await importConversations(c.get("db"), c.get("workspace"), dataset.data);
+    return c.json(result, 201);
+  })
   .post("/evaluations/import-dev", async (c) => {
     const data = precomputedEvaluationsSchema.parse(devEvaluations);
-    const result = await importPrecomputed(c.get("db"), c.get("workspace"), defaultChecklist, data);
+    const result = await importPrecomputed(
+      c.get("db"),
+      c.get("workspace"),
+      devDataset.data.dataset_group_id,
+      defaultChecklist,
+      data,
+    );
     return c.json(result, 201);
   })
   .get("/conversations/:id/recording", async (c) => {
@@ -518,13 +567,12 @@ export const cqaRoutes = new Hono<CqaEnv>()
       return c.json({ decision, decidedAt });
     },
   )
-  .post("/results/export", zValidator("json", exportResultsSchema, validationError), async (c) => {
+  .post("/results/export", async (c) => {
     const db = c.get("db");
-    const workspaceId = c.get("workspace");
-    const { ids: requested, checklistId } = c.req.valid("json");
-    const ids = [...new Set(requested)];
-    const checklist = await findChecklist(db, workspaceId, checklistId);
-    if (!checklist) throw new HTTPException(404, { message: "Checklist not found." });
+    const scope = and(
+      eq(cqaConversations.workspaceId, c.get("workspace")),
+      eq(cqaConversations.group, controlGroup),
+    );
 
     const conversations = await db
       .select({
@@ -533,15 +581,18 @@ export const cqaRoutes = new Hono<CqaEnv>()
         transcript: cqaConversations.transcript,
       })
       .from(cqaConversations)
-      .where(eq(cqaConversations.workspaceId, workspaceId));
-    const byId = new Map(conversations.map((row) => [row.id, row]));
-    if (ids.some((id) => !byId.has(id))) {
-      throw new HTTPException(404, {
-        message: "Some selected conversations were not found. Reload the page.",
+      .where(scope);
+    const bySource = new Map(conversations.map((row) => [row.sourceId, row]));
+    const controlConversations = controlDataset.data.records.flatMap(({ conversation_id }) => {
+      const conversation = bySource.get(conversation_id);
+      return conversation ? [conversation] : [];
+    });
+    if (controlConversations.length !== controlDataset.data.records.length) {
+      throw new HTTPException(409, {
+        message: "Load the full FBroker dataset before exporting.",
       });
     }
 
-    // The newest evaluation per conversation made with the chosen checklist.
     const evaluations = await db
       .select({
         conversationId: cqaEvaluations.conversationId,
@@ -551,19 +602,22 @@ export const cqaRoutes = new Hono<CqaEnv>()
       })
       .from(cqaEvaluations)
       .innerJoin(cqaConversations, eq(cqaEvaluations.conversationId, cqaConversations.id))
-      .where(eq(cqaConversations.workspaceId, workspaceId))
+      .where(scope)
       .orderBy(desc(cqaEvaluations.createdAt), desc(cqaEvaluations.id));
     const latest = new Map<string, (typeof evaluations)[number]>();
     for (const row of evaluations) {
-      if (row.checklist.id === checklistId && !latest.has(row.conversationId)) {
+      if (
+        row.checklist.id === defaultChecklist.id &&
+        row.checklist.revision === defaultChecklist.revision &&
+        !latest.has(row.conversationId)
+      ) {
         latest.set(row.conversationId, row);
       }
     }
 
     const { file, problems, models } = buildResultsFile(
-      ids.map((id) => {
-        const conversation = byId.get(id)!;
-        const evaluation = latest.get(id);
+      controlConversations.map((conversation) => {
+        const evaluation = latest.get(conversation.id);
         return {
           sourceId: conversation.sourceId,
           turnCount: conversation.transcript.length,

@@ -162,11 +162,6 @@ export const decideAppealSchema = z.object({
   reason: z.string().trim().min(1).max(2000),
 });
 
-export const exportResultsSchema = z.object({
-  ids: z.array(z.uuid()).min(1).max(500),
-  checklistId: z.uuid(),
-});
-
 export type ConversationRecord = z.infer<typeof conversationSchema>;
 export type Turn = z.infer<typeof turnSchema>;
 export type Answer = z.infer<typeof answerSchema>;
