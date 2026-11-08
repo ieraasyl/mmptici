@@ -1,5 +1,7 @@
 # mmptici
 
+Built by **ММ..ПТИЦЫ**.
+
 **Conversation Quality Analytics (CQA)** for Freedom Broker. The app scores operator work in support chats and calls against a weighted checklist, explains every score with quotes from the transcript, and lets reviewers appeal a rating. The React UI and Hono API deploy together as one Cloudflare Worker.
 
 [Live app](https://mmptici.ieraasyl.workers.dev) · [Hackathon brief](CQA_HACKATHON.md) · [Agent conventions](AGENTS.md)
@@ -51,7 +53,7 @@ Both files share one structure:
 ```json
 {
   "schema_version": "1.0",
-  "team_name": "ММ.. Птицы",
+  "team_name": "ММ..ПТИЦЫ",
   "model": { "mode": "local", "name": "Qwen/Qwen3.8-27B" },
   "results": [
     {
@@ -103,7 +105,6 @@ The PROD file was exported from the app's database after the 10 chats of [data/P
 
 | Field                              | Value                       |
 | ---------------------------------- | --------------------------- |
-| Team                               | ММ.. Птицы                  |
 | Model (`model.name`, `model.mode`) | `Qwen/Qwen3.8-27B`, `local` |
 | Dialogs scored                     | 65 of 65                    |
 | Average score                      | 84.38                       |
