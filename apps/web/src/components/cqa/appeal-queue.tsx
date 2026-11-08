@@ -9,7 +9,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { dataTableFeatures } from "@/components/ui/data-table-features";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { appealsQuery, dateLabel, type Appeal } from "@/lib/cqa";
+import { appealsQuery, dateLabel, scoreLabel, type Appeal } from "@/lib/cqa";
 import { AppealReview } from "./appeal-review";
 import { EmptyState, ErrorMessage, Loading, PageHeading } from "./ui";
 
@@ -40,6 +40,12 @@ const columns: AppealColumn[] = [
     header: "Rating",
     meta: { headerClassName: "hidden sm:table-cell", cellClassName: "hidden sm:table-cell" },
     cell: ({ row }) => <AppealRating appeal={row.original} />,
+  },
+  {
+    id: "score",
+    header: "Score",
+    meta: { headerClassName: "hidden sm:table-cell", cellClassName: "hidden sm:table-cell" },
+    cell: ({ row }) => <AppealScore appeal={row.original} />,
   },
   {
     id: "date",
@@ -86,6 +92,31 @@ function AppealRating({ appeal }: { appeal: Appeal }) {
           <span className="sr-only">Final rating</span>
           <Badge variant="secondary">{answerLabel(appeal.decision.answer)}</Badge>
         </>
+      )}
+    </div>
+  );
+}
+
+function AppealScore({ appeal: { score, decision } }: { appeal: Appeal }) {
+  if (!decision) return <span className="text-muted-foreground">{scoreLabel(score.original)}</span>;
+  const delta = score.original !== null && score.final !== null ? score.final - score.original : 0;
+  return (
+    <div className="inline-flex flex-wrap items-center gap-1.5">
+      <span className="text-muted-foreground">{scoreLabel(score.original)}</span>
+      <span aria-hidden="true" className="text-muted-foreground">
+        →
+      </span>
+      <span className="font-medium">{scoreLabel(score.final)}</span>
+      {delta !== 0 && (
+        <Badge variant={delta > 0 ? "secondary" : "outline"}>
+          {delta > 0 ? "+" : "−"}
+          {Math.abs(Math.round(delta * 100) / 100)}
+        </Badge>
+      )}
+      {score.violationOriginal !== score.violationFinal && (
+        <Badge variant="outline">
+          {score.violationFinal ? "Violation added" : "Violation removed"}
+        </Badge>
       )}
     </div>
   );

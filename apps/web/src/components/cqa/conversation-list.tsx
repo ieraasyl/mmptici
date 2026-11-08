@@ -7,6 +7,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowDown01Icon, Database01Icon, FileImportIcon } from "@hugeicons/core-free-icons";
 import { datasetFileSchema } from "@app/contracts";
 import { cqa, channelName, conversationsQuery, dashboardQuery, languageName } from "@/lib/cqa";
+import { useActiveChecklist } from "@/lib/selected-checklist";
 import { request } from "@/lib/request";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +35,7 @@ export function ConversationList() {
   const list = useQuery(conversationsQuery);
   // Scores and review status come from the same conversation summary used by the dashboard.
   const summary = useQuery(dashboardQuery);
+  const checklist = useActiveChecklist();
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
   const [language, setLanguage] = useState("");
@@ -142,7 +144,15 @@ export function ConversationList() {
     },
   ];
   const tableData = useMemo(() => {
-    const latest = new Map(summary.data?.conversations.map((item) => [item.id, item]));
+    // Show the latest result of the checklist picked above, not whichever run happened last.
+    const results = new Map(
+      summary.data?.checklistResults
+        .filter(
+          ({ evaluation }) =>
+            evaluation.checklistId === checklist.id && evaluation.revision === checklist.revision,
+        )
+        .map((item) => [item.id, item]),
+    );
     return (list.data?.conversations ?? [])
       .filter(
         (item) =>
@@ -150,8 +160,11 @@ export function ConversationList() {
           (!channel || item.channel === channel) &&
           (!group || item.group === group),
       )
-      .map((item) => ({ ...item, summary: latest.get(item.id) }));
-  }, [list.data, summary.data, language, channel, group]);
+      .map((item) => {
+        const latest = results.get(item.id);
+        return { ...item, evaluated: !!latest, summary: latest };
+      });
+  }, [list.data, summary.data, checklist.id, checklist.revision, language, channel, group]);
   const table = useTable({
     features: dataTableFeatures,
     columns: conversationColumns,
@@ -167,7 +180,16 @@ export function ConversationList() {
   );
   const hasSelection = Object.keys(rowSelection).length > 0;
   const selectedConversations = filtered.filter(({ id }) => rowSelection[id]);
-  const evaluatedCount = conversations.filter(({ evaluated }) => evaluated).length;
+  const evaluatedCount = summary.data
+    ? conversations.filter(({ id }) =>
+        summary.data.checklistResults.some(
+          ({ id: resultId, evaluation }) =>
+            resultId === id &&
+            evaluation.checklistId === checklist.id &&
+            evaluation.revision === checklist.revision,
+        ),
+      ).length
+    : 0;
   const importMenu = (
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline" />} disabled={importDataset.isPending}>

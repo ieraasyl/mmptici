@@ -1,0 +1,3780 @@
+{
+  "schema_version": "1.0",
+  "team_name": "ММ.. Птицы",
+  "model": {
+    "mode": "local",
+    "name": "Qwen/Qwen3.8-27B"
+  },
+  "results": [
+    {
+      "conversation_id": "p1-ru-001",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear enough from the start: they wanted to find their tariff in the web version without downloading a report.",
+          "evidence_turns": [1, 5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave navigation instructions and did not disclose account data or take a protected action.",
+          "evidence_turns": [1, 5, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step, and the customer confirmed they found the tariff.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and directly addressed the customer’s inconvenience by providing a web-version solution.",
+          "evidence_turns": [5, 10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer was able to continue and resolve the issue.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There is no evidence of insults, outside paid services, or disclosure of confidential information.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-002",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves by name in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator used the customer's details and asked clarifying questions about where and when the tariff names were seen before explaining next steps.",
+          "evidence_turns": [10, 11, 12, 15]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "No account-specific data was disclosed and no protected action was taken; the operator only gave general guidance and said identity confirmation would be needed before checking the account.",
+          "evidence_turns": [12, 15]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator explained a likely reason, stated that the cause could not be confirmed from the chat, and gave a clear next step to compare dates and provide details before any account check.",
+          "evidence_turns": [12, 15, 17, 19]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and acknowledged that the unexpected tariff change could be concerning.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear, coherent, and kept the conversation moving without confusing the customer.",
+          "evidence_turns": [10, 12, 15, 17, 19]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and offered further help if the question remained after the customer checked the dates.",
+          "evidence_turns": [19]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10, 12, 19]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-003",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator clarified whether the customer was using the app or web before giving navigation instructions.",
+          "evidence_turns": [11, 12, 13]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was a general question about fees and where to view the tariff, so identity verification was not required.",
+          "evidence_turns": [1, 5, 11]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 10,
+          "rationale": "The operator explained where to see the tariff name but did not answer the material question about where to find the commission.",
+          "evidence_turns": [14, 15]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and courteous throughout the short interaction.",
+          "evidence_turns": [11, 15]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The replies were mostly clear, but the final answer about the commission was unclear and did not directly address the customer's question.",
+          "evidence_turns": [13, 15]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [15]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [11, 13, 15]
+        }
+      ],
+      "score": {
+        "final_score": 75.63,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-004",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced himself in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's initial request already specified the desired top-up method, so there was enough information to answer from the start.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was general guidance on how to top up an account and did not require identity verification.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct app path and confirmed that details can be downloaded in the requested currency, resolving the issue.",
+          "evidence_turns": [10, 12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responsive; the customer did not express dissatisfaction.",
+          "evidence_turns": [10, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear and coherent, and the customer was informed to wait before the operator joined.",
+          "evidence_turns": [8, 10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There is no evidence of insults, outside paid-service offers, or confidential information disclosure.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-005",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced herself in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator used the stated top-up method, noted that bank conditions were needed for the commission amount, and clarified the menu path when the customer asked.",
+          "evidence_turns": [5, 10, 14]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was general information about fees and where to find details, with no personal data disclosure or protected action.",
+          "evidence_turns": [1, 10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next steps: find the details in the specified menu and check the bank commission before transferring.",
+          "evidence_turns": [10, 14, 16]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and apologized when the first navigation answer was unclear.",
+          "evidence_turns": [10, 14, 16]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 4,
+          "rationale": "The customer had to ask again because the first navigation instruction was vague and unclear.",
+          "evidence_turns": [12, 13, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and gave a final reminder about checking the bank commission.",
+          "evidence_turns": [16]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10, 14, 16]
+        }
+      ],
+      "score": {
+        "final_score": 88.75,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-006",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator used the customer's stated issue and asked for the missing currency detail before finalizing the request.",
+          "evidence_turns": [10, 13, 14]
+        },
+        {
+          "criterion_id": "identification",
+          "value": true,
+          "rationale": "Identity verification was confirmed before the operator proceeded with the account-related request.",
+          "evidence_turns": [10, 12, 13]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator escalated the payment issue, added the requested detail, and gave the correct next step by promising a response in chat.",
+          "evidence_turns": [13, 15]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and acknowledged the customer's concern about the missing payment.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear and coherent, and the customer was informed that a response would be provided in the chat.",
+          "evidence_turns": [10, 13, 15]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator summarized the next step and said goodbye.",
+          "evidence_turns": [15]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid-service offers, or confidential disclosures are present in the operator's turns.",
+          "evidence_turns": [10, 13, 15]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-007",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's issue and requested navigation were clear from the start, so no clarification was required.",
+          "evidence_turns": [1, 5, 11]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave app navigation instructions and did not disclose account data or take a protected action.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 10,
+          "rationale": "The operator gave the correct path to update profile data but left the customer's explicit question about when to retry withdrawal unanswered.",
+          "evidence_turns": [11, 12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and addressed the specific withdrawal/profile-update issue.",
+          "evidence_turns": [11, 13]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear and coherent, and the customer was told to wait before the operator joined.",
+          "evidence_turns": [8, 11, 13]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and summarized that the update path had been provided.",
+          "evidence_turns": [13]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There is no insult, outside paid-service offer, or confidential disclosure in the operator's replies.",
+          "evidence_turns": [11, 13]
+        }
+      ],
+      "score": {
+        "final_score": 84.62,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-008",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves by name in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer already provided enough context that the order was still processing, so no clarification was needed before answering.",
+          "evidence_turns": [5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave general process guidance and did not disclose account data or take a protected action.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator correctly told the customer to wait for the order to complete and data to update before repeating the withdrawal.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responsive, and the customer did not express dissatisfaction.",
+          "evidence_turns": [10, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer had been told to wait before the operator joined.",
+          "evidence_turns": [8, 10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, outside paid-service offer, or disclosure of confidential information.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-009",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator used the customer's description and asked what message was shown before giving an account-specific answer.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": false,
+          "rationale": "The operator disclosed account-specific information before identity verification, and the customer explicitly said they had not confirmed the account.",
+          "evidence_turns": [12, 13, 14]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 10,
+          "rationale": "The operator identified a withdrawal restriction but did not explain why it existed or give a concrete next step, only saying the question would be transferred.",
+          "evidence_turns": [12, 15, 16]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and addressed the customer's withdrawal issue by checking the account and saying it would be transferred.",
+          "evidence_turns": [10, 12, 16]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The replies were coherent, but there was a noticeable lapse when the operator did not explain the restriction and said confirmation was not needed.",
+          "evidence_turns": [12, 14, 15]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and stated that the question would be transferred for checking.",
+          "evidence_turns": [16]
+        },
+        {
+          "criterion_id": "critical",
+          "value": true,
+          "rationale": "The operator disclosed account-specific restriction information before identity verification, which is confidential account information.",
+          "evidence_turns": [12, 13]
+        }
+      ],
+      "score": {
+        "final_score": 65.5,
+        "critical_flag": true
+      }
+    },
+    {
+      "conversation_id": "p1-ru-010",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator clarified the platform and requested the missing paper's name before proceeding.",
+          "evidence_turns": [11, 16]
+        },
+        {
+          "criterion_id": "identification",
+          "value": true,
+          "rationale": "Identity confirmation was completed before the operator moved to the protected position-check request.",
+          "evidence_turns": [13, 15, 16]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator addressed the missing position, report download, period selection, and next step if the position reappears.",
+          "evidence_turns": [16, 21, 28, 30]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and acknowledged the customer's concern about the missing portfolio line.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear and coherent, and the customer did not need to repeat requests.",
+          "evidence_turns": [11, 19, 21, 28, 32]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and summarized that the position question had been passed on.",
+          "evidence_turns": [32]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid-service offers, or confidential information disclosure are present in the operator's turns.",
+          "evidence_turns": [11, 16, 32]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-011",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer had already specified the needed broker report for the previous year, so no clarification was required before answering.",
+          "evidence_turns": [5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only provided self-service navigation instructions and did not disclose account data or perform a protected action.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct path and confirmed the correct period, after which the customer successfully downloaded the report.",
+          "evidence_turns": [10, 11, 12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and directly addressed the customer's difficulty by providing the needed steps.",
+          "evidence_turns": [5, 10, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear and coherent, and the customer had already been told to wait before the operator joined.",
+          "evidence_turns": [8, 10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-012",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's question about the language of form 1042-S was clear, so no clarification was needed.",
+          "evidence_turns": [5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "This was a general informational question about a form language and did not require identity verification.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator answered the customer's material question by stating that form 1042-S is provided in English.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and the customer did not express dissatisfaction requiring a specific empathetic response.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's reply was clear and coherent, and the customer was able to continue and finish the conversation.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "closure",
+          "value": null,
+          "rationale": "The connection was interrupted after the customer said they were done, before the operator had a chance to close.",
+          "evidence_turns": [11, 12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-013",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer clearly asked where to find the company's financial reporting, so no clarification was needed before answering.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was for general public website information and did not require identity verification.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct specific navigation path and the customer confirmed the issue was resolved.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responsive, and the customer did not express dissatisfaction requiring a specific empathy response.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear, coherent, and directly addressed the customer's request.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator confirmed the correct section and said goodbye.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, unauthorized paid service offer, or disclosure of confidential information.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-014",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": false,
+          "rationale": "The operator greeted the customer in Russian but did not introduce themselves in the first reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator clarified where the customer was looking before providing the answer.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was a general navigation question and did not require identity verification.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step and the customer confirmed the issue was resolved.",
+          "evidence_turns": [12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and addressed the customer's confusion directly.",
+          "evidence_turns": [11, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The operator asked a redundant question after the customer had already provided the site, causing a minor repeat, but the conversation remained clear.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, unauthorized paid-service offers, or confidential disclosures are present in the operator's turns.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 75.63,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-015",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s issue was clear enough to answer without further clarification: the old account was closed and the login was still occupied.",
+          "evidence_turns": [1, 5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave a general explanation about login availability and did not disclose confidential account data or take a protected action.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator directly answered whether the old account caused the issue and gave the correct next step to use a different login.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and addressed the customer’s specific concern about the occupied login.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear, coherent, and sufficient for the customer to continue and understand the answer.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help in the closing message.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There is no evidence of insults, unauthorized paid services, or disclosure of confidential information.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-016",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves by name in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": false,
+          "rationale": "The operator gave an immediate instruction to reinstall the app without clarifying the platform or issue. The customer then had to explain they were using a computer.",
+          "evidence_turns": [10, 11, 13]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was general login guidance and no account data or protected action was disclosed, so identity verification was not required.",
+          "evidence_turns": [10, 14]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 15,
+          "rationale": "The operator eventually provided the correct login site and the customer confirmed this resolved the main issue. However, the initial incorrect app-related advice and lack of follow-up make the guidance less than fully complete.",
+          "evidence_turns": [10, 14, 15]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and addressed the customer's login problem directly.",
+          "evidence_turns": [10, 14, 16]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "There was one noticeable lapse when the operator assumed the customer was using an app, but the customer could still understand and continue the conversation.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [16]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10, 14, 16]
+        }
+      ],
+      "score": {
+        "final_score": 63.13,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-017",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced himself in the first operator reply.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator used the customer's context and clarified whether the customer had the exact ticker before giving instructions.",
+          "evidence_turns": [11, 12, 13]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was general app navigation, with no account data disclosure or protected action requiring identity verification.",
+          "evidence_turns": [11, 13]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step to use the exact ticker and verify the instrument before placing the order.",
+          "evidence_turns": [13, 14]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and addressed the customer's confusion about finding the correct bond.",
+          "evidence_turns": [11, 13]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear and coherent, and the customer had already been told to wait before the operator joined.",
+          "evidence_turns": [8, 11, 13]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or explicitly offer further help.",
+          "evidence_turns": [15]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [11, 13, 15]
+        }
+      ],
+      "score": {
+        "final_score": 93.75,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-018",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": false,
+          "rationale": "The operator answered without clarifying the missing bond or order details, then admitted not knowing when challenged.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": false,
+          "rationale": "The operator made an account-specific claim about the customer's order without any confirmed identity verification.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 0,
+          "rationale": "The operator did not answer where to see the rejection reason and gave an unsupported, likely incorrect conclusion.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": false,
+          "rationale": "The operator was abrupt and did not acknowledge the customer's concern or inconvenience.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 4,
+          "rationale": "The operator's wording was unclear and premature, causing the customer to ask for clarification.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator closed the chat without saying goodbye, summarizing, or offering further help.",
+          "evidence_turns": [12, 13]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There is no evidence of insults, outside paid services, or confidential information disclosure.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 16,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-019",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator asked whether the customer had a ticker before giving the search instruction.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "This was a general app navigation question and no account data or protected action was disclosed.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step and the customer confirmed finding the security.",
+          "evidence_turns": [10, 12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responsive to the customer's issue.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear and coherent, and the customer was informed to wait before the operator joined.",
+          "evidence_turns": [8, 10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid services, or confidential disclosures are present in the operator's turns.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 93.75,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-020",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's initial request was clear enough to answer without additional clarification, and the follow-up was also answered directly.",
+          "evidence_turns": [1, 10, 11, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "This was a general interface question and no account data or protected action was disclosed or performed.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct step to remove the margin checkbox and correctly explained that it does not affect an already opened position.",
+          "evidence_turns": [1, 10, 11, 12]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and responsive, and the customer did not express dissatisfaction.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear, coherent, and easy to follow.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, unauthorized paid-service offer, or disclosure of confidential information in the operator's replies.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-021",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced herself in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's question was clear enough to answer without further clarification.",
+          "evidence_turns": [5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "This was a general informational question about exchanges, so no identity verification was required.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator directly answered the material question with a simple, usable distinction between Nasdaq and NYSE.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responded courteously to the customer's request.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear and coherent, and the customer had already been told to wait before the operator joined.",
+          "evidence_turns": [8, 10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and expressed willingness to help.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid services, or confidential disclosures are present in the operator's turns.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-022",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": false,
+          "rationale": "The operator did not clarify the customer's investment goals, risk tolerance, or time horizon before responding.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "No account data was disclosed and no company protected action was performed; the request was a general product question.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 0,
+          "rationale": "The operator gave no substantive bond guidance or usable next step and instead asked the customer to send money personally.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": false,
+          "rationale": "When the customer expressed confusion and restated the request, the operator did not apologize or address the specific issue.",
+          "evidence_turns": [11, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The replies were understandable and coherent, but the off-topic personal money request was a noticeable lapse.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator closed the chat without saying goodbye, summarizing the outcome, or offering further help.",
+          "evidence_turns": [13, 14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": true,
+          "rationale": "The operator asked the customer to send money to a personal card and confirmed providing personal service outside the company.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 25.63,
+        "critical_flag": true
+      }
+    },
+    {
+      "conversation_id": "p1-ru-023",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves by name in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear enough to answer directly, so no clarification was required.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was a general app-navigation question and did not require identity verification.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step for finding bonds in the app, and the customer confirmed they could see them.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite, and the customer did not express dissatisfaction requiring a specific empathetic response.",
+          "evidence_turns": [10, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The replies were clear, but the operator made a noticeable lapse by offering a private paid consultation.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": true,
+          "rationale": "The operator offered a paid private consultation outside the company and asked for the customer’s personal phone number.",
+          "evidence_turns": [12]
+        }
+      ],
+      "score": {
+        "final_score": 85.38,
+        "critical_flag": true
+      }
+    },
+    {
+      "conversation_id": "p1-ru-024",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's initial question was clear enough to answer without further clarification.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was a general account question and did not require identity verification.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator correctly explained that the trading account should be used for buying securities.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responsive, and the customer did not express dissatisfaction.",
+          "evidence_turns": [10, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear, coherent, and easy to follow.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [13, 14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, unauthorized paid-service offer, or disclosure of confidential information.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-025",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The customer had not stated a specific issue, and the operator asked how they could help before providing any answer.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "No protected action or personal data disclosure occurred, and the customer left before stating a request requiring verification.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": null,
+          "rationale": "The conversation ended before the customer stated a request, so no guidance could be evaluated.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and used a standard courteous greeting and offer of help.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's reply was clear and coherent, and no communication issue prevented the customer from continuing.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "closure",
+          "value": null,
+          "rationale": "The customer left the chat before the operator had a chance to close the conversation.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-026",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced himself in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's request for the top-up details button was clear, so no clarification was needed.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "identification",
+          "value": false,
+          "rationale": "Top-up details are account-specific, but no identity verification was confirmed before the operator responded.",
+          "evidence_turns": [11, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 5,
+          "rationale": "The operator only said everything is in the app and did not identify the button or give a usable next step.",
+          "evidence_turns": [11, 12]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": false,
+          "rationale": "The customer showed mild frustration by repeating the request, but the operator did not acknowledge that inconvenience.",
+          "evidence_turns": [11, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 4,
+          "rationale": "The operator's generic opening ignored the already stated request, causing the customer to repeat it.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator closed the chat without saying goodbye, summarizing, or offering further help.",
+          "evidence_turns": [12, 13]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator's visible replies contain no insult, outside paid-service offer, or confidential disclosure.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 24.71,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-027",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear enough from the start, so no clarification was required before answering.",
+          "evidence_turns": [1, 5, 11]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only provided navigation instructions and did not disclose account data or take a protected action.",
+          "evidence_turns": [11, 13, 15]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator answered all material questions about the broker report, tariff location, web version, and report period.",
+          "evidence_turns": [11, 15, 17, 20, 22]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and directly addressed the customer’s difficulty finding the reports.",
+          "evidence_turns": [5, 11]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear, coherent, and easy to follow.",
+          "evidence_turns": [11, 13, 15, 17, 24]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [24]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, outside paid-service offer, or disclosure of confidential information.",
+          "evidence_turns": [11, 17, 24]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-028",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear enough to answer without further clarification.",
+          "evidence_turns": [1, 10, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only provided general navigation guidance and did not disclose personal data or take a protected action.",
+          "evidence_turns": [12, 14]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct app path and clarified the relevant section for personal data.",
+          "evidence_turns": [12, 14]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and addressed the customer’s concern by providing a clear path.",
+          "evidence_turns": [10, 12, 14, 16]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The replies were clear and coherent, and the customer was told to wait before the answer was provided.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [16]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid-service offers, or confidential disclosures are present in the operator’s turns.",
+          "evidence_turns": [10, 12, 14, 16]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-ru-029",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves by name in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was a general access issue, and the needed next step could be provided without further clarification.",
+          "evidence_turns": [1, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was a general question about finding the platform entrance and did not require identity verification.",
+          "evidence_turns": [1, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step by providing the web platform site, and the customer confirmed entering.",
+          "evidence_turns": [12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": false,
+          "rationale": "The operator was rude and did not respond appropriately when the customer objected to the tone.",
+          "evidence_turns": [10, 13, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 4,
+          "rationale": "The customer had to clarify which site to open because the operator’s first reply did not provide the needed answer.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": true,
+          "rationale": "The operator insulted the customer by questioning their ability to read.",
+          "evidence_turns": [10]
+        }
+      ],
+      "score": {
+        "final_score": 55.38,
+        "critical_flag": true
+      }
+    },
+    {
+      "conversation_id": "p1-ru-030",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator asked which document was downloaded before giving the navigation instruction.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was a general question about where to find information in a report, and no personal account data was disclosed.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct location for the tariff and the customer confirmed finding it.",
+          "evidence_turns": [10, 11, 12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responded helpfully to the customer's issue.",
+          "evidence_turns": [10, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The replies were clear and coherent, and the customer was told to wait before the operator joined.",
+          "evidence_turns": [8, 10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, unauthorized paid-service offer, or disclosure of confidential information.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 93.75,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-001",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear enough to answer directly, so no clarification was required.",
+          "evidence_turns": [1, 5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave general navigation guidance and did not disclose personal account data or take a protected action.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step for the web version, and the customer confirmed they found the information.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responsive, and the customer did not express dissatisfaction.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s reply was clear and coherent, and the customer was informed to wait before the operator joined.",
+          "evidence_turns": [8, 10]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, unauthorized paid-service offer, or disclosure of confidential information.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-002",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's initial question was sufficient to answer where to find the transfer details, so no clarification was required before answering.",
+          "evidence_turns": [1, 10, 11, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave general navigation instructions and did not disclose personal data or take a protected action.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct navigation path and the correct next step for choosing the currency, and the customer confirmed success.",
+          "evidence_turns": [10, 12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and directly addressed the customer's difficulty finding the option.",
+          "evidence_turns": [5, 10, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear, coherent, and easy to follow without requiring repetition.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-003",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced herself as Dana in the first operator reply.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator used the stated transfer issue and clarified missing details, including currency and timing, before forwarding the request.",
+          "evidence_turns": [14, 17, 18, 19]
+        },
+        {
+          "criterion_id": "identification",
+          "value": true,
+          "rationale": "Identity verification was confirmed by the system before the operator proceeded with payment-related details.",
+          "evidence_turns": [11, 13, 14]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step for the transfer by escalating with the collected details and also answered the report-related questions.",
+          "evidence_turns": [14, 19, 22, 24, 26]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator acknowledged the customer's concern about the missing money and remained polite throughout.",
+          "evidence_turns": [11, 26]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear and coherent, and the customer was told that the transfer answer would be sent in the chat.",
+          "evidence_turns": [11, 17, 22, 26]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and summarized that the answer about the transfer would be sent in the chat.",
+          "evidence_turns": [26]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid-service offers, or confidential disclosures appear in the operator's replies.",
+          "evidence_turns": [11, 22, 26]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-004",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear from the start, so no clarification was needed before answering.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave general navigation instructions and did not disclose account data or perform a protected action.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator provided the correct menu path and explained when the withdrawal request could be submitted again.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responded helpfully to the customer’s questions.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer was able to continue without confusion.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There is no evidence of insults, unauthorized paid-service offers, or disclosure of confidential information.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-005",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear enough to answer directly, so no clarification was required.",
+          "evidence_turns": [1, 10, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only provided navigation instructions and did not disclose personal data or take a protected action.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator ultimately gave the correct menu path, and the customer confirmed finding it.",
+          "evidence_turns": [10, 12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and responded to the customer’s difficulty by providing the exact path.",
+          "evidence_turns": [11, 12, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer was able to continue without confusion.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator did not say goodbye, summarize the outcome, or offer further help before the transcript ended.",
+          "evidence_turns": [13, 14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid-service offers, or confidential disclosures are present in the operator’s turns.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-006",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request and the needed date range were already clear, so no clarification was required before answering.",
+          "evidence_turns": [1, 5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave general navigation instructions and did not disclose personal data or take a protected action.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next steps for selecting the start and end dates for last year’s report.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and acknowledged the customer’s thanks.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer could continue without confusion.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not explicitly summarize the outcome or offer further help.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There is no evidence of insults, outside paid services, or confidential information disclosure.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-007",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s issue was clear from the start, so no clarification was needed before answering.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave a general explanation about login availability and did not disclose personal data or take a protected action.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator directly answered the customer’s question and gave the correct next step to use another login.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and addressed the customer’s concern without irritation.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear, coherent, and easy to follow.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insult, unauthorized paid service offer, or confidential disclosure is present in the operator’s turns.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-008",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": false,
+          "rationale": "The operator greeted the customer in Kazakh but did not introduce themselves in the first reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": false,
+          "rationale": "The operator asked which site the customer used even though it had already been provided in the chat history.",
+          "evidence_turns": [5, 10, 11]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was general navigation help, and no personal data or protected action was disclosed.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator correctly explained that the Global site is informational and gave the usable access options.",
+          "evidence_turns": [12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and addressed the customer's access problem directly.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The reply was clear, but the redundant question about the site was a noticeable lapse.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": null,
+          "rationale": "The transcript ends with the customer's thanks before the operator had a shown chance to close.",
+          "evidence_turns": [13]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid offers, or confidential disclosures are present in the operator's turns.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 60.67,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-009",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer already had the ticker and needed only general navigation help, so no further clarification was required.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was general guidance about finding a paper and filling an order, with no personal data disclosure or protected action.",
+          "evidence_turns": [11, 13]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator addressed the correct paper selection, how to proceed with a buy order, and the similar-paper issue with clear next steps.",
+          "evidence_turns": [11, 13, 16, 18]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and responded helpfully to the customer's confusion about similar papers.",
+          "evidence_turns": [11, 16, 18]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear, coherent, and easy to follow throughout the chat.",
+          "evidence_turns": [11, 13, 16, 18, 20]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [20]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, unauthorized paid-service offers, or confidential information disclosures are present in the operator's turns.",
+          "evidence_turns": [11, 13, 16, 18, 20]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-010",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was specific enough from the start, so no clarification was needed before answering.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "This was a general interface question and did not require identity verification before providing guidance.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step and the customer confirmed the issue was resolved.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responsive, and the customer expressed thanks without any unresolved dissatisfaction.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer was informed to wait before the operator joined.",
+          "evidence_turns": [8, 10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [11, 12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, unauthorized paid service offer, or disclosure of confidential information in the operator’s turns.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-011",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s question was a clear general product question, so no clarification was needed before answering.",
+          "evidence_turns": [5, 10, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was general product guidance and did not require identity verification or disclosure of personal data.",
+          "evidence_turns": [5, 10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator correctly answered that D-account funds cannot be used directly and gave the correct next step to open a trading account.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responsive, and the customer did not express dissatisfaction.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer was told to wait before the operator joined.",
+          "evidence_turns": [8, 10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": null,
+          "rationale": "The system cut the connection after the customer’s final acknowledgment, before the operator had a chance to close.",
+          "evidence_turns": [13, 14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, outside paid-service offer, or confidential information disclosure in the operator’s replies.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-012",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator used the available issue details and asked for the missing ticker and error message before attempting to resolve it.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "No account data was disclosed and no protected action was taken; the operator only requested the ticker and error message.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave a correct and usable next step by asking for the bond ticker and screen message to investigate the declined application.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and acknowledged the customer's delay while keeping the next step clear.",
+          "evidence_turns": [12, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear, coherent, and easy for the customer to follow.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and offered further help by telling the customer to send the requested details when ready.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid-service offers, or confidential disclosures are present in the operator’s messages.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-013",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s question about where to view bonds was answerable from the start, so no clarification was required.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "This was a general navigation question and no personal data or protected action was disclosed or performed.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step to open the Quotes section and search by name, and the customer confirmed finding it.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and no customer dissatisfaction required a specific response.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s reply was clear and coherent, and the customer was able to continue without confusion.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator did not say goodbye before closing the chat.",
+          "evidence_turns": [12, 14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": true,
+          "rationale": "The operator offered paid advice outside the company and asked for the customer’s personal phone number.",
+          "evidence_turns": [12]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": true
+      }
+    },
+    {
+      "conversation_id": "p1-kz-014",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Kazakh and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s question was clear enough to answer directly, so no clarification was needed.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "This was a general question about form language and did not require identity verification.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 15,
+          "rationale": "The operator gave the key fact that the form is provided in English, but did not explicitly state that it is not available in Kazakh.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and the customer did not express dissatisfaction.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The reply was understandable, but starting with “yes” before saying the form is in English was a noticeable wording lapse.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, outside paid-service offer, or confidential information disclosure.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 77.69,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-kz-015",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in the customer's language and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's request was specific and the account context was available, so no missing information needed clarification.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": false,
+          "rationale": "The operator disclosed an account-specific withdrawal restriction before any identity verification was confirmed.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 10,
+          "rationale": "The operator acknowledged the restriction and said they would check, but left the customer's main question about the reason unanswered.",
+          "evidence_turns": [10, 13, 14]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responded to the customer's issue by saying they would send it for checking.",
+          "evidence_turns": [10, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The replies were understandable, but the operator was abrupt about verification and did not explain any wait before closing.",
+          "evidence_turns": [10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, off-platform paid service offer, or serious confidential disclosure beyond the customer's own account status.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 53.53,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-001",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s issue and relevant history were already clear from the earlier chat, so no further clarification was needed before answering.",
+          "evidence_turns": [1, 5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was a general registration/login question and did not require identity verification or disclosure of protected account data.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator explained why the login was unavailable and gave the correct next step to use a different login.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responded courteously to the customer’s thanks.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear, coherent, and easy to follow.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-002",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear enough to answer directly, so no clarification was required.",
+          "evidence_turns": [1, 5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "This was a general navigation question and did not require identity verification.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct sign-in location and clarified that the company information site does not have sign-in.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responded helpfully to the customer’s confusion.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear, coherent, and easy to follow.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and acknowledged that the customer had resolved the issue.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, unauthorized paid-service offers, or confidential disclosures occurred.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-003",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear enough to answer directly, so no clarification was needed.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The customer asked for navigation help only, and the operator did not disclose account data or take a protected action.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct location for the pricing plan, and the customer confirmed finding it.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and addressed the customer’s concern by providing a way to see the plan without downloading a report.",
+          "evidence_turns": [5, 10]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer had been told to wait before the agent joined.",
+          "evidence_turns": [8, 10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-004",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear enough from the start, so no clarification was needed before answering.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only provided navigation instructions and did not disclose account data or take a protected action.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct steps to obtain the broker statement and confirmed the download step, after which the customer said it worked.",
+          "evidence_turns": [10, 12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responsive, and the customer did not express dissatisfaction requiring a specific empathy response.",
+          "evidence_turns": [10, 14]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer was told to wait before the agent joined.",
+          "evidence_turns": [8, 10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, outside paid-service offer, or disclosure of confidential information in the operator’s messages.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-005",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s initial question was specific enough to answer by providing the app path, so no clarification was required before answering.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave general navigation instructions and did not disclose account-specific data or take a protected action.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator provided the correct app path and confirmed the customer should select the currency before downloading the details.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and addressed the customer’s concern about taking the wrong details by specifying the currency selection step.",
+          "evidence_turns": [5, 10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer had been told to wait before the agent joined.",
+          "evidence_turns": [8, 10, 12, 14]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-006",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced themselves in the first operator reply.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator used the customer's details and clarified missing information, including currency and timing, before progressing the case.",
+          "evidence_turns": [10, 14, 15, 19, 20]
+        },
+        {
+          "criterion_id": "identification",
+          "value": true,
+          "rationale": "Identity verification was confirmed before the operator took account-specific action on the transfer.",
+          "evidence_turns": [11, 13, 16]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator addressed the transfer issue with a clear next step and also answered the follow-up questions about the broker report.",
+          "evidence_turns": [16, 21, 23, 26, 28]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and acknowledged the customer's concern about checking the transfer.",
+          "evidence_turns": [1, 11]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear and coherent, and the customer was told that updates would be provided in the chat.",
+          "evidence_turns": [16, 21, 23, 30]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and summarized the next step for the transfer update.",
+          "evidence_turns": [30]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid-service offers, or confidential disclosures are present in the operator's turns.",
+          "evidence_turns": [11, 16, 26, 30]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-007",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced themselves in the first reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's request was clear enough to answer without further clarification.",
+          "evidence_turns": [5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave navigation instructions and did not disclose account data or take a protected action.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 10,
+          "rationale": "The operator gave the correct path but left the customer's material question about when to retry unanswered.",
+          "evidence_turns": [10, 11, 12]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and directly addressed the blocked withdrawal issue.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The replies were clear and coherent, and the customer did not need to ask for repetition.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and confirmed where the profile request is located.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid-service offers, or confidential disclosures are present in the operator's turns.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 84.62,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-008",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced themselves in the first operator reply.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear enough to answer without further clarification, so this criterion does not apply.",
+          "evidence_turns": [1, 10, 11]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The conversation involved general app navigation and no account data or protected action was disclosed or performed.",
+          "evidence_turns": [11, 13, 16]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave correct next steps for finding the stock, proceeding with an order, and disabling the margin checkbox.",
+          "evidence_turns": [11, 13, 16, 18]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and responsive throughout the chat.",
+          "evidence_turns": [11, 20]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The conversation was mostly clear, but the reply about an existing position was awkward and could have been more direct.",
+          "evidence_turns": [18]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [20]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There is no evidence of insults, outside paid services, or disclosure of confidential information.",
+          "evidence_turns": [11, 13, 16, 18, 20]
+        }
+      ],
+      "score": {
+        "final_score": 85.38,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-009",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's request was clear enough to answer without further clarification.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was a general interface question and did not require identity verification.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step, and the customer confirmed they found the setting.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responsive to the customer's request.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's reply was clear and coherent, and the customer was able to continue without confusion.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "closure",
+          "value": null,
+          "rationale": "The connection was lost before the operator had a chance to close the conversation.",
+          "evidence_turns": [11, 12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-010",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s question was clear enough to answer without further clarification.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "This was a general product question that did not require identity verification.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator correctly explained that the D account cannot be used directly to buy securities and directed the customer to the trading account.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responsive, and the customer did not express dissatisfaction.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer had been told to wait before the agent joined.",
+          "evidence_turns": [8, 10]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There was no insult, unauthorized paid-service offer, or confidential disclosure in the operator’s messages.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-011",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced herself in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer's request was clear from the start, so no clarification was needed before answering.",
+          "evidence_turns": [5, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "This was a general question about a form's language and did not require identity verification.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator directly confirmed the material question about the 1042-S form language.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and responded courteously to the customer's request.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator's replies were clear and coherent, and the customer could continue without confusion.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "The operator said goodbye and indicated willingness to help, which satisfies the closing requirement.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid-service offers, or confidential disclosures appeared in the operator's turns.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 100,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-012",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear from the start, so no clarification was needed before answering.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The request was for general public information about where to find financial statements, so identity verification was not required.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct menu path and the customer confirmed it resolved the issue.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator was polite and directly addressed the customer’s stated problem by providing the correct location.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The operator’s replies were clear and coherent, and the customer had already been told to wait before the agent joined.",
+          "evidence_turns": [8, 10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [12]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [10, 12]
+        }
+      ],
+      "score": {
+        "final_score": 92.31,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p1-en-013",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer and introduced themselves in the first operator reply.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer’s request was clear enough to answer without further clarification.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "This was a general app-navigation question that did not require identity verification.",
+          "evidence_turns": [1, 10]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator gave the correct next step for finding bonds in the app, and the customer confirmed they could see the search bar.",
+          "evidence_turns": [1, 10, 11]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": false,
+          "rationale": "The operator made an intrusive paid-advice offer and did not stay focused on the customer’s stated need for app help.",
+          "evidence_turns": [12, 13]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The replies were understandable, but the sudden paid-advice request was a noticeable lapse in conversation management.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator closed the chat without saying goodbye, summarizing the outcome, or offering further help.",
+          "evidence_turns": [13, 14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": true,
+          "rationale": "The operator asked for the customer’s personal number to provide paid private advice, which is a serious violation.",
+          "evidence_turns": [12]
+        }
+      ],
+      "score": {
+        "final_score": 62.31,
+        "critical_flag": true
+      }
+    },
+    {
+      "conversation_id": "p1-en-014",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in English and introduced themselves as Tyler in the first operator reply.",
+          "evidence_turns": [11]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator used the account-specific detail that withdrawals were blocked and escalated to check the reason without needing further customer clarification.",
+          "evidence_turns": [10, 11, 13]
+        },
+        {
+          "criterion_id": "identification",
+          "value": false,
+          "rationale": "The operator disclosed an account restriction and said verification could be skipped before any identity verification was confirmed.",
+          "evidence_turns": [11, 12, 13]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 10,
+          "rationale": "The operator acknowledged the restriction and said they would send it to the team, but did not answer whether the customer would hear back.",
+          "evidence_turns": [11, 13, 14, 15]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": false,
+          "rationale": "The operator was brief but did not address the customer's concern about blocked withdrawals or the verification worry.",
+          "evidence_turns": [11, 12, 13]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The replies were mostly understandable, but “We can skip that” and the abrupt goodbye were noticeable lapses.",
+          "evidence_turns": [11, 13, 15]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [15]
+        },
+        {
+          "criterion_id": "critical",
+          "value": true,
+          "rationale": "The operator disclosed account-specific restriction information and indicated verification could be skipped, which is a confidentiality violation.",
+          "evidence_turns": [11, 12, 13]
+        }
+      ],
+      "score": {
+        "final_score": 45.5,
+        "critical_flag": true
+      }
+    },
+    {
+      "conversation_id": "p1-en-015",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": false,
+          "rationale": "The operator's first reply did not greet the customer or introduce themselves.",
+          "evidence_turns": [10]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": false,
+          "rationale": "The operator gave an instruction without clarifying the platform or login issue, and the customer had to explain they were on the website.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "No account data was disclosed and no protected action was taken, so identity verification was not required.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 15,
+          "rationale": "The final instruction to use tradernet.global resolved the access issue, but the initial unclear step caused confusion.",
+          "evidence_turns": [10, 12, 13]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator addressed the login issue directly and did not show rudeness.",
+          "evidence_turns": [10, 12]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 4,
+          "rationale": "The customer had to ask for clarification because the first instruction was unclear and did not match the website context.",
+          "evidence_turns": [10, 11]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help.",
+          "evidence_turns": [14]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid services, or confidential disclosures appear in the operator's messages.",
+          "evidence_turns": [10, 12, 14]
+        }
+      ],
+      "score": {
+        "final_score": 45,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p4-ru-003",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first reply.",
+          "evidence_turns": [13]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator used the customer's description and asked for the order number and identification before checking the issue.",
+          "evidence_turns": [19, 20, 40]
+        },
+        {
+          "criterion_id": "identification",
+          "value": true,
+          "rationale": "The operator completed name, tax, and SMS-code identification before disclosing the order status.",
+          "evidence_turns": [40, 49, 54, 65, 66]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 10,
+          "rationale": "The operator confirmed the order was accepted but still processing and promised a callback, but did not explain the delay or expected execution.",
+          "evidence_turns": [66, 68, 71, 76]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and responded to the customer's concern about the slow order by escalating it.",
+          "evidence_turns": [69, 70, 71]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The conversation was mostly clear, but the operator interrupted and initially explained the SMS code in a confusing way.",
+          "evidence_turns": [22, 50, 54]
+        },
+        {
+          "criterion_id": "closure",
+          "value": null,
+          "rationale": "The client ended the call immediately after the operator's callback commitment, so the operator did not have a chance to say goodbye.",
+          "evidence_turns": [76, 77, 78]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There is no evidence of insults, outside paid services, or confidential disclosure before verification.",
+          "evidence_turns": [13, 40, 65, 66]
+        }
+      ],
+      "score": {
+        "final_score": 84.74,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p4-ru-002",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": false,
+          "rationale": "The first operator reply introduces the company and name but does not include a greeting to the customer.",
+          "evidence_turns": [3]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The operator already knew the security and the order issue from the prior conversation, so no clarification of the customer's need was required.",
+          "evidence_turns": [3, 6]
+        },
+        {
+          "criterion_id": "identification",
+          "value": true,
+          "rationale": "The operator asked for and confirmed the customer's full name and address before connecting the trader and discussing the specific order.",
+          "evidence_turns": [12, 15, 64]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator explained that the security cannot be bought or sold through the app, only OTC, and answered why the order book may appear.",
+          "evidence_turns": [64, 66, 67, 69]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite, acknowledged the wait, and addressed the customer's rejected-order inconvenience.",
+          "evidence_turns": [10, 15, 60, 71]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "The customer was told to wait before the hold, and the customer-facing replies were coherent enough to continue without asking again.",
+          "evidence_turns": [15, 60, 64, 66]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator said goodbye but did not summarize the outcome or offer further help in the closing statement.",
+          "evidence_turns": [71]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid-service offers, or confidential disclosures are present in the operator's statements.",
+          "evidence_turns": [3, 15, 71]
+        }
+      ],
+      "score": {
+        "final_score": 82.35,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p4-ru-001",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced their name in the first operator reply.",
+          "evidence_turns": [13]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "The customer asked a general question about the support scope, so there was enough information to answer without further clarification.",
+          "evidence_turns": [23, 25, 26]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "The operator only gave general information about support and did not disclose account data or take a protected action.",
+          "evidence_turns": [26, 30]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 15,
+          "rationale": "The operator correctly explained that support is technical and cannot recommend securities, but did not clarify how to obtain a personal manager or another advice path.",
+          "evidence_turns": [26, 29, 30]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator acknowledged the customer's frustration and responded to the misunderstanding about support.",
+          "evidence_turns": [41, 42, 43]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The conversation was mostly clear, but there were a few unclear phrases, including the name exchange and an incoherent reply, without stopping the customer.",
+          "evidence_turns": [15, 17, 38]
+        },
+        {
+          "criterion_id": "closure",
+          "value": null,
+          "rationale": "The client ended the call before the operator had a chance to say goodbye or summarize.",
+          "evidence_turns": [43, 44]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "The operator did not insult the customer, offer outside paid services, or disclose confidential information.",
+          "evidence_turns": [26, 30, 43]
+        }
+      ],
+      "score": {
+        "final_score": 84.17,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p4-ru-005",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": false,
+          "rationale": "The operator greeted the customer in Russian but did not clearly introduce themselves by name in the first reply.",
+          "evidence_turns": [17]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator asked for the registration phone number and names before explaining the account deletion and re-registration steps.",
+          "evidence_turns": [19, 20, 24, 29]
+        },
+        {
+          "criterion_id": "identification",
+          "value": true,
+          "rationale": "The operator requested the registration phone number and customer name before checking and discussing the account deletion.",
+          "evidence_turns": [20, 21, 23, 24]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "The operator explained the deletion timing, instructed the customer to log out and wait, gave the next step to call from 9:00, and answered the document-selection question.",
+          "evidence_turns": [29, 44, 51, 67, 71]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and addressed the inconvenience by explaining the wait and next steps.",
+          "evidence_turns": [17, 49, 72]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 7,
+          "rationale": "The conversation was mostly understandable, but some unclear operator phrases caused one clarification request while the customer could still continue.",
+          "evidence_turns": [33, 38, 53, 54, 55]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The operator thanked the customer for contacting but did not clearly say goodbye or summarize the outcome before the customer ended the call.",
+          "evidence_turns": [72, 73, 75]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "No insults, outside paid-service offers, or confidential information disclosure are present in the operator's turns.",
+          "evidence_turns": [17, 29, 72]
+        }
+      ],
+      "score": {
+        "final_score": 80.5,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "p4-ru-004",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "The operator greeted the customer in Russian and introduced themselves in the first operator reply.",
+          "evidence_turns": [15]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "The operator clarified the customer's name, bond type, ticker, and account before answering.",
+          "evidence_turns": [23, 30, 34, 38]
+        },
+        {
+          "criterion_id": "identification",
+          "value": true,
+          "rationale": "The operator requested identity details and a code, then confirmed identity before discussing the customer's order.",
+          "evidence_turns": [47, 49, 71, 79]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 15,
+          "rationale": "The operator explained the issue and gave the correct next step, but did not explicitly confirm whether the customer must contact the trader for every purchase.",
+          "evidence_turns": [90, 94, 98, 112]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "The operator remained polite and addressed the customer's inconvenience by offering an email alternative to calling.",
+          "evidence_turns": [87, 90, 94]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 4,
+          "rationale": "The customer had to ask the operator to repeat the email address more than once, indicating a wording or clarity lapse.",
+          "evidence_turns": [34, 99, 104, 107]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "The customer ended the call before the operator said goodbye; the operator only asked about additional questions after the client ended.",
+          "evidence_turns": [113, 114, 115]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "There is no evidence of insults, outside paid services, or confidential disclosure before verification.",
+          "evidence_turns": [15, 79, 90]
+        }
+      ],
+      "score": {
+        "final_score": 81,
+        "critical_flag": false
+      }
+    }
+  ]
+}

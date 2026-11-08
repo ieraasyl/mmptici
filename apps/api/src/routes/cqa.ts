@@ -109,12 +109,18 @@ function findEvaluation(db: Db, workspaceId: string, id: string) {
     .get();
 }
 
-function summarizeAppeal(row: {
-  appeal: typeof cqaAppeals.$inferSelect;
-  evaluation: typeof cqaEvaluations.$inferSelect;
-  conversation: typeof cqaConversations.$inferSelect;
-}) {
+function summarizeAppeal(
+  row: {
+    appeal: typeof cqaAppeals.$inferSelect;
+    evaluation: typeof cqaEvaluations.$inferSelect;
+    conversation: typeof cqaConversations.$inferSelect;
+  },
+  evaluationAppeals: (typeof cqaAppeals.$inferSelect)[],
+) {
   const { appeal, evaluation, conversation } = row;
+  // The evaluation's score before any appeal and after every decision made on it so far.
+  const before = scoreEvaluation(evaluation.checklist, evaluation.ratings, []);
+  const after = scoreEvaluation(evaluation.checklist, evaluation.ratings, evaluationAppeals);
   const criterion = evaluation.checklist.criteria.find(({ id }) => id === appeal.criterionId)!;
   const original = evaluation.ratings.find(
     ({ criterionId }) => criterionId === appeal.criterionId,
@@ -128,6 +134,12 @@ function summarizeAppeal(row: {
     },
     criterion,
     original,
+    score: {
+      original: before.total,
+      final: after.total,
+      violationOriginal: before.seriousViolation,
+      violationFinal: after.seriousViolation,
+    },
     evidence: original.evidence.map((number) => ({
       number,
       ...conversation.transcript[number - 1],
@@ -459,7 +471,18 @@ export const cqaRoutes = new Hono<CqaEnv>()
       .innerJoin(cqaConversations, eq(cqaEvaluations.conversationId, cqaConversations.id))
       .where(eq(cqaConversations.workspaceId, c.get("workspace")))
       .orderBy(asc(cqaAppeals.decidedAt), desc(cqaAppeals.createdAt));
-    return c.json({ appeals: appeals.map(summarizeAppeal) });
+    const byEvaluation = new Map<string, (typeof cqaAppeals.$inferSelect)[]>();
+    for (const { appeal } of appeals) {
+      byEvaluation.set(appeal.evaluationId, [
+        ...(byEvaluation.get(appeal.evaluationId) ?? []),
+        appeal,
+      ]);
+    }
+    return c.json({
+      appeals: appeals.map((row) =>
+        summarizeAppeal(row, byEvaluation.get(row.appeal.evaluationId)!),
+      ),
+    });
   })
   .put(
     "/appeals/:id/decision",
