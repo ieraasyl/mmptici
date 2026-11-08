@@ -212,10 +212,12 @@ export async function evaluateRun(
       });
       result.failed += 1;
       options.io.err(`${id.padEnd(12)} FAILED  ${message}`);
-      if (error instanceof InferenceApiError && error.isAuthError) {
+      if (error instanceof InferenceApiError && (error.isAuthError || error.isBillingError)) {
         fatal = message;
         options.io.err(
-          "The provider rejected the credentials; no further conversations are started.",
+          error.isBillingError
+            ? "The provider has no remaining credits; no further conversations are started. Top up, then continue with --resume."
+            : "The provider rejected the credentials; no further conversations are started.",
         );
       }
     }

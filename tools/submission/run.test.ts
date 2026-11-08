@@ -278,6 +278,24 @@ describe("submission:run", () => {
     expect(read().records["c-001"].error).not.toContain("bad token");
   });
 
+  test("a provider 402 stops the run and leaves the rest pending for --resume", async () => {
+    const { input, run, read } = setup();
+    const calls: string[] = [];
+    const out = capture();
+    const deps: RunDeps = {
+      createClient: fakeClient({ calls, fail: () => new InferenceApiError(402, "no credits") }),
+      fingerprint: fingerprint(),
+    };
+    expect(
+      await runMain(["--input", input, "--run", run, "--concurrency", "1"], out.io, deps),
+    ).toBe(1);
+    expect(calls).toHaveLength(1);
+    const statuses = Object.values(read().records).map((r) => r.status);
+    expect(statuses.filter((s) => s === "failed")).toHaveLength(1);
+    expect(statuses.filter((s) => s === "pending")).toHaveLength(9);
+    expect(out.err.join("\n")).toMatch(/no remaining credits.*--resume/);
+  });
+
   test("refuses to overwrite an existing run file", async () => {
     const { input, run } = setup();
     await runMain(["--input", input, "--run", run], capture().io, {
