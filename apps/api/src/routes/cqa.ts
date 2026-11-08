@@ -15,6 +15,8 @@ import {
   precomputedEvaluationsSchema,
   runEvaluationSchema,
   saveChecklistSchema,
+  submissionChecklistIssues,
+  submissionFileSchema,
   type Dataset,
 } from "@app/contracts";
 import { and, asc, createDb, desc, eq, exists, isNull } from "@app/db";
@@ -553,6 +555,18 @@ export const cqaRoutes = new Hono<CqaEnv>()
     const ids = [...new Set(requested)];
     const checklist = await findChecklist(db, workspaceId, checklistId);
     if (!checklist) throw new HTTPException(404, { message: "Checklist not found." });
+    const issues = submissionChecklistIssues(checklist);
+    if (issues.length) {
+      return c.json(
+        {
+          error: {
+            code: "CHECKLIST_NOT_EXPORTABLE",
+            message: `This checklist cannot be exported in the results format: ${issues.slice(0, 3).join("; ")}.`,
+          },
+        },
+        422,
+      );
+    }
 
     const conversations = await db
       .select({
@@ -583,7 +597,11 @@ export const cqaRoutes = new Hono<CqaEnv>()
       .orderBy(desc(cqaEvaluations.createdAt), desc(cqaEvaluations.id));
     const latest = new Map<string, (typeof evaluations)[number]>();
     for (const row of evaluations) {
-      if (row.checklist.id === checklistId && !latest.has(row.conversationId)) {
+      if (
+        row.checklist.id === checklistId &&
+        row.checklist.revision === checklist.revision &&
+        !latest.has(row.conversationId)
+      ) {
         latest.set(row.conversationId, row);
       }
     }
@@ -610,6 +628,14 @@ export const cqaRoutes = new Hono<CqaEnv>()
         { error: { code: "EXPORT_INVALID", message: problems.slice(0, 3).join(" ") } },
         422,
       );
+    }
+    const valid = submissionFileSchema.safeParse(file);
+    if (!valid.success) {
+      const message = valid.error.issues
+        .slice(0, 3)
+        .map(({ path, message }) => `${path.join(".")}: ${message}`)
+        .join("; ");
+      return c.json({ error: { code: "RESULTS_INVALID", message } }, 422);
     }
     const ok = file.results.filter(({ status }) => status === "ok").length;
     return c.json({ file, summary: { ok, errors: file.results.length - ok, models } });

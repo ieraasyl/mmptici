@@ -1,9 +1,9 @@
 import { expect, test } from "vite-plus/test";
 import type { Answer, Rating } from "@app/contracts";
 import { defaultChecklist } from "./checklist.ts";
-import { buildResultsFile, RESULT_CODES } from "./results-export.ts";
+import { buildResultsFile, deriveModelHeader, RESULT_CODES } from "./results-export.ts";
 
-const meta = { teamName: "ММ.. Птицы", mode: "local" as const, modelName: "Qwen/Qwen3.8-27B" };
+const meta = "ММ.. Птицы";
 
 function ratings(answers: Record<string, Answer>): Rating[] {
   return Object.entries(answers).map(([criterionId, answer]) => ({
@@ -41,7 +41,7 @@ test("maps an evaluation onto the appendix format", () => {
   expect(file).toMatchObject({
     schema_version: "1.0",
     team_name: "ММ.. Птицы",
-    model: { mode: "local", name: "Qwen/Qwen3.8-27B" },
+    model: { mode: "local", name: "qwen" },
   });
   const [entry] = file.results;
   if (entry.status !== "ok") throw new Error("expected ok");
@@ -146,4 +146,24 @@ test("duplicate IDs and out-of-range evidence are reported as problems", () => {
   );
   expect(problems.some((p) => p.includes('"same" appears more than once'))).toBe(true);
   expect(problems.some((p) => p.startsWith("same/contact: evidence outside turns 1–1"))).toBe(true);
+});
+
+test("derives the header from the stored models", () => {
+  expect(deriveModelHeader([])).toEqual({ mode: "local", modelName: "Qwen/Qwen3.8-27B" });
+  expect(deriveModelHeader(["test-model", "test-model"])).toEqual({
+    mode: "local",
+    modelName: "test-model",
+  });
+  expect(deriveModelHeader(["Qwen/Qwen3.8-27B:cerebras"])).toEqual({
+    mode: "external_api",
+    modelName: "Qwen/Qwen3.8-27B:cerebras",
+  });
+  expect(deriveModelHeader(["b:novita", "a:cerebras"])).toEqual({
+    mode: "external_api",
+    modelName: "a:cerebras, b:novita",
+  });
+  expect(deriveModelHeader(["z-local", "a:cerebras"])).toEqual({
+    mode: "hybrid",
+    modelName: "a:cerebras, z-local",
+  });
 });

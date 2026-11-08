@@ -12,6 +12,15 @@ export const RESULTS_HEADER = {
   modelName: "Qwen/Qwen3.8-27B",
 } as const;
 
+/** A model with a provider suffix after a colon (HF router, e.g. `Qwen/Qwen3.8-27B:cerebras`) is external. */
+export function deriveModelHeader(models: string[]): Pick<Header, "mode" | "modelName"> {
+  const names = [...new Set(models)].sort();
+  if (!names.length) return { mode: RESULTS_HEADER.mode, modelName: RESULTS_HEADER.modelName };
+  const external = names.filter((name) => name.includes(":")).length;
+  const mode = external === 0 ? "local" : external === names.length ? "external_api" : "hybrid";
+  return { mode, modelName: names.join(", ") };
+}
+
 type Header = { teamName: string; mode: "local" | "external_api" | "hybrid"; modelName: string };
 
 /** App criterion id → the appendix criterion_id, in the appendix order. */
@@ -128,7 +137,7 @@ function findProblems(results: ResultEntry[], items: ExportItem[]): string[] {
 
 export function buildResultsFile(
   items: ExportItem[],
-  meta: Header = RESULTS_HEADER,
+  teamName: string = RESULTS_HEADER.teamName,
 ): { file: ResultsFile; problems: string[]; models: Record<string, number> } {
   const results = items.map(toEntry);
   const models: Record<string, number> = {};
@@ -137,10 +146,11 @@ export function buildResultsFile(
       models[item.evaluation.model] = (models[item.evaluation.model] ?? 0) + 1;
     }
   });
+  const meta = deriveModelHeader(Object.keys(models));
   return {
     file: {
       schema_version: "1.0",
-      team_name: meta.teamName,
+      team_name: teamName,
       model: { mode: meta.mode, name: meta.modelName },
       results,
     },

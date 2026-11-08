@@ -609,7 +609,7 @@ test("exports selected conversations as results.json in the organizers' format",
   expect(file).toMatchObject({
     schema_version: "1.0",
     team_name: "ММ.. Птицы",
-    model: { mode: "local", name: "Qwen/Qwen3.8-27B" },
+    model: { mode: "local", name: "test-model" },
   });
   const [entry] = file.results;
   expect(entry).toMatchObject({ conversation_id: "example-kz", status: "ok" });
@@ -637,7 +637,7 @@ test("exports selected conversations as results.json in the organizers' format",
   ]);
   expect(entry.score).toEqual({ final_score: 75, critical_flag: false });
 
-  // Any checklist exports; this one was never used on the conversation, so it is an error entry.
+  // A checklist that is not the default eight criteria cannot be exported.
   const custom = await cqa.checklists.$post(
     { json: { name: "Custom", criteria: checklists[0].criteria.slice(1) } },
     { headers },
@@ -645,8 +645,37 @@ test("exports selected conversations as results.json in the organizers' format",
   if (custom.status !== 201) throw new Error(await custom.text());
   const { checklist } = await custom.json();
   const customExport = await exportRun({ ids: [conversationId], checklistId: checklist.id });
-  if (customExport.status !== 200) throw new Error(await customExport.text());
-  expect((await customExport.json()).file.results[0]).toMatchObject({ status: "error" });
+  expect(customExport.status).toBe(422);
+  expect(await customExport.json()).toMatchObject({ error: { code: "CHECKLIST_NOT_EXPORTABLE" } });
+
+  // A saved copy of the default criteria exports, but only evaluations of its current revision.
+  const copy = await cqa.checklists.$post(
+    { json: { name: "Copy", criteria: checklists[0].criteria } },
+    { headers },
+  );
+  if (copy.status !== 201) throw new Error(await copy.text());
+  const saved = (await copy.json()).checklist;
+  const evaluate = (checklistId: string) =>
+    cqa.conversations[":id"].evaluations.$post(
+      { param: { id: conversationId }, json: { id: crypto.randomUUID(), checklistId } },
+      { headers: { ...headers, "X-CQA-Test-Model": "valid" } },
+    );
+  expect((await evaluate(saved.id)).status).toBe(201);
+  const revised = await cqa.checklists[":id"].$put(
+    {
+      param: { id: saved.id },
+      json: { name: "Copy", revision: saved.revision, criteria: saved.criteria },
+    },
+    { headers },
+  );
+  expect(revised.status).toBe(200);
+  const stale = await exportRun({ ids: [conversationId], checklistId: saved.id });
+  expect(stale.status).toBe(200);
+  expect(await stale.json()).toMatchObject({ file: { results: [{ status: "error" }] } });
+  expect((await evaluate(saved.id)).status).toBe(201);
+  const fresh = await exportRun({ ids: [conversationId], checklistId: saved.id });
+  expect(fresh.status).toBe(200);
+  expect(await fresh.json()).toMatchObject({ file: { results: [{ status: "ok" }] } });
   // Another workspace cannot export these conversations.
   expect((await exportRun({ ids: [conversationId], checklistId: defaultId }, other)).status).toBe(
     404,
