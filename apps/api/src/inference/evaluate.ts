@@ -5,7 +5,7 @@ import { extractJson, validateRatings } from "./validate.ts";
 
 /** After a reply is cut off at the token limit, the next attempt gets this much more room. */
 const TOKEN_BUDGET_GROWTH = 1.5;
-const MAX_TOKEN_BUDGET = 16_000;
+const MAX_TOKEN_BUDGET = 32_000;
 
 export type Attempt = {
   raw: string;
