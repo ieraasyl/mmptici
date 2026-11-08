@@ -5,7 +5,7 @@ import {
   type Rating,
   type Turn,
 } from "@app/contracts";
-import { and, eq, type createDb } from "@app/db";
+import { and, eq, inArray, ne, type createDb } from "@app/db";
 import { cqaConversations, cqaEvaluations } from "@app/db/schema";
 
 // Evaluations that were produced outside the app (other models, hand scoring) and ship with the DEV data,
@@ -161,8 +161,28 @@ export async function importPrecomputed(
     );
   const plan = planPrecomputedImport({ checklist, data, conversations, sources });
 
+  // Scores saved before IDs were deterministic have random IDs, so they are matched by conversation and model.
+  // Live runs do not count: running the model must not block loading the bundled scores.
+  const present = plan.rows.length
+    ? await db
+        .select({ conversationId: cqaEvaluations.conversationId, model: cqaEvaluations.model })
+        .from(cqaEvaluations)
+        .where(
+          and(
+            inArray(cqaEvaluations.conversationId, [
+              ...new Set(plan.rows.map(({ conversationId }) => conversationId)),
+            ]),
+            ne(cqaEvaluations.origin, "live"),
+          ),
+        )
+    : [];
+  const had = new Set(present.map(({ conversationId, model }) => `${conversationId}\0${model}`));
+  const fresh = plan.rows.filter(
+    ({ conversationId, model }) => !had.has(`${conversationId}\0${model}`),
+  );
+
   const rows = await Promise.all(
-    plan.rows.map(async (row) => ({
+    fresh.map(async (row) => ({
       ...row,
       id: await precomputedEvaluationId(workspaceId, row.conversationId, row.model),
     })),
@@ -184,7 +204,7 @@ export async function importPrecomputed(
   return {
     imported,
     // Entries that were already present count as skipped, like a repeated dataset import.
-    skipped: plan.skipped + (rows.length - imported),
+    skipped: plan.skipped + (plan.rows.length - imported),
     mismatched: plan.mismatched,
   };
 }

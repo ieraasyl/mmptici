@@ -6,4 +6,4 @@ export function createDb(binding: D1Database) {
   return drizzle(binding, { schema });
 }
 
-export { and, asc, desc, eq, exists, isNull } from "drizzle-orm";
+export { and, asc, desc, eq, exists, inArray, isNull, ne } from "drizzle-orm";
